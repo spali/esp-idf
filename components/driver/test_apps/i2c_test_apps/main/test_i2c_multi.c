@@ -705,7 +705,7 @@ static void i2c_slave_read_test_more_port(void)
 TEST_CASE_MULTIPLE_DEVICES("I2C master write slave test, more ports", "[i2c][test_env=generic_multi_device][timeout=150]", i2c_master_write_test_more_port, i2c_slave_read_test_more_port);
 #endif
 
-#if 0 && (CONFIG_IDF_TARGET_ESP32C3 || CONFIG_IDF_TARGET_ESP32S3)
+#if (CONFIG_IDF_TARGET_ESP32C3 || CONFIG_IDF_TARGET_ESP32S3)
 // For now, we tested the chip which has such problem.
 // This test can be extended to all chip when how uart baud rate
 // works has been figured out.
