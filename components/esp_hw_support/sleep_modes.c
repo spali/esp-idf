@@ -684,7 +684,7 @@ FORCE_INLINE_ATTR void misc_modules_sleep_prepare(bool deep_sleep, uint32_t pd_f
         regi2c_analog_cali_reg_read();
 #endif
     }
-#if CONFIG_ESP_ENABLE_PVT
+#if CONFIG_ESP_ENABLE_PVT && SOC_PVT_EN_WITH_SLEEP
     pvt_func_enable(false);
 #endif
 
@@ -699,7 +699,7 @@ FORCE_INLINE_ATTR void misc_modules_sleep_prepare(bool deep_sleep, uint32_t pd_f
  */
 FORCE_INLINE_ATTR void misc_modules_wake_prepare(uint32_t pd_flags)
 {
-#if CONFIG_ESP_ENABLE_PVT
+#if CONFIG_ESP_ENABLE_PVT && SOC_PVT_EN_WITH_SLEEP
     pvt_func_enable(true);
 #endif
 
