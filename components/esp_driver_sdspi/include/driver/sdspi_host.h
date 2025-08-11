@@ -71,6 +71,10 @@ typedef struct {
     bool gpio_wp_polarity;     /*!< GPIO write protect polarity
                                     0 means "active low", i.e. card is protected when the GPIO is low;
                                     1 means "active high", i.e. card is protected when GPIO is high. */
+    int8_t wait_for_miso; /*!< Timeout value in the driver will be waiting for MISO to be high before sending commands. Possible values are the following:
+                               0: default value (40ms); -1: no waiting (0ms); 1-127: timeout in ms; else: invalid value, default will be used.
+                               This can be used to speed up transactions in certain scenarios but should not be needed if correct pull-up resistors are used.
+                               Use with care on devices where multiple SPI slaves use the same SPI bus.*/
 } sdspi_device_config_t;
 
 #define SDSPI_SLOT_NO_CS          GPIO_NUM_NC      ///< indicates that card select line is not used
@@ -82,13 +86,14 @@ typedef struct {
 /**
  * Macro defining default configuration of SD SPI device.
  */
-#define SDSPI_DEVICE_CONFIG_DEFAULT() {\
+#define SDSPI_DEVICE_CONFIG_DEFAULT() { \
     .host_id   = SDSPI_DEFAULT_HOST, \
     .gpio_cs   = GPIO_NUM_13, \
     .gpio_cd   = SDSPI_SLOT_NO_CD, \
     .gpio_wp   = SDSPI_SLOT_NO_WP, \
     .gpio_int  = GPIO_NUM_NC, \
     .gpio_wp_polarity = SDSPI_IO_ACTIVE_LOW, \
+    .wait_for_miso = 0, \
 }
 
 /**
