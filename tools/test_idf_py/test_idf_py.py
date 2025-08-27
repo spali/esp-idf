@@ -48,6 +48,11 @@ class TestWithoutExtensions(TestCase):
 
         super().setUpClass()
 
+    @classmethod
+    def tearDownClass(cls):
+        cls.env_patcher.stop()
+        super().tearDownClass()
+
 
 class TestExtensions(TestWithoutExtensions):
     @classmethod
