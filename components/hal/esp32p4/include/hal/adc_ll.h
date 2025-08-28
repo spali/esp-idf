@@ -36,6 +36,9 @@ extern "C" {
 
 #define ADC_LL_NEED_APB_PERIPH_CLAIM(ADC_UNIT)      (((ADC_UNIT) == ADC_UNIT_1) ? 0 : 1)
 
+// ESP32P4 ADC2 channel is 2-7, so we need to subtract 2 to get the correct channel
+#define ADC_LL_UNIT2_CHANNEL_SUBSTRATION 2
+
 /*---------------------------------------------------------------
                     Oneshot
 ---------------------------------------------------------------*/
