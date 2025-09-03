@@ -97,7 +97,7 @@ def test_examples_partitions_ota(dut: Dut) -> None:
     dut.serial.bootloader_flash()
     print(' - Start app (flash partition_table and app)')
     dut.serial.write_flash_no_enc()
-    update_partitions(dut, 'wifi_high_traffic')
+    update_partitions(dut, 'wifi_high_traffic', False)
 
 
 @pytest.mark.flash_encryption_wifi_high_traffic
@@ -109,19 +109,32 @@ def test_examples_partitions_ota(dut: Dut) -> None:
 def test_examples_partitions_ota_with_flash_encryption_wifi(dut: Dut) -> None:
     dut.serial.erase_flash()
     dut.serial.flash()
-    update_partitions(dut, 'flash_encryption_wifi_high_traffic')
+    update_partitions(dut, 'flash_encryption_wifi_high_traffic', False)
 
 
-def update_partitions(dut: Dut, env_name: str | None) -> None:
+@pytest.mark.flash_encryption_wifi_high_traffic
+@pytest.mark.parametrize('config', ['flash_enc_wifi_2.data_partition_verification'], indirect=True)
+@pytest.mark.parametrize('skip_autoflash', ['y'], indirect=True)
+@idf_parametrize('target', ['esp32', 'esp32c3'], indirect=['target'])
+def test_examples_partitions_ota_with_flash_enc_wifi_2_data_partition_verification(dut: Dut) -> None:
+    dut.serial.erase_flash()
+    dut.serial.flash()
+    update_partitions(dut, 'flash_encryption_wifi_high_traffic', True)
+
+
+def update_partitions(dut: Dut, env_name: str | None, signed_storage: bool | None) -> None:
     port = 8000
     thread1 = multiprocessing.Process(target=start_https_server, args=(dut.app.binary_path, '0.0.0.0', port))
     thread1.daemon = True
     thread1.start()
     try:
+        if signed_storage:
+            update(dut, port, 'signed_storage.bin', env_name)
+        else:
+            update(dut, port, 'storage.bin', env_name)
         update(dut, port, 'partitions_ota.bin', env_name)
         update(dut, port, 'bootloader/bootloader.bin', env_name)
         update(dut, port, 'partition_table/partition-table.bin', env_name)
-        update(dut, port, 'storage.bin', env_name)
     finally:
         thread1.terminate()
 
