@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: 2015-2024 Espressif Systems (Shanghai) CO LTD
+ * SPDX-FileCopyrightText: 2015-2026 Espressif Systems (Shanghai) CO LTD
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -152,6 +152,20 @@ void wifi_module_enable(void);
  * @note Calling this function will only disable Wi-Fi module.
  */
 void wifi_module_disable(void);
+
+/**
+ * @brief Enable phy module by un-gating related clock and de-asserting the reset signal.
+ *
+ * @note This function acquires clocks required during the PHY enable sequence.
+ */
+void phy_module_enable(void);
+
+/**
+ * @brief Disable phy module by gating related clock and asserting the reset signal.
+ *
+ * @note This function releases clocks required during the PHY enable sequence.
+ */
+void phy_module_disable(void);
 
 #undef __PERIPH_CTRL_DEPRECATE_ATTR
 

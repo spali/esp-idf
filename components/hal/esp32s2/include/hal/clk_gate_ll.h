@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: 2015-2023 Espressif Systems (Shanghai) CO LTD
+ * SPDX-FileCopyrightText: 2015-2026 Espressif Systems (Shanghai) CO LTD
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -274,6 +274,18 @@ static inline void periph_ll_wifi_module_enable_clk_clear_rst(void)
 static inline void periph_ll_wifi_module_disable_clk_set_rst(void)
 {
     DPORT_CLEAR_PERI_REG_MASK(DPORT_WIFI_CLK_EN_REG, DPORT_WIFI_CLK_WIFI_EN_M);
+    DPORT_SET_PERI_REG_MASK(DPORT_CORE_RST_EN_REG, 0);
+}
+
+static inline void periph_ll_phy_calibration_module_enable_clk_clear_rst(void)
+{
+    DPORT_SET_PERI_REG_MASK(DPORT_WIFI_CLK_EN_REG, DPORT_WIFI_CLK_PHY_EN_M);
+    DPORT_CLEAR_PERI_REG_MASK(DPORT_CORE_RST_EN_REG, 0);
+}
+
+static inline void periph_ll_phy_calibration_module_disable_clk_set_rst(void)
+{
+    DPORT_CLEAR_PERI_REG_MASK(DPORT_WIFI_CLK_EN_REG, DPORT_WIFI_CLK_PHY_EN_M);
     DPORT_SET_PERI_REG_MASK(DPORT_CORE_RST_EN_REG, 0);
 }
 
