@@ -72,10 +72,6 @@ elseif(NOT BOOTLOADER_BUILD)
         list(APPEND srcs "vbat_hal.c")
     endif()
 
-    if(CONFIG_SOC_JPEG_CODEC_SUPPORTED)
-        list(APPEND srcs "jpeg_hal.c")
-    endif()
-
     if(CONFIG_SOC_SDIO_SLAVE_SUPPORTED)
         list(APPEND srcs "sdio_slave_hal.c")
     endif()
