@@ -18,6 +18,7 @@
 #include "hal/gdma_hal_ahb.h"
 #include "hal/gdma_hal_axi.h"
 #include "soc/gdma_periph.h"
+#include "hal/efuse_hal.h"
 #include "esp_private/gdma.h"
 
 #if CONFIG_GDMA_ISR_IRAM_SAFE || CONFIG_GDMA_CTRL_FUNC_IN_IRAM
