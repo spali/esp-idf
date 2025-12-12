@@ -287,6 +287,10 @@ static int ws_connect(esp_transport_handle_t t, const char *host, int port, int 
     }
 
     char* delim_ptr = strstr(ws->buffer, delimiter);
+    if (!delim_ptr) {
+        ESP_LOGE(TAG, "Header size exceeded buffer size or delimiter not found");
+        return -1;
+    }
 
     ws->http_status_code = get_http_status_code(ws->buffer);
     if (ws->http_status_code == -1)  {
