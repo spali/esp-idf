@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: 2015-2025 Espressif Systems (Shanghai) CO LTD
+ * SPDX-FileCopyrightText: 2015-2026 Espressif Systems (Shanghai) CO LTD
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -304,12 +304,16 @@ static int ws_connect(esp_transport_handle_t t, const char *host, int port, int 
         ESP_LOGD(TAG, "Read header chunk %d, current header size: %d", len, header_len);
     } while (NULL == strstr(ws->buffer, delimiter) && header_len < WS_BUFFER_SIZE - 1);
 
-    if (header_len >= WS_BUFFER_SIZE - 1) {
-        ESP_LOGE(TAG, "Header size exceeded buffer size");
+    if (header_len > WS_BUFFER_SIZE - 1) {
+        ESP_LOGE(TAG, "Header size exceeded buffer size (need=%d, max=%d)", header_len + 1, WS_BUFFER_SIZE);
         return -1;
     }
 
     char* delim_ptr = strstr(ws->buffer, delimiter);
+    if (!delim_ptr) {
+        ESP_LOGE(TAG, "Header size exceeded buffer size or delimiter not found");
+        return -1;
+    }
 
     ws->http_status_code = get_http_status_code(ws->buffer);
     if (ws->http_status_code == -1) {
