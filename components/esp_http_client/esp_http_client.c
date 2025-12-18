@@ -1886,8 +1886,8 @@ esp_err_t esp_http_client_open(esp_http_client_handle_t client, int write_len)
 
 int esp_http_client_write(esp_http_client_handle_t client, const char *buffer, int len)
 {
-    if (client->state < HTTP_STATE_REQ_COMPLETE_HEADER) {
-        return ESP_FAIL;
+    if (client == NULL || len < 0 || client->state < HTTP_STATE_REQ_COMPLETE_HEADER || (buffer == NULL && len > 0)) {
+        return -1;
     }
 
     int wlen = 0, widx = 0;
@@ -1902,6 +1902,46 @@ int esp_http_client_write(esp_http_client_handle_t client, const char *buffer, i
         len -= wlen;
     }
     return widx;
+}
+
+int esp_http_client_chunk_write_begin(esp_http_client_handle_t client, const int len)
+{
+    if (client == NULL || client->state < HTTP_STATE_REQ_COMPLETE_HEADER || len <= 0) {
+        return -1;
+    }
+
+    char header_buffer[16];
+    int header_len = snprintf(header_buffer, sizeof(header_buffer), "%x\r\n", len);
+    int wlen = esp_transport_write(client->transport, header_buffer, header_len, client->timeout_ms);
+
+    if (wlen < 0 || wlen != header_len) {
+        return -1;
+    }
+    return 0;
+}
+
+int esp_http_client_chunk_write_end(esp_http_client_handle_t client, bool last_chunk)
+{
+    if (client == NULL || client->state < HTTP_STATE_REQ_COMPLETE_HEADER) {
+        return -1;
+    }
+
+    /* Send chunk trailer: \r\n */
+    int wlen = esp_transport_write(client->transport, "\r\n", 2, client->timeout_ms);
+    if (wlen < 0 || wlen != 2) {
+        return -1;
+    }
+
+    if (last_chunk) {
+        /* Send final terminator: 0\r\n\r\n */
+        const char *terminator = "0\r\n\r\n";
+        wlen = esp_transport_write(client->transport, terminator, strlen(terminator), client->timeout_ms);
+        if (wlen < 0 || wlen != strlen(terminator)) {
+            return -1;
+        }
+    }
+
+    return 0;
 }
 
 esp_err_t esp_http_client_close(esp_http_client_handle_t client)
