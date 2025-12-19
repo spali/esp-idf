@@ -1,13 +1,10 @@
 /*
- * SPDX-FileCopyrightText: 2015-2025 Espressif Systems (Shanghai) CO LTD
+ * SPDX-FileCopyrightText: 2015-2026 Espressif Systems (Shanghai) CO LTD
  *
  * SPDX-License-Identifier: Apache-2.0
  */
 
 #include "sdkconfig.h"
-#include "esp_flash.h"
-#include "memspi_host_driver.h"
-#include "esp_flash_spi_init.h"
 #include "driver/gpio.h"
 #include "esp_rom_gpio.h"
 #include "esp_rom_efuse.h"
@@ -15,14 +12,9 @@
 #include "esp_heap_caps.h"
 #include "hal/spi_types.h"
 #include "esp_private/spi_share_hw_ctrl.h"
-#include "esp_private/mspi_intr.h"
 #include "esp_ldo_regulator.h"
-#include "hal/spi_flash_hal.h"
-#include "esp_flash_port/spi_flash_chip_driver.h"
 #include "hal/gpio_hal.h"
-#include "esp_flash_internal.h"
 #include "esp_rom_gpio.h"
-#include "esp_private/spi_flash_os.h"
 #include "esp_private/cache_utils.h"
 #include "esp_private/log_util.h"
 #include "esp_private/startup_internal.h"
@@ -33,7 +25,15 @@
 #include "esp_private/esp_clk_tree_common.h"
 #include "clk_ctrl_os.h"
 #include "soc/soc_caps.h"
+#include "hal/spi_flash_hal.h"
 #include "hal/mspi_ll.h"
+
+#include "esp_flash.h"
+#include "esp_flash_spi_init.h"
+#include "esp_flash_chips/spi_flash_chip_driver.h"
+#include "esp_private/memspi_host_driver.h"
+#include "esp_private/esp_flash_internal.h"
+#include "esp_private/spi_flash_os.h"
 
 __attribute__((unused)) static const char TAG[] = "spi_flash";
 
@@ -360,12 +360,10 @@ static void deinit_gpspi_clock(esp_flash_t *chip)
     // Disable the clock source
     esp_clk_tree_enable_src(chip->clock_source, false);
 
-#if SOC_SPI_SUPPORT_CLK_RC_FAST
     // Disable RC_FAST clock if it was used
-    if (chip->clock_source == SPI_CLK_SRC_RC_FAST) {
+    if ((soc_module_clk_t)chip->clock_source == SOC_MOD_CLK_RC_FAST) {
         periph_rtc_dig_clk8m_disable();
     }
-#endif
 #endif // !CONFIG_IDF_TARGET_ESP32
 }
 
@@ -663,11 +661,11 @@ ESP_SYSTEM_INIT_FN(init_flash, CORE, BIT(0), 130)
 #endif // CONFIG_SPI_FLASH_BROWNOUT_RESET
     // The log library will call the registered callback function to check if the cache is disabled.
     esp_log_util_set_cache_enabled_cb(spi_flash_cache_enabled);
-    // Register MSPI Flash interrupt
-#if MSPI_LL_INTR_EVENT_SUPPORTED && MSPI_LL_INTR_SHARED
-    esp_mspi_register_isr(NULL);
-#endif
-    //else register flash standalone ISR to deal with CPU / API flash access
     return ESP_OK;
 }
 #endif // !CONFIG_APP_BUILD_TYPE_PURE_RAM_APP
+
+void esp_flash_spi_init_include_func(void)
+{
+    // Linker hook function, exists to make the linker examine this file
+}
