@@ -33,11 +33,7 @@ else()
     endif()
 endif()
 
-if(esp_tee_build)
-    if(CONFIG_SOC_BOD_SUPPORTED)
-        list(APPEND srcs "brownout_hal.c")
-    endif()
-elseif(NOT BOOTLOADER_BUILD)
+if(NOT esp_tee_build AND NOT BOOTLOADER_BUILD)
     list(APPEND srcs "color_hal.c")
 
     if(CONFIG_SOC_SYSTIMER_SUPPORTED AND NOT CONFIG_HAL_SYSTIMER_USE_ROM_IMPL)
@@ -58,14 +54,6 @@ elseif(NOT BOOTLOADER_BUILD)
 
     if(CONFIG_SOC_MODEM_CLOCK_IS_INDEPENDENT AND CONFIG_SOC_MODEM_CLOCK_SUPPORTED)
         list(APPEND srcs "${target}/modem_clock_hal.c")
-    endif()
-
-    if(CONFIG_SOC_BOD_SUPPORTED)
-        list(APPEND srcs "brownout_hal.c")
-    endif()
-
-    if(CONFIG_SOC_VBAT_SUPPORTED)
-        list(APPEND srcs "vbat_hal.c")
     endif()
 
 endif()
