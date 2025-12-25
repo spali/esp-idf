@@ -15,10 +15,6 @@ if(CONFIG_SOC_EFUSE_SUPPORTED)
     list(APPEND srcs "efuse_hal.c" "${target}/efuse_hal.c")
 endif()
 
-if(CONFIG_SOC_LP_TIMER_SUPPORTED)
-    list(APPEND srcs "lp_timer_hal.c")
-endif()
-
 if(NOT CONFIG_APP_BUILD_TYPE_PURE_RAM_APP)
     if(CONFIG_SOC_MMU_PERIPH_NUM)
         list(APPEND srcs "mmu_hal.c")
