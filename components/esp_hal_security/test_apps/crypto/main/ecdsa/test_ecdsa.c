@@ -15,13 +15,13 @@
 #include "esp_err.h"
 #include "esp_efuse.h"
 #include "esp_efuse_table.h"
-#include "esp_hal_security/ecc_ll.h"
-#include "esp_hal_security/ecdsa_hal.h"
+#include "hal/ecc_ll.h"
+#include "hal/ecdsa_hal.h"
 #include "hal/efuse_ll.h"
-#include "esp_hal_security/ecdsa_ll.h"
-#include "esp_hal_security/ecdsa_types.h"
+#include "hal/ecdsa_ll.h"
+#include "hal/ecdsa_types.h"
 #ifdef SOC_MPI_SUPPORTED
-#include "esp_hal_security/mpi_ll.h"
+#include "hal/mpi_ll.h"
 #endif
 #include "soc/soc_caps.h"
 
