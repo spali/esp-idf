@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: 2024-2025 Espressif Systems (Shanghai) CO LTD
+ * SPDX-FileCopyrightText: 2024-2026 Espressif Systems (Shanghai) CO LTD
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -778,6 +778,19 @@ static inline void i2s_ll_tx_enable_pdm(i2s_dev_t *hw)
 }
 
 /**
+ * @brief Enable I2S RX PDM mode
+ *
+ * @param hw Peripheral I2S hardware instance address.
+ * @param pdm2pcm_en Set true to enable RX PDM to PCM filter
+ */
+static inline void i2s_ll_rx_enable_pdm(i2s_dev_t *hw, bool pdm2pcm_en)
+{
+    (void)pdm2pcm_en;
+    hw->rx_conf.rx_pdm_en = true;
+    hw->rx_conf.rx_tdm_en = false;
+}
+
+/**
  * @brief Set I2S TX PDM prescale
  *
  * @param hw Peripheral I2S hardware instance address.
@@ -934,21 +947,6 @@ static inline uint32_t i2s_ll_tx_get_pdm_fp(i2s_dev_t *hw)
 static inline uint32_t i2s_ll_tx_get_pdm_fs(i2s_dev_t *hw)
 {
     return hw->tx_pcm2pdm_conf1.tx_pdm_fs;
-}
-
-/**
- * @brief Enable RX PDM mode.
- * @note  ESP32-C61 doesn't support pdm in rx mode, disable anyway
- *
- * @param hw Peripheral I2S hardware instance address.
- * @param pdm_enable Set true to RX enable PDM mode (ignored)
- */
-static inline void i2s_ll_rx_enable_pdm(i2s_dev_t *hw, bool pdm_enable)
-{
-    // Due to the lack of `PDM to PCM` module on ESP32-C61, PDM RX is not available
-    HAL_ASSERT(!pdm_enable);
-    hw->rx_conf.rx_pdm_en = 0;
-    hw->rx_conf.rx_tdm_en = 1;
 }
 
 /**
