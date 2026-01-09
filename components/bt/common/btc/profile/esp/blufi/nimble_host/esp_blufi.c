@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: 2015-2025 Espressif Systems (Shanghai) CO LTD
+ * SPDX-FileCopyrightText: 2015-2026 Espressif Systems (Shanghai) CO LTD
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -340,7 +340,9 @@ esp_blufi_gap_event(struct ble_gap_event *event, void *arg)
         }
         if (event->connect.status != 0) {
             /* Connection failed; resume advertising. */
-           ((void(*)(void))arg)();
+           if (arg != NULL) {
+	       ((void(*)(void))arg)();
+	   }
         }
         return 0;
     case BLE_GAP_EVENT_DISCONNECT:
@@ -375,7 +377,9 @@ esp_blufi_gap_event(struct ble_gap_event *event, void *arg)
     case BLE_GAP_EVENT_ADV_COMPLETE:
         ESP_LOGI(TAG, "advertise complete; reason=%d",
                  event->adv_complete.reason);
-        ((void(*)(void))arg)();
+        if (arg != NULL) {
+            ((void(*)(void))arg)();
+        }
         return 0;
 
     case BLE_GAP_EVENT_SUBSCRIBE:
