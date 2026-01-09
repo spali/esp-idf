@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2022-2025 Espressif Systems (Shanghai) CO LTD
+# SPDX-FileCopyrightText: 2022-2026 Espressif Systems (Shanghai) CO LTD
 # SPDX-License-Identifier: CC0-1.0
 import time
 
@@ -9,6 +9,7 @@ from pytest_embedded_idf.utils import soc_filtered_targets
 
 
 @pytest.mark.generic
+@pytest.mark.temp_skip_ci(targets=['esp32c5'], reason='c5 eco2 does not support top pd')
 @idf_parametrize(
     'config,target',
     [
@@ -75,6 +76,35 @@ def test_sleep_uart_handling(dut: Dut) -> None:
     assert '<<<DISCARD_DATA_9_SHOULD_BE_LOST>>>' not in output.group().decode(), (
         'DISCARD mode failed: data should have been discarded but DISCARD_DATA_9_SHOULD_BE_LOST marker appeared'
     )
+
+
+@pytest.mark.generic
+@idf_parametrize(
+    'config',
+    [
+        'pd_vddsdio',
+        'psram',
+    ],
+    indirect=['config'],
+)
+@idf_parametrize('target', ['esp32c5'], indirect=['target'])
+def test_esp_system_esp32c5(dut: Dut) -> None:
+    dut.run_all_single_board_cases(timeout=60)
+
+
+@pytest.mark.generic
+@pytest.mark.esp32c5_eco3
+@idf_parametrize(
+    'config',
+    [
+        'default',
+        'psram_with_pd_top',
+    ],
+    indirect=['config'],
+)
+@idf_parametrize('target', ['esp32c5'], indirect=['target'])
+def test_esp_system_esp32c5_eco3(dut: Dut) -> None:
+    dut.run_all_single_board_cases(timeout=60)
 
 
 @pytest.mark.generic
