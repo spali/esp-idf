@@ -337,7 +337,7 @@ esp_err_t spi_slave_hd_deinit(spi_host_device_t host_id)
     }
 #endif
 
-    spicommon_bus_free_io_cfg(&host->bus_attr->bus_cfg, &host->bus_attr->gpio_reserve);
+    spicommon_bus_free_io_cfg(host_id);
     spicommon_cs_free_io(host->cs_io_num, &host->bus_attr->gpio_reserve);
     free(host->hal.dmadesc_tx);
     free(host->hal.dmadesc_rx);
