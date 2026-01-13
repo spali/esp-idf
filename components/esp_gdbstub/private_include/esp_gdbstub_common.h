@@ -91,6 +91,13 @@ void gdbstub_handle_uart_int(esp_gdbstub_frame_t *regs_frame);
  * @param dst  pointer to the GDB register file
  */
 void esp_gdbstub_tcb_to_regfile(TaskHandle_t tcb, esp_gdbstub_gdb_regfile_t *dst);
+
+/**
+ * Find the TCB that owns the given exception frame
+ * @param frame  pointer to the exception frame
+ * @return pointer to the TCB, or NULL if not found
+ */
+const StaticTask_t *esp_gdbstub_find_tcb_by_frame(const esp_gdbstub_frame_t *frame);
 #endif // CONFIG_ESP_GDBSTUB_SUPPORT_TASKS
 
 
