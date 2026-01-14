@@ -531,6 +531,10 @@ config SOC_SPI_MAX_PRE_DIVIDER
     int
     default 8192
 
+config SOC_MEMSPI_ENCRYPTION_ALIGNMENT
+    int
+    default 16
+
 config SOC_LP_TIMER_BIT_WIDTH_LO
     int
     default 32
