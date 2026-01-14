@@ -42,6 +42,8 @@ extern "C" {
 
 #define SPI_LL_DMA_MAX_BIT_LEN    (1 << 18)    //reg len: 18 bits
 #define SPI_LL_CPU_MAX_BIT_LEN    (16 * 32)    //Fifo len: 16 words
+#define SPI_LL_TX_MINI_EXTRA_BITS (ESP_CHIP_REV_ABOVE(efuse_hal_chip_revision(), 102) ? 1 : 2)  //Minimum length of TX non byte aligned data in bits
+#define SPI_LL_RX_MINI_EXTRA_BITS 1            //Minimum length of RX non byte aligned data in bits
 #define SPI_LL_MOSI_FREE_LEVEL    1            //Default level after bus initialized
 
 /**
