@@ -482,7 +482,9 @@ static int ws_read_payload(esp_transport_handle_t t, char *buffer, int len, int 
 
     // Receive and process payload
     if (bytes_to_read != 0 && (rlen = esp_transport_read_internal(ws, buffer, bytes_to_read, timeout_ms)) <= 0) {
-        ESP_LOGE(TAG, "Error read data(%d)", rlen);
+        if (rlen < 0) {
+            ESP_LOGE(TAG, "Error read data(%d)", rlen);
+        }
         return rlen;
     }
     ws->frame_state.bytes_remaining -= rlen;
@@ -531,10 +533,12 @@ static int ws_read_header(esp_transport_handle_t t, char *buffer, int len, int t
     char ws_header[MAX_WEBSOCKET_HEADER_SIZE];
     char *data_ptr = ws_header, mask;
     int rlen;
-    int poll_read;
     ws->frame_state.header_received = false;
-    if ((poll_read = esp_transport_poll_read(ws->parent, timeout_ms)) <= 0) {
-        return poll_read;
+    if (ws->buffer_len == 0) {
+        int poll_read = esp_transport_poll_read(ws->parent, timeout_ms);
+        if (poll_read <= 0) {
+            return poll_read;
+        }
     }
 
     // Receive and process header first (based on header size)
@@ -673,8 +677,10 @@ static int ws_read(esp_transport_handle_t t, char *buffer, int len, int timeout_
 
     if (ws->frame_state.payload_len) {
         if ( (rlen = ws_read_payload(t, buffer, len, timeout_ms)) <= 0) {
-            ESP_LOGE(TAG, "Error reading payload data(%d)", rlen);
-            ws->frame_state.bytes_remaining = 0;
+            if (rlen < 0) {
+                ESP_LOGE(TAG, "Error reading payload data(%d)", rlen);
+                ws->frame_state.bytes_remaining = 0;
+            }
             return rlen;
         }
     }
@@ -686,6 +692,10 @@ static int ws_read(esp_transport_handle_t t, char *buffer, int len, int timeout_
 static int ws_poll_read(esp_transport_handle_t t, int timeout_ms)
 {
     transport_ws_t *ws = esp_transport_get_context_data(t);
+    if (ws->buffer_len > 0) {
+        ESP_LOGD(TAG, "ws_poll_read: buffered data available (%zu bytes)", ws->buffer_len);
+        return 1;
+    }
     return esp_transport_poll_read(ws->parent, timeout_ms);
 }
 
