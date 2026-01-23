@@ -47,7 +47,8 @@ def _create_idf_copy_via_worktree(path_from: Path, path_to: Path) -> str:
     """
     import uuid
 
-    branch_name = f'test-worktree-{uuid.uuid4().hex[:8]}'
+    timestamp = datetime.datetime.now().strftime('%H%M%S')
+    branch_name = f'test-worktree-{timestamp}-{uuid.uuid4().hex[:8]}'
 
     logging.debug(f'creating git worktree at {path_to} (branch: {branch_name})')
     subprocess.run(

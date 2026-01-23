@@ -82,7 +82,7 @@ def test_spaces_bundle3(idf_copy: Path) -> None:
 def test_spaces_bundle4(dummy_: str, idf_py: IdfPyFunc, test_app_copy: Path) -> None:
     logging.info(f'Running test spaces bundle 4 in {test_app_copy}')
     (test_app_copy / 'sdkconfig').write_text('CONFIG_APP_REPRODUCIBLE_BUILD=y')
-    idf_py('reconfigure')
+    idf_py('build')
     (test_app_copy / 'sdkconfig').unlink()
 
     idf_py('set-target', 'esp32s2')
