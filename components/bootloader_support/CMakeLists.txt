@@ -28,7 +28,7 @@ if(esp_tee_build)
 
     idf_component_register(SRCS ${tee_srcs}
                            INCLUDE_DIRS ${tee_inc_dirs}
-                           PRIV_REQUIRES efuse esp_app_format esptool_py)
+                           PRIV_REQUIRES efuse esp_app_format esptool_py esp_hal_security)
     return()
 endif()
 
