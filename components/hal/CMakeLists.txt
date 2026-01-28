@@ -37,7 +37,11 @@ else()
     endif()
 endif()
 
-if(NOT esp_tee_build AND NOT BOOTLOADER_BUILD)
+if(esp_tee_build)
+    if(CONFIG_SOC_BOD_SUPPORTED)
+        list(APPEND srcs "brownout_hal.c")
+    endif()
+elseif(NOT BOOTLOADER_BUILD)
     list(APPEND srcs "color_hal.c")
 
     if(CONFIG_SOC_CLK_TREE_SUPPORTED)
