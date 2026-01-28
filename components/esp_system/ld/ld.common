@@ -120,3 +120,8 @@ ASSERT((ADDR(NEXT_SECTION) == ADDR(PREV_SECTION) + SIZEOF(PREV_SECTION)), \
 #else
 #define ASSERT_PICOLIBC_REENT_STUB()
 #endif
+
+#define SECTION_MAPPINGS(SECTION_NAME)              \
+\n    arrays[SECTION_NAME]                          \
+\n    mapping[SECTION_NAME]                         \
+\n    mutable[SECTION_NAME]
