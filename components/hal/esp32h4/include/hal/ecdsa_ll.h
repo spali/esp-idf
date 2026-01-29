@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: 2025 Espressif Systems (Shanghai) CO LTD
+ * SPDX-FileCopyrightText: 2025-2026 Espressif Systems (Shanghai) CO LTD
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -30,6 +30,14 @@ __attribute__((always_inline)) static inline void ecdsa_ll_set_ecdsa_key_blk(ecd
     (void)efuse_blk;
 }
 
+/**
+ * @brief Check if the ECDSA peripheral is supported on this chip revision
+ * For ESP32-H4, ECDSA is always supported
+ */
+static inline bool ecdsa_ll_is_supported(void)
+{
+    return true;
+}
 
 #ifdef __cplusplus
 }
