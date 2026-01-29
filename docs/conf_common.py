@@ -213,6 +213,8 @@ I3C_DOCS = [
     'api-reference/peripherals/i3c_master.rst',
 ]
 
+CORDIC_DOCS = ['api-reference/peripherals/cordic.rst']
+
 SPI_DOCS = [
     'api-reference/peripherals/spi_master.rst',
     'api-reference/peripherals/spi_slave.rst',
@@ -405,6 +407,7 @@ conditional_include_dict = {
     'SOC_JPEG_CODEC_SUPPORTED': JPEG_DOCS,
     'SOC_PPA_SUPPORTED': PPA_DOCS,
     'SOC_GP_LDO_SUPPORTED': LDO_DOCS,
+    'SOC_CORDIC_SUPPORTED': CORDIC_DOCS,
     'esp32': ESP32_DOCS,
     'esp32s2': ESP32S2_DOCS,
     'esp32s3': ESP32S3_DOCS,

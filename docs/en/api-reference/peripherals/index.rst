@@ -13,6 +13,7 @@ Peripherals API
     :SOC_BITSCRAMBLER_SUPPORTED: bitscrambler
     :SOC_MIPI_CSI_SUPPORTED: camera_driver
     :SOC_CLK_TREE_SUPPORTED: clk_tree
+    :SOC_CORDIC_SUPPORTED: cordic
     :SOC_DAC_SUPPORTED: dac
     :SOC_ECDSA_SUPPORTED: ecdsa
     :SOC_ETM_SUPPORTED: etm
