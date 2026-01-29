@@ -101,6 +101,20 @@ The following deprecated functions have been removed:
 
 Note that the new AES functions return error codes for better error handling, unlike the old void functions.
 
+.. only:: SOC_DIG_SIGN_SUPPORTED
+
+    Digital Signature (DS) peripheral
+    ---------------------------------
+
+    The DS peripheral is now used via the **PSA Crypto RSA DS driver** instead of the legacy Mbed TLS RSA sign/decrypt alternates. The application-facing flow (obtain DS context from secure cert/NVS, pass to ESP-TLS or use for signing/decryption) is unchanged; only the internal implementation uses the PSA driver.
+
+    - **Breaking change**: The legacy DS integration has been removed and replaced by the PSA RSA DS driver.
+
+    - **Migration**:
+
+      * **For TLS (ESP-TLS):** Enable ``CONFIG_ESP_TLS_USE_DS_PERIPHERAL`` and pass ``esp_ds_data_ctx_t`` as ``ds_data`` in :cpp:type:`esp_tls_cfg_t`. See :ref:`digital-signature-with-esp-tls` in the :doc:`ESP-TLS documentation </api-reference/protocols/esp_tls>`.
+      * **For direct use (signing/decryption in application code):** Enable ``CONFIG_MBEDTLS_HARDWARE_RSA_DS_PERIPHERAL``, import ``esp_rsa_ds_opaque_key_t`` with ``psa_import_key()`` using ``PSA_KEY_LIFETIME_ESP_RSA_DS_VOLATILE``, then use ``psa_sign_hash()`` or ``psa_asymmetric_decrypt()``. See the :doc:`Digital Signature (DS) </api-reference/peripherals/ds>` documentation, section **Using DS with PSA Crypto**.
+
 BluFi
 -----
 
