@@ -131,19 +131,19 @@ static inline void ecdsa_ll_reset_register(void)
 static inline void ecdsa_ll_enable_intr(ecdsa_ll_intr_type_t type)
 {
     switch (type) {
-        case ECDSA_INT_CALC_DONE:
+    case ECDSA_INT_CALC_DONE:
 #if HAL_CONFIG(CHIP_SUPPORT_MIN_REV) >= 300
-            REG_SET_FIELD(ECDSA_INT_ENA_REG, ECDSA_PREP_DONE_INT_ENA, 1);
+        REG_SET_FIELD(ECDSA_INT_ENA_REG, ECDSA_PREP_DONE_INT_ENA, 1);
 #else
-            REG_SET_FIELD(ECDSA_INT_ENA_REG, ECDSA_CALC_DONE_INT_ENA, 1);
+        REG_SET_FIELD(ECDSA_INT_ENA_REG, ECDSA_CALC_DONE_INT_ENA, 1);
 #endif
-            break;
-        case ECDSA_INT_SHA_RELEASE:
-            REG_SET_FIELD(ECDSA_INT_ENA_REG, ECDSA_SHA_RELEASE_INT_ENA, 1);
-            break;
-        default:
-            HAL_ASSERT(false && "Unsupported interrupt type");
-            break;
+        break;
+    case ECDSA_INT_SHA_RELEASE:
+        REG_SET_FIELD(ECDSA_INT_ENA_REG, ECDSA_SHA_RELEASE_INT_ENA, 1);
+        break;
+    default:
+        HAL_ASSERT(false && "Unsupported interrupt type");
+        break;
     }
 }
 
@@ -155,19 +155,19 @@ static inline void ecdsa_ll_enable_intr(ecdsa_ll_intr_type_t type)
 static inline void ecdsa_ll_disable_intr(ecdsa_ll_intr_type_t type)
 {
     switch (type) {
-        case ECDSA_INT_CALC_DONE:
+    case ECDSA_INT_CALC_DONE:
 #if HAL_CONFIG(CHIP_SUPPORT_MIN_REV) >= 300
-            REG_SET_FIELD(ECDSA_INT_ENA_REG, ECDSA_PREP_DONE_INT_ENA, 0);
+        REG_SET_FIELD(ECDSA_INT_ENA_REG, ECDSA_PREP_DONE_INT_ENA, 0);
 #else
-            REG_SET_FIELD(ECDSA_INT_ENA_REG, ECDSA_CALC_DONE_INT_ENA, 0);
+        REG_SET_FIELD(ECDSA_INT_ENA_REG, ECDSA_CALC_DONE_INT_ENA, 0);
 #endif
-            break;
-        case ECDSA_INT_SHA_RELEASE:
-            REG_SET_FIELD(ECDSA_INT_ENA_REG, ECDSA_SHA_RELEASE_INT_ENA, 0);
-            break;
-        default:
-            HAL_ASSERT(false && "Unsupported interrupt type");
-            break;
+        break;
+    case ECDSA_INT_SHA_RELEASE:
+        REG_SET_FIELD(ECDSA_INT_ENA_REG, ECDSA_SHA_RELEASE_INT_ENA, 0);
+        break;
+    default:
+        HAL_ASSERT(false && "Unsupported interrupt type");
+        break;
     }
 }
 
@@ -179,19 +179,19 @@ static inline void ecdsa_ll_disable_intr(ecdsa_ll_intr_type_t type)
 static inline void ecdsa_ll_clear_intr(ecdsa_ll_intr_type_t type)
 {
     switch (type) {
-        case ECDSA_INT_CALC_DONE:
+    case ECDSA_INT_CALC_DONE:
 #if HAL_CONFIG(CHIP_SUPPORT_MIN_REV) >= 300
-            REG_SET_FIELD(ECDSA_INT_ENA_REG, ECDSA_PREP_DONE_INT_CLR, 1);
+        REG_SET_FIELD(ECDSA_INT_ENA_REG, ECDSA_PREP_DONE_INT_CLR, 1);
 #else
-            REG_SET_FIELD(ECDSA_INT_CLR_REG, ECDSA_CALC_DONE_INT_CLR, 1);
+        REG_SET_FIELD(ECDSA_INT_CLR_REG, ECDSA_CALC_DONE_INT_CLR, 1);
 #endif
-            break;
-        case ECDSA_INT_SHA_RELEASE:
-            REG_SET_FIELD(ECDSA_INT_CLR_REG, ECDSA_SHA_RELEASE_INT_CLR, 1);
-            break;
-        default:
-            HAL_ASSERT(false && "Unsupported interrupt type");
-            break;
+        break;
+    case ECDSA_INT_SHA_RELEASE:
+        REG_SET_FIELD(ECDSA_INT_CLR_REG, ECDSA_SHA_RELEASE_INT_CLR, 1);
+        break;
+    default:
+        HAL_ASSERT(false && "Unsupported interrupt type");
+        break;
     }
 }
 
@@ -226,15 +226,15 @@ static inline void ecdsa_ll_set_mode(ecdsa_mode_t mode)
 static inline void ecdsa_ll_set_curve(ecdsa_curve_t curve)
 {
     switch (curve) {
-        case ECDSA_CURVE_SECP192R1:
-        case ECDSA_CURVE_SECP256R1:
-        case ECDSA_CURVE_SECP384R1:
-        case ECDSA_CURVE_SM2:
-            REG_SET_FIELD(ECDSA_CONF_REG, ECDSA_ECC_CURVE, curve);
-            break;
-        default:
-            HAL_ASSERT(false && "Unsupported curve");
-            return;
+    case ECDSA_CURVE_SECP192R1:
+    case ECDSA_CURVE_SECP256R1:
+    case ECDSA_CURVE_SECP384R1:
+    case ECDSA_CURVE_SM2:
+        REG_SET_FIELD(ECDSA_CONF_REG, ECDSA_ECC_CURVE, curve);
+        break;
+    default:
+        HAL_ASSERT(false && "Unsupported curve");
+        return;
     }
 }
 

@@ -11,7 +11,7 @@
 #include "soc/ecdsa_reg.h"
 #include "soc/pcr_struct.h"
 #include "soc/efuse_periph.h"
-#include "esp_hal_security/ecdsa_types.h"
+#include "hal/ecdsa_types.h"
 
 #ifdef __cplusplus
 extern "C" {

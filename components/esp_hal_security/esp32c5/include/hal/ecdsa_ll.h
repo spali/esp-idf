@@ -454,7 +454,6 @@ static inline bool ecdsa_ll_is_supported(void)
     return true;
 }
 
-
 #ifdef __cplusplus
 }
 #endif
