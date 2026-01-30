@@ -150,9 +150,6 @@ elseif(NOT BOOTLOADER_BUILD)
         list(APPEND srcs "ds_hal.c")
     endif()
 
-    if(CONFIG_SOC_TEMP_SENSOR_SUPPORTED)
-        list(APPEND srcs "temperature_sensor_hal.c")
-    endif()
 endif()
 
 idf_component_register(SRCS ${srcs}
