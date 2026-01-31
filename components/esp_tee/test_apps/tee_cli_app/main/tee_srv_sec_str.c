@@ -1,10 +1,11 @@
 /*
- * SPDX-FileCopyrightText: 2024-2025 Espressif Systems (Shanghai) CO LTD
+ * SPDX-FileCopyrightText: 2024-2026 Espressif Systems (Shanghai) CO LTD
  *
  * SPDX-License-Identifier: Apache-2.0
  */
 #include <string.h>
 
+#include "soc/soc_caps.h"
 #include "esp_event.h"
 #include "esp_log.h"
 
@@ -20,10 +21,16 @@
 #include "example_tee_srv.h"
 
 #define SHA256_DIGEST_SZ         (32)
-#define ECDSA_SECP256R1_KEY_LEN  (32)
+#if CONFIG_SECURE_TEE_SEC_STG_SUPPORT_SECP384R1_SIGN
+#define MAX_ECDSA_KEY_LEN        (48)
+#else
+#define MAX_ECDSA_KEY_LEN        (32)
+#endif /* CONFIG_SECURE_TEE_SEC_STG_SUPPORT_SECP384R1_SIGN */
 
 #define AES256_GCM_TAG_LEN       (16)
 #define MAX_AES_PLAINTEXT_LEN    (256)
+
+#define ECDSA_SECP256R1_KEY_LEN  (32)
 
 static const char *TAG = "tee_sec_stg";
 
@@ -266,7 +273,7 @@ static int tee_sec_stg_sign(int argc, char **argv)
         goto exit;
     }
 
-    size_t sign_hexstr_len = (ECDSA_SECP256R1_KEY_LEN * 2) * 2 + 1;
+    size_t sign_hexstr_len = (MAX_ECDSA_KEY_LEN * 2) * 2 + 1;
     char *sign_hexstr = calloc(sign_hexstr_len, sizeof(char));
     if (sign_hexstr == NULL) {
         err = ESP_ERR_NO_MEM;
@@ -284,7 +291,7 @@ static int tee_sec_stg_sign(int argc, char **argv)
         goto exit;
     }
 
-    size_t pubkey_hexstr_len = (ECDSA_SECP256R1_KEY_LEN * 2) * 2 + 1;
+    size_t pubkey_hexstr_len = (MAX_ECDSA_KEY_LEN * 2) * 2 + 1;
     char *pubkey_hexstr = calloc(pubkey_hexstr_len, sizeof(char));
     if (pubkey_hexstr == NULL) {
         err = ESP_ERR_NO_MEM;
