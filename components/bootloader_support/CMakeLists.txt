@@ -74,7 +74,8 @@ if(BOOTLOADER_BUILD OR CONFIG_APP_BUILD_TYPE_RAM)
         "private_include")
     set(priv_requires micro-ecc spi_flash efuse esp_bootloader_format esp_app_format esptool_py)
     # `esp_hal_ana_conv` is required by bootloader_random_esp32xx.c
-    list(APPEND priv_requires esp_hal_wdt esp_hal_gpio esp_hal_uart esp_hal_ana_conv)
+    list(APPEND priv_requires esp_hal_wdt esp_hal_gpio esp_hal_uart esp_hal_ana_conv
+         esp_hal_security)
     list(APPEND srcs
     "src/bootloader_init.c"
     "src/bootloader_clock_loader.c"
