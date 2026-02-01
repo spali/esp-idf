@@ -12,14 +12,13 @@
 #include "soc/soc.h"
 #include "soc/pmu_struct.h"
 #include "soc/pvt_reg.h"
-#include "soc/pmu_reg.h"
 #include "soc/pcr_reg.h"
+#include "soc/pmu_reg.h"
 #include "hal/pmu_hal.h"
 #include "pmu_param.h"
 #include "esp_rom_sys.h"
 #include "esp_private/esp_pmu.h"
 #include "soc/regi2c_dig_reg.h"
-#include "regi2c_ctrl.h"
 #include "soc/rtc.h"
 #include "hal/efuse_ll.h"
 #include "hal/efuse_hal.h"
@@ -31,25 +30,25 @@ static __attribute__((unused)) const char *TAG = "pmu_pvt";
 
 static uint8_t get_lp_hp_gap(void)
 {
-    int8_t pvt_offset = 0;
+    int8_t lp_hp_gap = 0;
     uint32_t blk_version = efuse_hal_blk_version();
-    if (blk_version >= 3) {
-        uint8_t offset_read = efuse_ll_get_dbias_vol_gap();
-        bool offset_flag = offset_read >> 4;
-        uint8_t offset_value = offset_read & 0xf;
-        int8_t pvt_offset = 0;
-        if (offset_flag) {
-            pvt_offset = -1 * offset_value;
+    uint8_t lp_hp_gap_efuse = 0;
+    if (blk_version >= 2) {
+        lp_hp_gap_efuse = efuse_ll_get_dbias_vol_gap();
+        bool gap_flag = lp_hp_gap_efuse >> 4;
+        uint8_t gap_abs_value = lp_hp_gap_efuse & 0xf;
+        if (gap_flag) {
+            lp_hp_gap = -1 * gap_abs_value;
         } else {
-            pvt_offset = offset_value;
+            lp_hp_gap = gap_abs_value;
         }
-        pvt_offset = pvt_offset - 2;
-        assert((pvt_offset >= -15) && (pvt_offset <= 13));
-        if (pvt_offset < 0 ) {
-            pvt_offset = 16 - pvt_offset;
+        lp_hp_gap = lp_hp_gap - 8;
+        assert((lp_hp_gap >= -15) && (lp_hp_gap <= 7));
+        if (lp_hp_gap < 0 ) {
+            lp_hp_gap = 16 - lp_hp_gap;
         }
     }
-    return pvt_offset;
+    return lp_hp_gap;
 }
 
 static void set_pvt_hp_lp_gap(uint8_t value)
@@ -67,18 +66,18 @@ static void set_pvt_hp_lp_gap(uint8_t value)
 
 FORCE_INLINE_ATTR uint32_t get_pvt_hp_dbias(void)
 {
-    return REG_GET_FIELD(PMU_HP_ACTIVE_HP_REGULATOR0_REG, PMU_HP_DBIAS_VOL);
+    return GET_PERI_REG_BITS2(PMU_HP_ACTIVE_HP_REGULATOR0_REG, PMU_HP_DBIAS_VOL_V, PMU_HP_DBIAS_VOL_S);
 }
 
 FORCE_INLINE_ATTR uint32_t get_pvt_lp_dbias(void)
 {
-    return REG_GET_FIELD(PMU_HP_ACTIVE_HP_REGULATOR0_REG, PMU_LP_DBIAS_VOL);
+    return GET_PERI_REG_BITS2(PMU_HP_ACTIVE_HP_REGULATOR0_REG, PMU_LP_DBIAS_VOL_V, PMU_LP_DBIAS_VOL_S);
 }
 
 void pvt_auto_dbias_init(void)
 {
     uint32_t blk_version = efuse_hal_blk_version();
-    if (blk_version >= 3) {
+    if (blk_version >= 2) {
         SET_PERI_REG_MASK(PCR_PVT_MONITOR_CONF_REG, PCR_PVT_MONITOR_CLK_EN);
         SET_PERI_REG_MASK(PCR_PVT_MONITOR_FUNC_CLK_CONF_REG, PCR_PVT_MONITOR_FUNC_CLK_EN);
         /*config for dbias func*/
@@ -94,13 +93,12 @@ void pvt_auto_dbias_init(void)
         SET_PERI_REG_BITS(PVT_DBIAS_CMD2_REG, PVT_DBIAS_CMD2_PVT, PVT_CMD2, PVT_DBIAS_CMD2_PVT_S); // Configure auto-dbias adjust property, such as adjusting step
         SET_PERI_REG_BITS(PVT_DBIAS_TIMER_REG, PVT_TIMER_TARGET, PVT_TARGET, PVT_TIMER_TARGET_S);   // Configure auto-dbias  voltage regulation cycle
 
-        SET_PERI_REG_BITS(PCR_PVT_MONITOR_FUNC_CLK_CONF_REG, PCR_PVT_MONITOR_FUNC_CLK_DIV_NUM, PVT_CLK_DIV, PCR_PVT_MONITOR_FUNC_CLK_DIV_NUM_S); //pvt function clock divider number
+        SET_PERI_REG_BITS(PCR_PVT_MONITOR_FUNC_CLK_CONF_REG, PCR_PVT_MONITOR_FUNC_CLK_DIV_NUM, PVT_CLK_DIV, PCR_PVT_MONITOR_FUNC_CLK_DIV_NUM_S);//pvt function clock divider number
 
-        /*config for pvt cell: unit0; site2; vt2*/
-        SET_PERI_REG_MASK(PCR_PVT_MONITOR_FUNC_CLK_CONF_REG, PCR_PVT_MONITOR_FUNC_CLK_SEL); //pvt function clock source select
-        SET_PERI_REG_BITS(PVT_COMB_PD_SITE2_UNIT0_VT2_CONF2_REG, PVT_MONITOR_EDG_MOD_VT2_PD_SITE2_UNIT0, PVT_EDG_MODE, PVT_MONITOR_EDG_MOD_VT2_PD_SITE2_UNIT0_S);  // Select edge_mode
-        SET_PERI_REG_BITS(PVT_COMB_PD_SITE2_UNIT0_VT2_CONF1_REG, PVT_DELAY_LIMIT_VT2_PD_SITE2_UNIT0, PVT_DELAY_NUM_HIGH, PVT_DELAY_LIMIT_VT2_PD_SITE2_UNIT0_S); // The threshold for determining whether the voltage is too high
-        SET_PERI_REG_BITS(PVT_COMB_PD_SITE2_UNIT1_VT2_CONF1_REG, PVT_DELAY_LIMIT_VT2_PD_SITE2_UNIT1, PVT_DELAY_NUM_LOW, PVT_DELAY_LIMIT_VT2_PD_SITE2_UNIT1_S); // The threshold for determining whether the voltage is too low
+        /*config for pvt cell: unit0; site2; vt1*/
+        SET_PERI_REG_MASK(PCR_PVT_MONITOR_FUNC_CLK_CONF_REG, PCR_PVT_MONITOR_FUNC_CLK_SEL); // choose pvt clk
+        SET_PERI_REG_BITS(PVT_COMB_PD_SITE2_UNIT0_VT1_CONF1_REG, PVT_DELAY_LIMIT_VT1_PD_SITE2_UNIT0, PVT_DELAY_NUM_HIGH, PVT_DELAY_LIMIT_VT1_PD_SITE2_UNIT0_S); // The threshold for determining whether the voltage is too high
+        SET_PERI_REG_BITS(PVT_COMB_PD_SITE2_UNIT1_VT1_CONF1_REG, PVT_DELAY_LIMIT_VT1_PD_SITE2_UNIT1, PVT_DELAY_NUM_LOW, PVT_DELAY_LIMIT_VT1_PD_SITE2_UNIT1_S); // The threshold for determining whether the voltage is too low
         SET_PERI_REG_BITS(PVT_COMB_PD_SITE2_UNIT2_VT1_CONF1_REG, PVT_DELAY_LIMIT_VT1_PD_SITE2_UNIT2, PVT_DELAY_NUM_PUMP, PVT_DELAY_LIMIT_VT1_PD_SITE2_UNIT2_S); // The threshold for chargepump
 
         /*config lp offset for pvt func*/
@@ -112,13 +110,13 @@ void pvt_auto_dbias_init(void)
 void IRAM_ATTR pvt_func_enable(bool enable)
 {
     uint32_t blk_version = efuse_hal_blk_version();
-    if (blk_version >= 3) {
+    if (blk_version >= 2) {
         if (enable) {
-            SET_PERI_REG_MASK(PMU_HP_ACTIVE_HP_REGULATOR0_REG, PMU_DIG_DBIAS_INIT);     // start calibration @HP_CALI_DBIAS_DEFAUL
+            SET_PERI_REG_MASK(PMU_HP_ACTIVE_HP_REGULATOR0_REG, PMU_DIG_DBIAS_INIT);     // start calibration @HP_CALI_DBIAS_DEFAULT
             SET_PERI_REG_MASK(PCR_PVT_MONITOR_FUNC_CLK_CONF_REG, PCR_PVT_MONITOR_FUNC_CLK_EN);
             SET_PERI_REG_MASK(PCR_PVT_MONITOR_CONF_REG, PCR_PVT_MONITOR_CLK_EN);
-            SET_PERI_REG_MASK(PVT_CLK_CFG_REG, PVT_MONITOR_CLK_PVT_EN);
-            SET_PERI_REG_MASK(PVT_COMB_PD_SITE2_UNIT0_VT2_CONF1_REG, PVT_MONITOR_EN_VT2_PD_SITE2_UNIT0);    // enable pvt clk
+            SET_PERI_REG_MASK(PVT_CLK_CFG_REG, PVT_MONITOR_CLK_PVT_EN);                // once enable cannot be closed
+            SET_PERI_REG_MASK(PVT_COMB_PD_SITE2_UNIT0_VT1_CONF1_REG, PVT_MONITOR_EN_VT1_PD_SITE2_UNIT0); // enable pvt clk
             esp_rom_delay_us(10);
             CLEAR_PERI_REG_MASK(PMU_HP_ACTIVE_HP_REGULATOR0_REG, PMU_DIG_REGULATOR0_DBIAS_SEL); // hand over control of dbias to pvt
             CLEAR_PERI_REG_MASK(PMU_HP_ACTIVE_HP_REGULATOR0_REG, PMU_DIG_DBIAS_INIT);     // must clear @HP_CALI_DBIAS_DEFAULT
@@ -139,7 +137,7 @@ void IRAM_ATTR pvt_func_enable(bool enable)
 void charge_pump_init(void)
 {
     uint32_t blk_version = efuse_hal_blk_version();
-    if (blk_version >= 3) {
+    if (blk_version >= 2) {
         /*config for charge pump*/
         SET_PERI_REG_BITS(PVT_PMUP_CHANNEL_CFG_REG, PVT_PUMP_CHANNEL_CODE0, PVT_PUMP_CHANNEL_CODE, PVT_PUMP_CHANNEL_CODE0_S);   //Set channel code
         WRITE_PERI_REG(PVT_PMUP_BITMAP_LOW0_REG, (1 << PVT_PUMP_BITMAP));  // Select monitor cell for charge pump
@@ -150,7 +148,7 @@ void charge_pump_init(void)
 void IRAM_ATTR charge_pump_enable(bool enable)
 {
     uint32_t blk_version = efuse_hal_blk_version();
-    if (blk_version >= 3) {
+    if (blk_version >= 2) {
         if (enable) {
             SET_PERI_REG_MASK(PVT_PMUP_DRV_CFG_REG, PVT_PUMP_EN);   // enable charge pump
         } else {
