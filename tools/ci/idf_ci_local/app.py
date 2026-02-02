@@ -36,6 +36,8 @@ class IdfCMakeApp(CMakeApp):
                     'gitlab',
                     'upload-artifacts',
                     self.app_dir,
+                    '--build-dir',
+                    self.build_dir,
                 ],
                 stdout=sys.stdout,
                 stderr=sys.stderr,
