@@ -37,7 +37,7 @@ Three parameters need to be prepared to calculate the digital signature:
 
 Since the signature calculation takes some time, there are two possible API versions to use in ESP-IDF. The first one is :cpp:func:`esp_ds_sign` and simply blocks until the calculation is finished. If software needs to do something else during the calculation, :cpp:func:`esp_ds_start_sign` can be called, followed by periodic calls to :cpp:func:`esp_ds_is_busy` to check when the calculation has finished. Once the calculation has finished, :cpp:func:`esp_ds_finish_sign` can be called to get the resulting signature.
 
-The APIs :cpp:func:`esp_ds_sign` and :cpp:func:`esp_ds_start_sign` calculate a plain RSA signature with the help of the DS peripheral. This signature must be converted to an appropriate format (e.g. PKCS#1 v1.5 or PSS) for use in TLS or other protocols.
+The APIs :cpp:func:`esp_ds_sign` and :cpp:func:`esp_ds_start_sign` calculate a plain RSA signature with the help of the DS peripheral. This signature must be converted to an appropriate format (e.g., PKCS#1 v1.5 or PSS) for use in TLS or other protocols.
 
 .. note::
 
@@ -45,7 +45,7 @@ The APIs :cpp:func:`esp_ds_sign` and :cpp:func:`esp_ds_start_sign` calculate a p
 
 **PSA Crypto driver**
 
-The DS peripheral is also exposed via the **PSA Crypto RSA DS driver**, so you can use standard PSA APIs for signing (PKCS#1 v1.5 or PSS) and RSA decryption (PKCS#1 v1.5 or OAEP). Enable ``CONFIG_MBEDTLS_HARDWARE_RSA_DS_PERIPHERAL`` in **Component config** > **mbedTLS**. For using the DS peripheral with ESP-TLS (e.g. TLS client authentication), see :ref:`digital-signature-with-esp-tls` in the ESP-TLS documentation.
+The DS peripheral is also exposed via the **PSA Crypto RSA DS driver**, so you can use standard PSA APIs for signing (PKCS#1 v1.5 or PSS) and RSA decryption (PKCS#1 v1.5 or OAEP). Enable ``CONFIG_MBEDTLS_HARDWARE_RSA_DS_PERIPHERAL`` in ``Component config`` > ``mbedTLS``. For using the DS peripheral with ESP-TLS (e.g. TLS client authentication), see :ref:`digital-signature-with-esp-tls` in the ESP-TLS documentation.
 
 .. _configure-the-ds-peripheral:
 
@@ -63,7 +63,7 @@ For more details, see **{IDF_TARGET_NAME} Technical Reference Manual** > **Digit
 
 To configure the DS peripheral for development purposes, you can use the `esp-secure-cert-tool <https://pypi.org/project/esp-secure-cert-tool>`_.
 
-The encrypted private key parameters obtained after the DS peripheral configuration are then to be kept in flash. The application needs to read the DS data from flash (e.g. through the APIs provided by the `esp_secure_cert_mgr <https://github.com/espressif/esp_secure_cert_mgr>`_ component; see the `component/README <https://github.com/espressif/esp_secure_cert_mgr#readme>`_ for more details). For using the DS peripheral with ESP-TLS, see :ref:`digital-signature-with-esp-tls`.
+The encrypted private key parameters obtained after the DS peripheral configuration should be stored in flash. The application needs to read the DS data from flash (e.g. through the APIs provided by the `esp_secure_cert_mgr <https://github.com/espressif/esp_secure_cert_mgr>`_ component; see the `component/README <https://github.com/espressif/esp_secure_cert_mgr#readme>`_ for more details). For using the DS peripheral with ESP-TLS, see :ref:`digital-signature-with-esp-tls`.
 
 Using DS with PSA Crypto
 ------------------------
@@ -110,7 +110,7 @@ To use the DS peripheral for signing or decryption in application code (outside 
 Example for SSL Mutual Authentication Using DS
 ----------------------------------------------
 
-The SSL mutual authentication example that previously lived under ``examples/protocols/mqtt/ssl_ds`` is now shipped with the standalone `espressif/mqtt <https://components.espressif.com/components/espressif/mqtt>`__ component. Follow the component documentation to fetch the SSL DS example and build it together with ESP-MQTT. The example continues to use `mqtt_client` (implemented by ESP-MQTT) to connect to ``test.mosquitto.org`` over mutual-authenticated TLS, with the TLS portion handled by `ESP-TLS`.
+The SSL mutual authentication example that previously lived under ``examples/protocols/mqtt/ssl_ds`` is now shipped with the standalone `espressif/mqtt <https://components.espressif.com/components/espressif/mqtt>`__ component. Follow the component documentation to fetch the SSL DS example and build it together with ESP-MQTT. The example continues to use ``mqtt_client`` (implemented by ESP-MQTT) to connect to ``test.mosquitto.org`` over mutual-authenticated TLS, with the TLS portion handled by ESP-TLS.
 
 API Reference
 -------------
