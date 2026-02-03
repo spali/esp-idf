@@ -95,6 +95,13 @@
 #define UC_BT_CLASSIC_BQB_ENABLED           FALSE
 #endif
 
+//Enable Classic Bluetooth power control vsc
+#ifdef CONFIG_BT_CLASSIC_ENABLE_POWER_CTRL_VSC
+#define UC_BT_CLASSIC_ENABLE_POWER_CTRL_VSC         CONFIG_BT_CLASSIC_ENABLE_POWER_CTRL_VSC
+#else
+#define UC_BT_CLASSIC_ENABLE_POWER_CTRL_VSC         FALSE
+#endif
+
 //BLE
 #ifdef CONFIG_BT_BLE_ENABLED
 #define UC_BT_BLE_ENABLED                   CONFIG_BT_BLE_ENABLED
