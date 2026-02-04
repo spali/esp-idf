@@ -38,6 +38,7 @@ sys.dont_write_bytecode = True
 import python_version_checker  # noqa: E402
 
 try:
+    import idf_py_actions.help_custom_targets_skip as _help_custom_targets
     from idf_py_actions.errors import FatalError
     from idf_py_actions.tools import PROG
     from idf_py_actions.tools import SHELL_COMPLETE_RUN
@@ -746,6 +747,113 @@ def init_cli(verbose_output: list | None = None) -> Any:
                 self._print_closing_message(global_args, tasks_to_run.keys())
 
             return tasks_to_run
+
+        def _get_custom_targets(self) -> list[tuple[str, str]]:
+            """
+            List likely user-facing phony targets: ``ninja -t targets`` when possible;
+            else ``cmake --build … help``.
+            """
+            # Note: ``project_dir`` and ``resolve_build_dir()`` are captured from the enclosing init_cli scope and
+            # resolved at call-time (when formatting help), not at function definition time.
+            build_dir = resolve_build_dir()
+            cache = os.path.join(build_dir, 'CMakeCache.txt')
+            ninja_file = os.path.join(build_dir, 'build.ninja')
+            makefile = os.path.join(build_dir, 'Makefile')
+            if not (os.path.isfile(cache) or os.path.isfile(ninja_file) or os.path.isfile(makefile)):
+                return []
+
+            def configure_ready_for_cmake_help() -> bool:
+                """
+                Skip ``cmake --build`` until configure has run
+                and root ``CMakeLists.txt`` is not newer than the cache.
+                """
+                if not os.path.isfile(cache):
+                    return False
+                root_cml = os.path.join(project_dir, 'CMakeLists.txt')
+                if not os.path.isfile(root_cml):
+                    return True
+                try:
+                    return os.path.getmtime(root_cml) <= os.path.getmtime(cache)
+                except OSError:
+                    return False
+
+            defined = set(self._actions.keys()) | set(self.commands_with_aliases.keys())
+            found: set[str] = set()
+
+            def add_from_help_text(text: str) -> None:
+                for raw in text.splitlines():
+                    line = _help_custom_targets.strip_cmake_help_listing_quotes(raw.strip())
+                    m = _help_custom_targets.PHONY_BUILD_LINE_RE.match(line)
+                    if m and m.group(2).lower() == 'phony':
+                        n = m.group(1).strip()
+                        if _help_custom_targets.should_list_custom_target(n, defined):
+                            found.add(n)
+                    elif line.startswith('...'):
+                        rest = line[3:].lstrip()
+                        if rest:
+                            n = rest.split()[0]
+                            if _help_custom_targets.should_list_custom_target(n, defined):
+                                found.add(n)
+
+            if os.path.isfile(ninja_file):
+                try:
+                    r = subprocess.run(
+                        ['ninja', '-t', 'targets', 'all'],
+                        cwd=build_dir,
+                        capture_output=True,
+                        text=True,
+                        encoding='utf-8',
+                        errors='replace',
+                        timeout=_help_custom_targets.NINJA_TARGETS_HELP_TIMEOUT_SEC,
+                    )
+                    if r.returncode == 0:
+                        add_from_help_text((r.stdout or '') + (r.stderr or ''))
+                except (subprocess.TimeoutExpired, FileNotFoundError, OSError) as exc:
+                    print_warning(f'Failed querying Ninja custom targets with "ninja -t targets all": {exc}')
+                    pass
+
+                # If ``ninja -t`` produced nothing we could parse (empty output, different format, etc.),
+                # still read ``build.ninja`` so ``--help`` works without Ninja on PATH and without CMake.
+                if not found:
+                    try:
+                        with open(ninja_file, encoding='utf-8', errors='replace') as f:
+                            for raw in f:
+                                m = _help_custom_targets.NINJA_BUILD_PHONY_RE.match(raw)
+                                if not m:
+                                    continue
+                                outputs = m.group(1).strip()
+                                for n in _help_custom_targets.split_ninja_build_outputs(outputs):
+                                    if _help_custom_targets.should_list_custom_target(n, defined):
+                                        found.add(n)
+                    except OSError as exc:
+                        print_warning(f'Failed reading Ninja file {ninja_file} for custom targets: {exc}')
+                        pass
+
+            if not found and configure_ready_for_cmake_help():
+                try:
+                    r = subprocess.run(
+                        ['cmake', '--build', build_dir, '--target', 'help'],
+                        capture_output=True,
+                        text=True,
+                        encoding='utf-8',
+                        errors='replace',
+                        timeout=_help_custom_targets.CMAKE_BUILD_HELP_TIMEOUT_SEC,
+                    )
+                    if r.returncode == 0:
+                        add_from_help_text((r.stdout or '') + (r.stderr or ''))
+                except (subprocess.TimeoutExpired, FileNotFoundError, OSError) as exc:
+                    print_warning(f'Failed querying CMake custom targets with "cmake --build --target help": {exc}')
+                    pass
+
+            return [(n, '') for n in sorted(found, key=str.lower)]
+
+        def format_help(self, ctx: click.core.Context, formatter: click.HelpFormatter) -> None:
+            """Override to append custom CMake targets section."""
+            super().format_help(ctx, formatter)
+            targets = self._get_custom_targets()
+            if targets:
+                with formatter.section('CMake Custom Targets'):
+                    formatter.write_dl(list(targets))
 
     def load_cli_extension_from_dir(ext_dir: str) -> Any | None:
         """Load extension 'idf_ext.py' from directory and return the action_extensions function"""
