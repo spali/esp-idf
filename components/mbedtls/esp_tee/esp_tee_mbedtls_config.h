@@ -187,3 +187,6 @@
 #if SOC_AES_SUPPORTED
 #define MBEDTLS_AES_FEWER_TABLES
 #endif
+
+/* ESP-TEE is single threaded so we can disable threading in mbedTLS */
+#undef MBEDTLS_THREADING_C
