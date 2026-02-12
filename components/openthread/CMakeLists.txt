@@ -70,7 +70,7 @@ if(CONFIG_OPENTHREAD_FTD OR CONFIG_OPENTHREAD_MTD)
                            REQUIRES esp_netif lwip driver
                            LDFRAGMENTS linker.lf
                            PRIV_REQUIRES console esp_coex esp_event esp_partition esp_timer
-                                         ieee802154 mbedtls nvs_flash)
+                                         ieee802154 mbedtls nvs_flash esp_psram)
 elseif(CONFIG_OPENTHREAD_RADIO)
     # RCP mode uses explicit source list from srcs_radio.cmake
     idf_component_register(SRCS ${rcp_srcs}
@@ -79,7 +79,7 @@ elseif(CONFIG_OPENTHREAD_RADIO)
                            REQUIRES esp_netif lwip driver
                            LDFRAGMENTS linker.lf
                            PRIV_REQUIRES console esp_coex esp_event esp_partition esp_timer
-                                         ieee802154 mbedtls nvs_flash)
+                                         ieee802154 mbedtls nvs_flash esp_psram)
 elseif(CONFIG_OPENTHREAD_SPINEL_ONLY)
     # SPINEL_ONLY mode uses explicit source list from srcs_spinel.cmake
     idf_component_register(SRCS ${spinel_srcs}
@@ -88,7 +88,7 @@ elseif(CONFIG_OPENTHREAD_SPINEL_ONLY)
                            REQUIRES esp_netif lwip driver
                            LDFRAGMENTS linker.lf
                            PRIV_REQUIRES console esp_coex esp_event esp_partition esp_timer
-                                         ieee802154 mbedtls nvs_flash)
+                                         ieee802154 mbedtls nvs_flash esp_psram)
 else()
     # This is not supposed to happen, but in older versions of IDF components couldn't be selectively
     # enabled based on KConfig options so some examples just included openthread for all configs.
@@ -97,7 +97,7 @@ else()
                            REQUIRES esp_netif lwip driver
                            LDFRAGMENTS linker.lf
                            PRIV_REQUIRES console esp_coex esp_event esp_partition esp_timer
-                                         ieee802154 mbedtls nvs_flash)
+                                         ieee802154 mbedtls nvs_flash esp_psram)
 endif()
 
 if(CONFIG_OPENTHREAD_RADIO_TREL)
