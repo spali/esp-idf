@@ -258,6 +258,7 @@ def test_build_cmake_executable_suffix(idf_py: IdfPyFunc, test_app_copy: Path) -
     assert 'Project build complete' in ret.stdout, 'Build with CMAKE_EXECUTABLE_SUFFIX set failed'
 
 
+@pytest.mark.test_app_copy('tools/test_build_system/kconfig_test_app')
 def test_build_with_misspelled_kconfig(idf_py: IdfPyFunc, test_app_copy: Path) -> None:
     logging.info('idf.py can build with misspelled Kconfig file')
     ret = idf_py('build')
