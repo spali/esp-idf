@@ -226,7 +226,7 @@ IRAM_ATTR bool phy_module_has_clock_bits(uint32_t mask)
 #endif
 #endif
     if ((val & mask) != mask) {
-        ESP_LOGW("periph_ctrl", "phy module clock bits 0x%x, required 0x%x", val, mask);
+        ESP_LOGW("periph_ctrl", "phy module clock bits 0x%" PRIx32 ", required 0x%" PRIx32, val, mask);
         return false;
     }
     return true;
