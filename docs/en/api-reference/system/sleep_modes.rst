@@ -370,17 +370,61 @@ RTC peripherals or RTC memories do not need to be powered on during sleep in thi
 UART Wakeup (Light-sleep Only)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-When {IDF_TARGET_NAME} receives UART input from external devices, it is often necessary to wake up the chip when input data is available. The UART peripheral contains a feature which allows waking up the chip from Light-sleep when a certain number of positive edges on RX pin are seen. This number of positive edges can be set using :cpp:func:`uart_set_wakeup_threshold` function. Note that the character which triggers wakeup (and any characters before it) will not be received by the UART after wakeup. This means that the external device typically needs to send an extra character to the {IDF_TARGET_NAME} to trigger wakeup before sending the data.
+When {IDF_TARGET_NAME} receives UART input from external devices, it is often necessary to wake up the chip when input data is available. The UART peripheral supports multiple wakeup modes that can wake up the chip from Light-sleep. The wakeup mode and its parameters can be configured using :cpp:func:`uart_wakeup_setup` function.
+
+The UART wakeup supports the following modes:
+
+.. only:: SOC_UART_WAKEUP_SUPPORT_ACTIVE_THRESH_MODE
+
+    **Mode 0 (UART_WK_MODE_ACTIVE_THRESH) - Active Edge Threshold Wakeup**
+
+        When all clocks are powered down, the chip can be woken up by toggling the RXD pin for a certain number of cycles. The chip wakes up when the number of rising edges is greater than or equal to threshold value. The threshold value can be configured using the ``rx_edge_threshold`` field in :cpp:type:`uart_wakeup_cfg_t` structure.
+
+.. only:: SOC_UART_WAKEUP_SUPPORT_FIFO_THRESH_MODE
+
+    **Mode 1 (UART_WK_MODE_FIFO_THRESH) - RX FIFO Threshold Wakeup**
+
+        Since the UART Core clock remains active, the UART RX can still receive data and store it in the RX FIFO. The chip can be woken up from Light-sleep when the number of bytes in the RX FIFO exceeds the configured threshold. The threshold value can be configured using the ``rx_fifo_threshold`` field in :cpp:type:`uart_wakeup_cfg_t` structure.
+
+.. only:: SOC_UART_WAKEUP_SUPPORT_START_BIT_MODE
+
+    **Mode 2 (UART_WK_MODE_START_BIT) - Start Bit Detection Wakeup**
+
+        The chip wakes up when the UART RX detects a start bit.
+
+.. only:: SOC_UART_WAKEUP_SUPPORT_CHAR_SEQ_MODE
+
+    **Mode 3 (UART_WK_MODE_CHAR_SEQ) - Character Sequence Detection Wakeup**
+
+        The chip wakes up when the UART RX receives a specific character sequence. The character sequence can be configured using the ``wake_chars_seq`` field in :cpp:type:`uart_wakeup_cfg_t` structure. The character sequence supports wildcard matching using '*' to represent any symbol.
 
 :cpp:func:`esp_sleep_enable_uart_wakeup` function can be used to enable this wakeup source.
 
-After waking-up from UART, you should send some extra data through the UART port in Active mode, so that the internal wakeup indication signal can be cleared. Otherwises, the next UART wake-up would trigger with two less rising edges than the configured threshold value.
+.. only:: SOC_UART_WAKEUP_SUPPORT_ACTIVE_THRESH_MODE
+
+    After waking-up from UART wakeup mode 0, you should send some extra data through the UART port or reset the UART module in Active mode, otherwise, the next UART wake-up would trigger with two less rising edges than the configured threshold value.
 
     .. only:: SOC_PM_SUPPORT_TOP_PD
 
        .. note::
 
            In Light-sleep mode, setting Kconfig option :ref:`CONFIG_PM_POWER_DOWN_PERIPHERAL_IN_LIGHT_SLEEP` will invalidate UART wakeup.
+
+.. only:: SOC_ULP_LP_UART_SUPPORTED
+
+    LP_UART can wake up the ULP LP core coprocessor. LP_UART supports the same wakeup modes as the HP UART described above, including active edge threshold wakeup, RX FIFO threshold wakeup, start bit detection wakeup, and character sequence detection wakeup.
+
+    To use LP_UART to wake up the ULP LP core, follow these steps:
+
+    #. Set the :c:macro:`ULP_LP_CORE_WAKEUP_SOURCE_LP_UART` flag in the ``wakeup_source`` field of the :cpp:type:`ulp_lp_core_cfg_t` structure.
+    #. Initialize the LP UART (call :cpp:func:`lp_core_uart_init`).
+    #. Configure the LP_UART wakeup mode using the :cpp:func:`lp_core_uart_wakeup_setup` function with a :cpp:type:`uart_wakeup_cfg_t` structure, using the same configuration method as HP UART.
+
+    .. note::
+
+        Once the LP core wakes up due to LP_UART, you must call :cpp:func:`ulp_lp_core_lp_uart_reset_wakeup_en` or reset the LP UART module to clear the wakeup signal before the LP core goes to sleep, otherwise, it will be repeated wakeup.
+
+    For example code on LP_UART wakeup, refer to :example:`system/ulp/lp_core/lp_uart/lp_uart_char_seq_wakeup`.
 
 .. _disable_sleep_wakeup_source:
 
