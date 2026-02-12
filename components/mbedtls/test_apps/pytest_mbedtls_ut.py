@@ -129,3 +129,16 @@ def test_mbedtls_ecdsa_sign(dut: Dut) -> None:
 @idf_parametrize('target', ['esp32s3'], indirect=['target'])
 def test_mbedtls_ds_rsa(dut: Dut) -> None:
     dut.run_all_single_board_cases(group='ds_rsa')
+
+
+@pytest.mark.generic
+@pytest.mark.parametrize(
+    'config',
+    [
+        'aria',
+    ],
+    indirect=True,
+)
+@idf_parametrize('target', ['esp32s3'], indirect=['target'])
+def test_mbedtls_aria(dut: Dut) -> None:
+    dut.run_all_single_board_cases(group='aria')
