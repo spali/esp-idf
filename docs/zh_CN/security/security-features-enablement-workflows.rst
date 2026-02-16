@@ -788,5 +788,3 @@ Secure Boot v2 指南
     使用 ``esptool`` 命令，将 NVS 分区 (``nvs_encr_partition.bin``) 和 NVS 加密密钥 (``nvs_encr_key.bin``) 烧录到各自的偏移地址。通过 ``idf.py build`` 成功后打印的输出，可查看所有推荐的 ``esptool`` 命令行选项。
 
     若芯片启用了 flash 加密，请在烧录前先对 NVS 加密密钥分区进行加密。详情请参阅 `flash 加密工作流程 <enable-flash-encryption-externally_>`_ 中与烧录相关的步骤。
-
-关于同时启用所有安全功能（安全启动 v2、flash 加密、NVS 加密及基于 HMAC 的 JTAG）的完整示例，请参阅 :example:`security/security_features_app`。
