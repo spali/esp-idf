@@ -263,7 +263,8 @@ def test_build_with_misspelled_kconfig(idf_py: IdfPyFunc, test_app_copy: Path) -
     logging.info('idf.py can build with misspelled Kconfig file')
     ret = idf_py('build')
     assert " file should be named 'Kconfig.projbuild'" in ret.stderr, 'Misspelled Kconfig file should be detected'
-    assert_built(BOOTLOADER_BINS + APP_BINS + PARTITION_BIN)
+    kconfig_app_bins = ['build/kconfig_test_app.elf', 'build/kconfig_test_app.bin']
+    assert_built(BOOTLOADER_BINS + kconfig_app_bins + PARTITION_BIN)
     with open(test_app_copy / 'sdkconfig') as f:
         sdkconfig = f.read()
         assert 'CONFIG_FROM_MISSPELLED_KCONFIG=y' in sdkconfig, (
