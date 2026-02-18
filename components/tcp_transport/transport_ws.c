@@ -571,6 +571,13 @@ static int ws_read_header(esp_transport_handle_t t, char *buffer, int len, int t
         return -1;
     }
 
+    // RFC 6455 Section 5.5: Control frames MUST NOT be fragmented
+    if ((ws->frame_state.opcode & WS_OPCODE_CONTROL_FRAME) && !ws->frame_state.fin) {
+        ESP_LOGE(TAG, "Fragmented control frame detected (opcode=0x%02X, fin=%d) - protocol violation",
+                ws->frame_state.opcode, ws->frame_state.fin);
+        return -1;
+    }
+
     if (payload_len == 126) {
         // headerLen += 2;
         if ((rlen = esp_transport_read_exact_size(ws, data_ptr, header, timeout_ms)) <= 0) {
