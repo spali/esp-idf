@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: 2015-2025 Espressif Systems (Shanghai) CO LTD
+ * SPDX-FileCopyrightText: 2015-2026 Espressif Systems (Shanghai) CO LTD
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -584,11 +584,18 @@ static int ws_read_header(esp_transport_handle_t t, char *buffer, int len, int t
     ws->frame_state.header_received = true;
     ws->frame_state.fin = (*data_ptr & 0x80) != 0;
     ws->frame_state.opcode = (*data_ptr & 0x0F);
+    uint8_t rsv = (*data_ptr & 0x70);
     data_ptr ++;
     mask = ((*data_ptr >> 7) & 0x01);
     payload_len = (*data_ptr & 0x7F);
     data_ptr++;
-    ESP_LOGD(TAG, "Opcode: %d, mask: %d, len: %d", ws->frame_state.opcode, mask, payload_len);
+    ESP_LOGD(TAG, "Opcode: %d, mask: %d, len: %d, rsv: 0x%02X", ws->frame_state.opcode, mask, payload_len, rsv);
+
+    // RFC 6455 Section 5.2: RSV bits MUST be 0 unless an extension is negotiated
+    if (rsv != 0) {
+        ESP_LOGE(TAG, "Non-zero RSV bits detected (rsv=0x%02X) - protocol violation, no extensions negotiated", rsv);
+        return -1;
+    }
     if (payload_len == 126) {
         // headerLen += 2;
         if ((rlen = esp_transport_read_exact_size(ws, data_ptr, header, timeout_ms)) <= 0) {
