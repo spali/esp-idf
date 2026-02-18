@@ -600,7 +600,12 @@ static int ws_read_header(esp_transport_handle_t t, char *buffer, int len, int t
             payload_len = (uint8_t)data_ptr[4] << 24 | (uint8_t)data_ptr[5] << 16 | (uint8_t)data_ptr[6] << 8 | data_ptr[7];
         }
     }
-
+    // RFC 6455 Section 5.5: Control frames MUST have payload length of 125 bytes or less
+    if ((ws->frame_state.opcode & WS_OPCODE_CONTROL_FRAME) && payload_len > 125) {
+        ESP_LOGE(TAG, "Control frame with excessive payload detected (opcode=0x%02X, payload_len=%d) - protocol violation",
+                 ws->frame_state.opcode, payload_len);
+        return -1;
+    }
     if (mask) {
         // Read and store mask
         if (payload_len != 0 && (rlen = esp_transport_read_exact_size(ws, buffer, mask_len, timeout_ms)) <= 0) {
