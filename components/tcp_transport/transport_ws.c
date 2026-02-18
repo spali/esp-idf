@@ -596,6 +596,14 @@ static int ws_read_header(esp_transport_handle_t t, char *buffer, int len, int t
         ESP_LOGE(TAG, "Non-zero RSV bits detected (rsv=0x%02X) - protocol violation, no extensions negotiated", rsv);
         return -1;
     }
+
+    // RFC 6455 Section 5.2: Validate opcode (only 0x0-0x2 for data, 0x8-0xA for control are defined)
+    if ((ws->frame_state.opcode >= 0x3 && ws->frame_state.opcode <= 0x7) ||
+        (ws->frame_state.opcode >= 0xB && ws->frame_state.opcode <= 0xF)) {
+        ESP_LOGE(TAG, "Reserved opcode detected (opcode=0x%02X) - protocol violation", ws->frame_state.opcode);
+        return -1;
+    }
+
     if (payload_len == 126) {
         // headerLen += 2;
         if ((rlen = esp_transport_read_exact_size(ws, data_ptr, header, timeout_ms)) <= 0) {
