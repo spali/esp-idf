@@ -6,7 +6,7 @@
  *
  * SPDX-License-Identifier: MIT
  *
- * SPDX-FileContributor: 2023-2025 Espressif Systems (Shanghai) CO LTD
+ * SPDX-FileContributor: 2023-2026 Espressif Systems (Shanghai) CO LTD
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -49,10 +49,13 @@
 #define CORE_ID_SIZE        4
 #endif
 
+/* Align the value up to the nearest multiple of 4 */
+#define PORT_ALIGN_UP_TO_4(value) (((value) + 3) & ~3)
+
 #define PORT_OFFSET_PX_END_OF_STACK ( \
     PORT_OFFSET_PX_STACK \
     + 4                                 /* void * pxDummy6 */ \
-    + CONFIG_FREERTOS_MAX_TASK_NAME_LEN /* uint8_t ucDummy7[ configMAX_TASK_NAME_LEN ] */ \
+    + PORT_ALIGN_UP_TO_4(configMAX_TASK_NAME_LEN) /* uint8_t ucDummy7[ configMAX_TASK_NAME_LEN ] */ \
     + CORE_ID_SIZE                      /* BaseType_t xDummyCoreID */ \
 )
 
