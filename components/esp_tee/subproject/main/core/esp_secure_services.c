@@ -355,6 +355,25 @@ esp_err_t _ss_esp_ds_encrypt_params(esp_ds_data_t *data,
 
     return esp_ds_encrypt_params(data, iv, p_data, key);
 }
+
+esp_err_t _ss_esp_ds_encrypt_params_using_key_type(esp_ds_data_t *data,
+                                                   const void *iv,
+                                                   const esp_ds_p_data_t *p_data,
+                                                   const void *key,
+                                                   esp_ds_key_type_t key_type)
+{
+    bool valid_addr = ((esp_tee_ptr_in_ree((void *)data) && esp_tee_ptr_in_ree((void *)p_data)) &&
+                       (esp_tee_ptr_in_ree((void *)iv) && esp_tee_ptr_in_ree((void *)key)));
+
+    valid_addr &= esp_tee_ptr_in_ree((void *)((char *)data + sizeof(esp_ds_data_t)));
+
+    if (!valid_addr) {
+        return ESP_ERR_INVALID_ARG;
+    }
+    ESP_FAULT_ASSERT(valid_addr);
+
+    return esp_ds_encrypt_params_using_key_type(data, iv, p_data, key, key_type);
+}
 #endif
 
 /* ---------------------------------------------- MPI ------------------------------------------------- */
