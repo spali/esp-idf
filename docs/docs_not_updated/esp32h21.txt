@@ -115,14 +115,6 @@ api-reference/peripherals/adc_continuous.rst
 api-reference/peripherals/sdspi_host.rst
 api-reference/peripherals/vad.rst
 api-reference/peripherals/isp.rst
-api-reference/peripherals/usb_host/usb_host_notes_usbh.rst
-api-reference/peripherals/usb_host/usb_host_notes_ext_hub.rst
-api-reference/peripherals/usb_host/usb_host_notes_arch.rst
-api-reference/peripherals/usb_host/usb_host_notes_index.rst
-api-reference/peripherals/usb_host/usb_host_notes_ext_port.rst
-api-reference/peripherals/usb_host/usb_host_notes_design.rst
-api-reference/peripherals/usb_host/usb_host_notes_enum.rst
-api-reference/peripherals/usb_host/usb_host_notes_dwc_otg.rst
 api-reference/peripherals/parlio.rst
 api-reference/peripherals/adc_calibration.rst
 api-reference/peripherals/lp_i2s.rst
