@@ -113,6 +113,32 @@ function(__dump_build_properties)
 endfunction()
 
 #[[
+    __idf_build_dispatch_build_event(<event> <target>)
+
+    *event[in]*
+
+        Build event name. Currently only ``POST_ELF`` is supported. Other build
+        events may be extended when required.
+
+    *target[in]*
+
+        Name of the primary CMake target at this event point. Passed as the
+        sole argument to every registered callback so that callbacks can
+        operate on the correct target without querying build properties.
+        For ``POST_ELF`` this is the executable target name.
+
+    Internal dispatcher called by the build system at well-defined lifecycle
+    points. Invokes every CMake function registered for
+    ``event`` via ``idf_component_register_build_event_callback``.
+#]]
+function(__idf_build_dispatch_build_event event target)
+    idf_build_get_property(callbacks "__BUILD_EVENT_CALLBACKS_${event}")
+    foreach(cb IN LISTS callbacks)
+        cmake_language(CALL "${cb}" "${target}")
+    endforeach()
+endfunction()
+
+#[[
     __get_library_interface_or_die(LIBRARY <library>
                                    OUTPUT <variable>)
 
@@ -608,6 +634,9 @@ function(idf_build_executable executable)
     endif()
 
     set_target_properties(${executable} PROPERTIES LIBRARY_INTERFACE ${library})
+
+    # Dispatch POST_ELF event once the executable target exists
+    __idf_build_dispatch_build_event(POST_ELF "${executable}")
 endfunction()
 
 #[[
