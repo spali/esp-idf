@@ -509,6 +509,8 @@ static int read_block(httpd_req_t *req, http_parser *parser, size_t offset, size
     if (new_scratch == NULL) {
         free(raux->scratch);
         raux->scratch = NULL;
+        /* Set last.at to NULL to avoid accidental dereference of dangling pointer */
+        parser_data->last.at = NULL;
         ESP_LOGE(TAG, "Unable to allocate the scratch buffer");
         return 0;
     }
