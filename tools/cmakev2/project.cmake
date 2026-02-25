@@ -799,6 +799,11 @@ endfunction()
 #]]
 macro(idf_project_default)
     idf_project_init()
+
+    # Use DEFERRED optional-requires resolution only when this will be the sole
+    # library being built.
+    idf_build_set_property(IDF_COMPONENT_OPTIONAL_REQUIRES_MODE DEFERRED)
+
     # Only the idf_project_init macro needs be called within the global scope,
     # as it includes the project_include.cmake files and the cmake version of
     # the configuration. The remaining functionality of the idf_project_default
