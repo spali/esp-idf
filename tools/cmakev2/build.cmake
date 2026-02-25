@@ -336,6 +336,12 @@ function(idf_build_library library)
         target_link_libraries("${library}" INTERFACE "${component_interface}")
     endforeach()
 
+    # Process optional requirements in DEFERRED mode only (no-op in IMMEDIATE or when unset).
+    idf_build_get_property(opt_req_mode IDF_COMPONENT_OPTIONAL_REQUIRES_MODE)
+    if("${opt_req_mode}" STREQUAL "DEFERRED")
+        __idf_component_process_optional_requires()
+    endif()
+
     # Get all targets transitively linked to the library interface target.
     __get_target_dependencies(TARGET "${library}" OUTPUT dependencies)
 

@@ -439,7 +439,28 @@ The Behavior of ``idf_component_optional_requires`` has Changed
 
 In v1, the ``idf_component_optional_requires`` function adds a dependency on a specified component only if that component is already included in the build (for instance, if it is already required by another component). To achieve this, v1 examines the ``BUILD_COMPONENTS`` build property, which is generated during the early evaluation phase and lists all components involved in the build.
 
-In v2, the ``BUILD_COMPONENTS`` build property is no longer available because the early evaluation phase has been removed. Consequently, the function now adds the dependency if the component is recognized by the build system. This behavior may pull unnecessary components into the build, leading to longer build times. Using ``idf_component_optional_requires`` in v2 should be avoided, instead, optional dependencies should be added using conditional logic based on the project configuration.
+In v2, there is no early collection phase and ``BUILD_COMPONENTS`` does not exist. The build system discovers components as it evaluates dependencies. So v2 cannot use the same "only if already in the build" check; it has to choose a different rule.
+
+The build system supports two behaviors, controlled by the ``IDF_COMPONENT_OPTIONAL_REQUIRES_MODE`` build property:
+
+* **IMMEDIATE (default)** — When a component calls ``idf_component_optional_requires(type req_component)``, the build system includes ``req_component`` and links it to the caller if it is recognized (discovered). No check is made whether the rest of the project actually needs that component. This is safe for multi-binary projects (multiple executables or binaries), but it can pull in more components than necessary and increase build time.
+
+* **DEFERRED** — The build system does not include or link immediately. It records the request and resolves it later in :cmakev2:ref:`idf_build_library`: the optional component is linked only if it ends up in that library's dependency graph. This matches v1 semantics and keeps the number of linked components minimal. It **must not** be used when building more than one library (see below).
+
+A multi-binary project is one that creates more than one executable or binary (for example, several application executables built from the same tree). Such a project calls :cmakev2:ref:`idf_build_library` or :cmakev2:ref:`idf_build_executable` more than once. In v2, component targets are shared globally across all libraries. If ``IDF_COMPONENT_OPTIONAL_REQUIRES_MODE`` is set to **DEFERRED**, the build system resolves optional requirements when it processes each library. When it processes the second or a later library, it may add new links to component targets that are already used by the first library. The first library's metadata (such as the list of linker fragments or linked components) was already computed when that library was processed and is not updated. As a result, linker script generation and section placement for the first library can be incorrect or stale. For this reason, DEFERRED mode is not allowed when more than one library is built; the build fails with an error in that case. **IMMEDIATE** mode does not have this problem, because optional requirements are applied during component evaluation, before any per-library metadata is computed. The side effect of the IMMEDIATE mode is that it can pull in more components than necessary and increase build time.
+
+:cmakev2:ref:`idf_project_default` (the usual entry point for a single-executable project) sets ``IDF_COMPONENT_OPTIONAL_REQUIRES_MODE`` to **DEFERRED** before building the default executable when no libraries have been created yet. So if your project uses ``idf_project_default()`` and builds only one executable, you get DEFERRED behavior automatically and do not need to do anything.
+
+If you do not use :cmakev2:ref:`idf_project_default` and instead call :cmakev2:ref:`idf_project_init` and then the lower-level API (:cmakev2:ref:`idf_build_executable`, :cmakev2:ref:`idf_build_library`) yourself, the default mode is **IMMEDIATE**. If you build only one library/executable and want the same efficient, v1-like behavior as ``idf_project_default``, you must set the mode to DEFERRED yourself after project init:
+
+.. code-block:: cmake
+
+    idf_project_init()
+    idf_build_set_property(IDF_COMPONENT_OPTIONAL_REQUIRES_MODE DEFERRED)
+    idf_build_executable(my_app COMPONENTS main ...)
+    # ... rest of your project ...
+
+Do **not** set ``IDF_COMPONENT_OPTIONAL_REQUIRES_MODE`` to ``DEFERRED`` if you build multiple libraries; the build will error. Keep the default IMMEDIATE in that case.
 
 API Reference
 =============
