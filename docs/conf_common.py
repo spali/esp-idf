@@ -64,6 +64,15 @@ BLE_MESH_DOCS = [
     'api-reference/bluetooth/esp-ble-mesh.rst',
 ]
 
+BLE_ISO_DOCS = [
+    'api-reference/bluetooth/esp-ble-iso.rst',
+]
+
+BLE_AUDIO_DOCS = [
+    'api-reference/bluetooth/esp-ble-audio.rst',
+    'api-guides/ble/ble-audio.rst',
+]
+
 CLASSIC_BT_DOCS = [
     'api-guides/classic-bt/index.rst',
     'api-guides/classic-bt/overview.rst',
@@ -343,6 +352,8 @@ conditional_include_dict = {
     'SOC_BT_SUPPORTED': BT_DOCS,
     'SOC_BLE_SUPPORTED': BLE_DOCS,
     'SOC_BLE_MESH_SUPPORTED': BLE_MESH_DOCS,
+    'SOC_BLE_ISO_SUPPORTED': BLE_ISO_DOCS,
+    'SOC_BLE_AUDIO_SUPPORTED': BLE_AUDIO_DOCS,
     'SOC_BLUFI_SUPPORTED': BLUFI_DOCS,
     'SOC_WIFI_SUPPORTED': WIFI_DOCS,
     'SOC_BT_CLASSIC_SUPPORTED': CLASSIC_BT_DOCS,
