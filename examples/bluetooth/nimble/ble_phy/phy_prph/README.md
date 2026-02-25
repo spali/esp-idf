@@ -58,7 +58,7 @@ I (459) NimBLE: 60:55:f9:f7:3e:23
 I (469) NimBLE:
 
 I (469) NimBLE: Default LE PHY set successfully
-I (479) NimBLE: GAP procedure initiated: extended advertise; instance=1
+I (479) NimBLE: GAP procedure initiated: extended advertise; instance=0
 
 I (479) uart: queue free spaces: 8
 I (489) main_task: Returned from app_main()
@@ -89,7 +89,7 @@ I (1779) NimBLE:  conn_itvl=40 conn_latency=0 supervision_timeout=256 encrypted=
 
 I (1789) NimBLE:
 
-I (1789) NimBLE: GAP procedure initiated: extended advertise; instance=1
+I (1789) NimBLE: GAP procedure initiated: extended advertise; instance=0
 
 I (1809) NimBLE: connection established; status=0
 I (1809) NimBLE: handle=1 our_ota_addr_type=0 our_ota_addr=
@@ -118,7 +118,7 @@ I (3039) NimBLE:  conn_itvl=40 conn_latency=0 supervision_timeout=256 encrypted=
 
 I (3049) NimBLE:
 
-I (3059) NimBLE: GAP procedure initiated: extended advertise; instance=1
+I (3059) NimBLE: GAP procedure initiated: extended advertise; instance=0
 
 I (3079) NimBLE: connection established; status=0
 I (3079) NimBLE: handle=1 our_ota_addr_type=0 our_ota_addr=
@@ -151,7 +151,7 @@ I (7872) NimBLE:
 
 ## Accepting connection directly on 2M / Coded Phy
 
-The example can also be configured to advertise directly on 2M auxillary PHY or CODED PHY
+The example can also be configured to advertise directly on 2M auxiliary PHY or CODED PHY
 
 In main.c file, in bleprph_on_sync function, set the s_current_phy to the intended phy.
 
