@@ -184,7 +184,7 @@ HMAC 的第三种应用场景是将其作为密钥，启用软禁用的 JTAG 接
     // 创建不透明密钥引用
     esp_hmac_opaque_key_t opaque_key = {
         .use_km_key = false,
-        .efuse_block = EFUSE_BLK_KEY4,
+        .efuse_key_id = HMAC_KEY4,
     };
 
     // 导入不透明密钥
