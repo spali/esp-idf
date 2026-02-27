@@ -22,6 +22,16 @@ examples/security/hmac_soft_jtag:
   depends_filepatterns:
     - examples/security/hmac_soft_jtag/**/*
 
+examples/security/key_manager:
+  disable:
+    - if: SOC_KEY_MANAGER_SUPPORTED != 1
+  disable_test:
+    - if: IDF_TARGET not in ["esp32c5"]
+      reason: sufficient to test on one Key Manager-supported chip
+  depends_components:
+    - esp_security
+    - mbedtls
+
 examples/security/nvs_encryption_hmac:
   disable:
     - if: SOC_HMAC_SUPPORTED != 1
