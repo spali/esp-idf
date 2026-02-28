@@ -1204,12 +1204,13 @@ static SPI_MASTER_ISR_ATTR esp_err_t setup_dma_priv_buffer(spi_host_t *host, uin
             alignment = MAX(host->dma_ctx->dma_align_rx_int, host->bus_attr->cache_align_int);
         }
     }
-    need_malloc |= (((uint32_t)buffer | len) & (alignment - 1));
+    // length also must be aligned if cache sync is required, otherwise don't need
+    need_malloc |= (use_psram || host->bus_attr->cache_align_int > 1) ? (((uint32_t)buffer | len) & (alignment - 1)) : (((uint32_t)buffer) & (alignment - 1));
     ESP_EARLY_LOGV(SPI_TAG, "%s %p, len %d, is_ptr_ext %d, use_psram: %d, alignment: %d, need_malloc: %d from %s", is_tx ? "TX" : "RX", buffer, len, is_ptr_ext, use_psram, alignment, need_malloc, (mem_cap & MALLOC_CAP_SPIRAM) ? "psram" : "internal");
+    uint32_t align_len = (len + alignment - 1) & (~(alignment - 1));   // up align alignment
     if (need_malloc) {
         ESP_RETURN_ON_FALSE_ISR(!(flags & SPI_TRANS_DMA_BUFFER_ALIGN_MANUAL), ESP_ERR_INVALID_ARG, SPI_TAG, "Set flag SPI_TRANS_DMA_BUFFER_ALIGN_MANUAL but %s addr&len not align to %d, or not dma_capable", is_tx ? "TX" : "RX", alignment);
-        len = (len + alignment - 1) & (~(alignment - 1));   // up align alignment
-        uint32_t *temp = heap_caps_aligned_alloc(alignment, len, mem_cap);
+        uint32_t *temp = heap_caps_aligned_alloc(alignment, align_len, mem_cap);
         ESP_RETURN_ON_FALSE_ISR(temp != NULL, ESP_ERR_NO_MEM, SPI_TAG, "Failed to allocate priv %s buffer", is_tx ? "TX" : "RX");
 
         if (is_tx) {
@@ -1219,7 +1220,8 @@ static SPI_MASTER_ISR_ATTR esp_err_t setup_dma_priv_buffer(spi_host_t *host, uin
     }
     *ret_buffer = buffer;
     if (use_psram || (host->bus_attr->cache_align_int > 1)) {
-        esp_err_t ret = esp_cache_msync((void *)buffer, len, is_tx ? (ESP_CACHE_MSYNC_FLAG_DIR_C2M | ESP_CACHE_MSYNC_FLAG_UNALIGNED) : ESP_CACHE_MSYNC_FLAG_DIR_M2C);
+        uint32_t sync_flags = is_tx ? (ESP_CACHE_MSYNC_FLAG_DIR_C2M | ESP_CACHE_MSYNC_FLAG_UNALIGNED) : ESP_CACHE_MSYNC_FLAG_DIR_M2C;
+        esp_err_t ret = esp_cache_msync((void *)buffer, need_malloc ? align_len : len, sync_flags);
         ESP_RETURN_ON_FALSE_ISR(ret == ESP_OK, ESP_ERR_INVALID_ARG, SPI_TAG, "sync failed for %s buffer", is_tx ? "TX" : "RX");
     }
     return ESP_OK;
