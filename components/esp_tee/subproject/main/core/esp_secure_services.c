@@ -347,6 +347,8 @@ esp_err_t _ss_esp_ds_encrypt_params(esp_ds_data_t *data,
                        (esp_tee_ptr_in_ree((void *)iv) && esp_tee_ptr_in_ree((void *)key)));
 
     valid_addr &= esp_tee_ptr_in_ree((void *)((char *)data + sizeof(esp_ds_data_t)));
+    valid_addr &= esp_tee_ptr_in_ree((void *)((char *)p_data + sizeof(esp_ds_p_data_t)));
+    valid_addr &= esp_tee_ptr_in_ree((void *)((char *)key + ESP_DS_DATA_KEY_SIZE));
 
     if (!valid_addr) {
         return ESP_ERR_INVALID_ARG;
@@ -366,6 +368,8 @@ esp_err_t _ss_esp_ds_encrypt_params_using_key_type(esp_ds_data_t *data,
                        (esp_tee_ptr_in_ree((void *)iv) && esp_tee_ptr_in_ree((void *)key)));
 
     valid_addr &= esp_tee_ptr_in_ree((void *)((char *)data + sizeof(esp_ds_data_t)));
+    valid_addr &= esp_tee_ptr_in_ree((void *)((char *)p_data + sizeof(esp_ds_p_data_t)));
+    valid_addr &= esp_tee_ptr_in_ree((void *)((char *)key + ESP_DS_DATA_KEY_SIZE));
 
     if (!valid_addr) {
         return ESP_ERR_INVALID_ARG;
