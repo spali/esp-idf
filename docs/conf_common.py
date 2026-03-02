@@ -154,11 +154,6 @@ TOUCH_SENSOR_DOCS = ['api-reference/peripherals/cap_touch_sens.rst']
 
 SPIRAM_DOCS = ['api-guides/external-ram.rst']
 
-USB_DOCS = [
-    'api-reference/peripherals/usb_device.rst',
-    'api-reference/peripherals/usb_host.rst',
-]
-
 I80_LCD_DOCS = ['api-reference/peripherals/lcd/i80_lcd.rst']
 RGB_LCD_DOCS = ['api-reference/peripherals/lcd/rgb_lcd.rst']
 DSI_LCD_DOCS = ['api-reference/peripherals/lcd/dsi_lcd.rst']
@@ -351,7 +346,6 @@ conditional_include_dict = {
     'SOC_SDMMC_HOST_SUPPORTED': SDMMC_DOCS,
     'SOC_SDIO_SLAVE_SUPPORTED': SDIO_SLAVE_DOCS,
     'SOC_MCPWM_SUPPORTED': MCPWM_DOCS,
-    'SOC_USB_OTG_SUPPORTED': USB_DOCS,
     'SOC_USB_SERIAL_JTAG_SUPPORTED': USB_SERIAL_JTAG_DOCS,
     'SOC_DEDICATED_GPIO_SUPPORTED': DEDIC_GPIO_DOCS,
     'SOC_LCD_I80_SUPPORTED': I80_LCD_DOCS,
@@ -501,9 +495,10 @@ QEMU_TARGETS = ['esp32', 'esp32c3', 'esp32s3']
 ESP_TEE_TARGETS = ['esp32c6', 'esp32h2', 'esp32c5', 'esp32c61']
 
 
-def _resolve_redirect_page_macros(redirect_pages, target):
+def _resolve_redirect_page_macros(redirect_pages, target, language):
     replace_map = {
         '{IDF_TARGET_PATH_NAME}': target,
+        '{IDF_DOCS_LANGUAGE}': language,
     }
 
     resolved_redirect_pages = []
@@ -537,7 +532,9 @@ def conf_setup(app, config):
         # Not for all target
         pass
 
-    config.html_redirect_pages = _resolve_redirect_page_macros(config.html_redirect_pages, config.idf_target)
+    config.html_redirect_pages = _resolve_redirect_page_macros(
+        config.html_redirect_pages, config.idf_target, config.language
+    )
 
     config.html_baseurl = f'https://docs.espressif.com/projects/esp-idf/{config.language}/stable/{config.idf_target}'
 

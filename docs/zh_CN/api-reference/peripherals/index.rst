@@ -49,7 +49,7 @@
     :SOC_TOUCH_SENSOR_SUPPORTED: cap_touch_sens
     :SOC_TWAI_SUPPORTED: twai
     uart
-    :SOC_USB_OTG_SUPPORTED: usb_device
-    :SOC_USB_OTG_SUPPORTED: usb_host
+    :SOC_USB_OTG_SUPPORTED: USB 设备栈 <https://docs.espressif.com/projects/esp-usb/zh_CN/latest/{IDF_TARGET_PATH_NAME}/usb_device.html>
+    :SOC_USB_OTG_SUPPORTED: USB 主机 <https://docs.espressif.com/projects/esp-usb/zh_CN/latest/{IDF_TARGET_PATH_NAME}/usb_host.html>
 
 本部分的 API 示例代码存放在 ESP-IDF 示例项目的 :example:`peripherals` 目录下。
