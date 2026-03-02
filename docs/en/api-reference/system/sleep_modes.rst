@@ -367,6 +367,8 @@ RTC peripherals or RTC memories do not need to be powered on during sleep in thi
     Any IO can be used as the external input to wake up the chip from Light-sleep. Each pin can be individually configured to trigger wakeup on high or low level using the :cpp:func:`gpio_wakeup_enable` function. Then the :cpp:func:`esp_sleep_enable_gpio_wakeup` function should be called to enable this wakeup source.
 
 
+.. _uart_wakeup_light_sleep:
+
 UART Wakeup (Light-sleep Only)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
