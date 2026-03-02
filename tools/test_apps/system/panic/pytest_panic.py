@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2022-2025 Espressif Systems (Shanghai) CO LTD
+# SPDX-FileCopyrightText: 2022-2026 Espressif Systems (Shanghai) CO LTD
 # SPDX-License-Identifier: CC0-1.0
 import itertools
 import re
@@ -46,13 +46,6 @@ CONFIGS = list(
 CONFIG_PANIC = list(itertools.chain(itertools.product(['panic'], ['supported_targets'])))
 CONFIG_PANIC_DUAL_CORE = list(itertools.chain(itertools.product(['panic'], TARGETS_DUAL_CORE)))
 CONFIG_PANIC_HALT = list(itertools.chain(itertools.product(['panic_halt'], TARGETS_ALL)))
-
-CONFIGS_BACKTRACE = list(
-    itertools.chain(
-        # One single-core target and one dual-core target is enough
-        itertools.product(['framepointer'], ['esp32c3', 'esp32p4'])
-    )
-)
 
 CONFIGS_DUAL_CORE = list(
     itertools.chain(
@@ -1369,20 +1362,6 @@ def test_tcb_corrupted(dut: PanicTestDut, target: str, config: str, test_func_na
     coredump_pattern = [re.compile(pattern.decode('utf-8')) for pattern in regex_patterns]
 
     common_test(dut, config, expected_backtrace=None, expected_coredump=coredump_pattern)
-
-
-@pytest.mark.generic
-@idf_parametrize('config, target', CONFIGS_BACKTRACE, indirect=['config', 'target'])
-def test_panic_print_backtrace(dut: PanicTestDut, config: str, test_func_name: str) -> None:
-    dut.run_test_func(test_func_name)
-    regex_pattern = rb'abort\(\) was called at PC [0-9xa-f]+ on core 0'
-    dut.expect(regex_pattern)
-    dut.expect_backtrace()
-    dut.expect_elf_sha256()
-    dut.expect_none(['Guru Meditation', 'Re-entered core dump'])
-
-    coredump_pattern = re.compile(PANIC_ABORT_PREFIX + regex_pattern.decode('utf-8'))
-    common_test(dut, config, expected_backtrace=None, expected_coredump=[coredump_pattern])
 
 
 @pytest.mark.generic

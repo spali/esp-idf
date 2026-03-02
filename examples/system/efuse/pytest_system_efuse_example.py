@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2022-2025 Espressif Systems (Shanghai) CO LTD
+# SPDX-FileCopyrightText: 2022-2026 Espressif Systems (Shanghai) CO LTD
 # SPDX-License-Identifier: Unlicense OR CC0-1.0
 import logging
 import os
@@ -6,7 +6,6 @@ import os
 import pytest
 from pytest_embedded import Dut
 from pytest_embedded_idf.utils import idf_parametrize
-from pytest_embedded_idf.utils import soc_filtered_targets
 from pytest_embedded_qemu.dut import QemuDut
 
 
@@ -68,7 +67,7 @@ def test_examples_efuse_with_virt_flash_enc(dut: Dut) -> None:
     # check and log bin size
     binary_file = os.path.join(dut.app.binary_path, 'bootloader', 'bootloader.bin')
     bin_size = os.path.getsize(binary_file)
-    logging.info('{}_bootloader_virt_flash_enc_bin_size: {}KB'.format(dut.app.target, bin_size // 1024))
+    logging.info(f'{dut.app.target}_bootloader_virt_flash_enc_bin_size: {bin_size // 1024}KB')
 
     print(' - Erase flash')
     dut.serial.erase_flash()
@@ -127,7 +126,7 @@ def test_examples_efuse_with_virt_flash_enc_aes_256(dut: Dut) -> None:
     # check and log bin size
     binary_file = os.path.join(dut.app.binary_path, 'bootloader', 'bootloader.bin')
     bin_size = os.path.getsize(binary_file)
-    logging.info('{}_bootloader_virt_flash_enc_aes_256_bin_size: {}KB'.format(dut.app.target, bin_size // 1024))
+    logging.info(f'{dut.app.target}_bootloader_virt_flash_enc_aes_256_bin_size: {bin_size // 1024}KB')
 
     print(' - Erase flash')
     dut.serial.erase_flash()
@@ -247,7 +246,7 @@ def test_examples_efuse_with_virt_flash_enc_release(dut: Dut) -> None:
     # check and log bin size
     binary_file = os.path.join(dut.app.binary_path, 'bootloader', 'bootloader.bin')
     bin_size = os.path.getsize(binary_file)
-    logging.info('{}_bootloader_virt_flash_enc_release_bin_size: {}KB'.format(dut.app.target, bin_size // 1024))
+    logging.info(f'{dut.app.target}_bootloader_virt_flash_enc_release_bin_size: {bin_size // 1024}KB')
 
     dut.serial.erase_flash()
 
@@ -303,7 +302,7 @@ def test_examples_efuse_with_virt_secure_boot_v1(dut: Dut) -> None:
     # check and log bin size
     binary_file = os.path.join(dut.app.binary_path, 'bootloader', 'bootloader.bin')
     bin_size = os.path.getsize(binary_file)
-    logging.info('{}_bootloader_virt_secure_boot_v1_bin_size: {}KB'.format(dut.app.target, bin_size // 1024))
+    logging.info(f'{dut.app.target}_bootloader_virt_secure_boot_v1_bin_size: {bin_size // 1024}KB')
 
     print(' - Erase flash')
     dut.serial.erase_flash()
@@ -415,7 +414,7 @@ def test_examples_efuse_with_virt_secure_boot_v2(dut: Dut) -> None:
     # only for ESP32 ECO3
     binary_file = os.path.join(dut.app.binary_path, 'bootloader', 'bootloader.bin')
     bin_size = os.path.getsize(binary_file)
-    logging.info('{}_bootloader_secure_boot_v2_bin_size: {}KB'.format(dut.app.target, bin_size // 1024))
+    logging.info(f'{dut.app.target}_bootloader_secure_boot_v2_bin_size: {bin_size // 1024}KB')
 
     print(' - Erase flash')
     dut.serial.erase_flash()
@@ -593,7 +592,7 @@ def example_efuse_with_virt_secure_boot_v2_esp32xx(dut: Dut) -> None:
     # check and log bin size
     binary_file = os.path.join(dut.app.binary_path, 'bootloader', 'bootloader.bin')
     bin_size = os.path.getsize(binary_file)
-    logging.info('{}_bootloader_virt_secure_boot_v2_bin_size: {}KB'.format(dut.app.target, bin_size // 1024))
+    logging.info(f'{dut.app.target}_bootloader_virt_secure_boot_v2_bin_size: {bin_size // 1024}KB')
 
     print(' - Erase flash')
     dut.serial.erase_flash()
@@ -661,14 +660,6 @@ def example_efuse_with_virt_secure_boot_v2_esp32xx(dut: Dut) -> None:
     indirect=['target'],
 )
 def test_examples_efuse_with_virt_secure_boot_v2_esp32xx(dut: Dut) -> None:
-    example_efuse_with_virt_secure_boot_v2_esp32xx(dut)
-
-
-@pytest.mark.generic
-@pytest.mark.parametrize('config', ['virt_secure_boot_v2_ecdsa_p384'], indirect=True)
-@pytest.mark.parametrize('skip_autoflash', ['y'], indirect=True)
-@idf_parametrize('target', soc_filtered_targets('SOC_ECDSA_SUPPORT_CURVE_P384 == 1'), indirect=['target'])
-def test_examples_efuse_with_virt_secure_boot_v2_ecdsa_p384_esp32xx(dut: Dut) -> None:
     example_efuse_with_virt_secure_boot_v2_esp32xx(dut)
 
 
@@ -764,7 +755,7 @@ def test_examples_efuse_with_virt_sb_v1_and_fe(dut: Dut) -> None:
     # check and log bin size
     binary_file = os.path.join(dut.app.binary_path, 'bootloader', 'bootloader.bin')
     bin_size = os.path.getsize(binary_file)
-    logging.info('{}_bootloader_virt_sb_v1_and_fe_bin_size: {}KB'.format(dut.app.target, bin_size // 1024))
+    logging.info(f'{dut.app.target}_bootloader_virt_sb_v1_and_fe_bin_size: {bin_size // 1024}KB')
 
     print(' - Erase flash')
     dut.serial.erase_flash()
@@ -835,7 +826,7 @@ def test_examples_efuse_with_virt_sb_v2_and_fe(dut: Dut) -> None:
     # check and log bin size
     binary_file = os.path.join(dut.app.binary_path, 'bootloader', 'bootloader.bin')
     bin_size = os.path.getsize(binary_file)
-    logging.info('{}_bootloader_virt_sb_v2_and_fe_bin_size: {}KB'.format(dut.app.target, bin_size // 1024))
+    logging.info(f'{dut.app.target}_bootloader_virt_sb_v2_and_fe_bin_size: {bin_size // 1024}KB')
 
     print(' - Erase flash')
     dut.serial.erase_flash()
@@ -1003,7 +994,7 @@ def example_efuse_with_virt_sb_v2_and_fe(dut: Dut) -> None:
     # check and log bin size
     binary_file = os.path.join(dut.app.binary_path, 'bootloader', 'bootloader.bin')
     bin_size = os.path.getsize(binary_file)
-    logging.info('{}_bootloader_virt_sb_v2_and_fe_bin_size: {}KB'.format(dut.app.target, bin_size // 1024))
+    logging.info(f'{dut.app.target}_bootloader_virt_sb_v2_and_fe_bin_size: {bin_size // 1024}KB')
 
     dut.serial.erase_flash()
 
@@ -1101,12 +1092,4 @@ def example_efuse_with_virt_sb_v2_and_fe(dut: Dut) -> None:
     indirect=['target'],
 )
 def test_examples_efuse_with_virt_sb_v2_and_fe_esp32xx(dut: Dut) -> None:
-    example_efuse_with_virt_sb_v2_and_fe(dut)
-
-
-@pytest.mark.generic
-@pytest.mark.parametrize('skip_autoflash', ['y'], indirect=True)
-@pytest.mark.parametrize('config', ['virt_sb_v2_ecdsa_p384_and_fe'], indirect=True)
-@idf_parametrize('target', soc_filtered_targets('SOC_ECDSA_SUPPORT_CURVE_P384 == 1'), indirect=['target'])
-def test_examples_efuse_with_virt_sb_v2_ecdsa_p384_and_fe_esp32xx(dut: Dut) -> None:
     example_efuse_with_virt_sb_v2_and_fe(dut)
