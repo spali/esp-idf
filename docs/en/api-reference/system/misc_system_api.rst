@@ -213,6 +213,18 @@ To get the version at build time, additional version macros are provided. They c
       #endif
 
 
+Debug Helpers
+-------------
+
+The debug helper APIs in ``esp_debug_helpers.h`` provide utilities for run-time debugging and stack backtrace output.
+
+- :cpp:func:`esp_backtrace_print` prints the current stack backtrace.
+- :cpp:func:`esp_backtrace_print_all_tasks` prints backtraces for all tasks.
+- :cpp:func:`esp_backtrace_get_start` and :cpp:func:`esp_backtrace_get_next_frame` allow manual iteration over backtrace frames.
+
+These APIs are useful when diagnosing crashes, watchdog timeouts, or unexpected control flow.
+
+
 .. _app-version:
 
 App Version
@@ -237,4 +249,5 @@ API Reference
 .. include-build-file:: inc/esp_mac.inc
 .. include-build-file:: inc/esp_chip_info.inc
 .. include-build-file:: inc/esp_cpu.inc
+.. include-build-file:: inc/esp_debug_helpers.inc
 .. include-build-file:: inc/esp_app_desc.inc
