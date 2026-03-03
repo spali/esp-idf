@@ -35,12 +35,12 @@ These parameters are used to derive and deploy the actual cryptographic key insi
 
 ### Hardware Required
 
-This example requires an ESP32-C5 (Key Manager supported) development board.
+This example can be executed on any development board with a Espressif SOC chip supporting the Key Manager peripheral (see Supported Targets table above).
 
 ### Configure the Project
 
 ```bash
-idf.py set-target esp32c5
+idf.py set-target <chip_name>
 idf.py menuconfig
 ```
 
@@ -283,8 +283,8 @@ The script generates:
 This example includes a pytest that can be run with the ESP-IDF pytest framework:
 
 ```bash
-# Run the test on ESP32-C5
-pytest --target esp32c5
+# Run the test on the target
+pytest --target <chip_name>
 ```
 
 The test verifies:

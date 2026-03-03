@@ -130,13 +130,56 @@ In this case all the eFuses related to Flash Encryption are written with help of
 
             espsecure generate-flash-encryption-key --keylen 128 my_flash_encryption_key.bin
 
-3. Burn the Flash Encryption key into eFuse
+3. Programming the generated Flash Encryption key into the device
+
+    .. only:: SOC_KEY_MANAGER_SUPPORTED
+
+        a. If you intend to use the Key Manager to store the Flash Encryption key, generate the Key Recovery Information for the Flash Encryption key and store it in the flash memory at the address 0x0 using the command:
+
+        .. code-block:: bash
+
+            esptool --port PORT write-flash 0x0 key_recovery_info.bin
+
+        Once the Key Recovery info is stored in the flash memory, you also need to program the ``KM_XTS_KEY_LENGTH_256`` and the ``FORCE_USE_KEY_MANAGER_KEY`` eFuses.
+
+        .. warning::
+
+            This action **cannot be reverted**.
+
+        Bit 1 of the ``FORCE_USE_KEY_MANAGER_KEY`` eFuse is used to force using a Key Manager-based XTS-AES key. Once this eFuse is burned, eFuse-based Flash Encryption keys can no longer be used; the device will exclusively use the Key Manager for Flash Encryption key management.
+
+        .. code-block:: bash
+
+            espefuse --port PORT burn-efuse FORCE_USE_KEY_MANAGER_KEY 2
+
+        The ``KM_XTS_KEY_LENGTH_256`` eFuse is used to control the length of the Key-Manager based XTS-AES key. Set this eFuse to 1 to use a 128-bit key, and to 0 to use a 256-bit key.
+
+        In case of using a 128-bit key, set the ``KM_XTS_KEY_LENGTH_256`` eFuse to 1.
+
+        .. code-block:: bash
+
+            espefuse --port PORT burn-efuse KM_XTS_KEY_LENGTH_256 1
+
+        Otherwise in case of using a 256-bit key, set the ``KM_XTS_KEY_LENGTH_256`` eFuse to 0.
+
+        .. code-block:: bash
+
+            espefuse --port PORT burn-efuse KM_XTS_KEY_LENGTH_256 0
+
+<<<<<<< HEAD
+        b. To store the Flash Encryption key in the eFuses, run the following commands:
+
+    .. only:: not SOC_KEY_MANAGER_SUPPORTED
+
+        To store the Flash Encryption key in the eFuses, run the following commands:
+=======
+
+    To store the Flash Encryption key in the eFuses, run the following commands:
+>>>>>>> 78b730138b6 (docs(key-manager): Add Key-Manager peripheral related documentation)
 
     .. warning::
 
         This action **cannot be reverted**.
-
-    It can be done by running:
 
     .. only:: not SOC_FLASH_ENCRYPTION_XTS_AES
 
