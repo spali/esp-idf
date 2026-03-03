@@ -528,6 +528,7 @@
 #define SOC_TWAI_SUPPORTS_RX_STATUS     1
 #define SOC_TWAI_SUPPORT_FD             1
 #define SOC_TWAI_SUPPORT_TIMESTAMP      1
+#define SOC_TWAI_SUPPORT_SLEEP_RETENTION    1
 
 /*-------------------------- eFuse CAPS----------------------------*/
 #define SOC_EFUSE_DIS_PAD_JTAG 1

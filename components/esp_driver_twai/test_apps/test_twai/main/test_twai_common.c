@@ -19,8 +19,8 @@
 #include "esp_twai.h"
 #include "esp_twai_onchip.h"
 #include "soc/twai_periph.h"
-#include "esp_private/gpio.h"
 #include "soc/gpio_sig_map.h"
+#include "esp_private/gpio.h"
 #include "driver/uart.h" // for baudrate detection
 
 #define TEST_TX_GPIO                4
