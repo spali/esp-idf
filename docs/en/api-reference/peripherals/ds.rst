@@ -3,7 +3,6 @@ RSA Digital Signature Peripheral (RSA_DS)
 
 :link_to_translation:`zh_CN:[中文]`
 
-<<<<<<< HEAD
 The RSA Digital Signature Peripheral (RSA_DS) provides hardware acceleration of signing messages based on RSA. It uses pre-encrypted parameters to calculate a signature. The parameters are encrypted using HMAC as a key-derivation function. In turn, the HMAC uses eFuses as the input key.
 
 .. only:: SOC_KEY_MANAGER_SUPPORTED
@@ -11,9 +10,6 @@ The RSA Digital Signature Peripheral (RSA_DS) provides hardware acceleration of 
     On {IDF_TARGET_NAME}, the RSA Digital Signature Peripheral (RSA_DS) can also use a key stored in the Key Manager instead of an eFuse key block. The AES encryption key can be directly deployed in the Key Manager with the type :cpp:enumerator:`ESP_KEY_MGR_DS_KEY`. Refer to :ref:`key-manager` for more details.
 
 The whole process happens in hardware so that neither the decryption key for the RSA parameters nor the input key for the HMAC key derivation function can be seen by the software while calculating the signature.
-=======
-The RSA Digital Signature Peripheral (RSA_DS) provides hardware acceleration of signing messages based on RSA. It uses pre-encrypted parameters to calculate a signature. The parameters are encrypted using HMAC as a key-derivation function. In turn, the HMAC uses eFuses as the input key. The whole process happens in hardware so that neither the decryption key for the RSA parameters nor the input key for the HMAC key derivation function can be seen by the software while calculating the signature.
->>>>>>> 81dc3a427c00 (docs(security): Standardize naming of digital signature hardware modules)
 
 For more detailed information on the hardware involved in the signature calculation and the registers used, see **{IDF_TARGET_NAME} Technical Reference Manual** > **RSA Digital Signature Peripheral (RSA_DS)** [`PDF <{IDF_TARGET_TRM_EN_URL}#digsig>`__].
 
@@ -55,7 +51,7 @@ The APIs :cpp:func:`esp_ds_sign` and :cpp:func:`esp_ds_start_sign` calculate a p
 
 **PSA Crypto driver**
 
-The DS peripheral is also exposed via the **PSA Crypto RSA DS driver**, so you can use standard PSA APIs for signing (PKCS#1 v1.5 or PSS) and RSA decryption (PKCS#1 v1.5 or OAEP). Enable ``CONFIG_MBEDTLS_HARDWARE_RSA_DS_PERIPHERAL`` in ``Component config`` > ``mbedTLS``. For using the DS peripheral with ESP-TLS (e.g. TLS client authentication), see :ref:`digital-signature-with-esp-tls` in the ESP-TLS documentation.
+The RSA_DS peripheral is also exposed via the **PSA Crypto RSA_DS driver**, so you can use standard PSA APIs for signing (PKCS#1 v1.5 or PSS) and RSA decryption (PKCS#1 v1.5 or OAEP). Enable ``CONFIG_MBEDTLS_HARDWARE_RSA_DS_PERIPHERAL`` in ``Component config`` > ``mbedTLS``. For using the RSA_DS peripheral with ESP-TLS (e.g. TLS client authentication), see :ref:`digital-signature-with-esp-tls` in the ESP-TLS documentation.
 
 .. _configure-the-ds-peripheral:
 
@@ -73,7 +69,7 @@ For more details, see **{IDF_TARGET_NAME} Technical Reference Manual** > **RSA D
 
 To configure the RSA_DS peripheral for development purposes, you can use the `esp-secure-cert-tool <https://pypi.org/project/esp-secure-cert-tool>`_.
 
-The encrypted private key parameters obtained after the RSA_DS peripheral configuration should be stored in flash. The application needs to read the RSA_DS data from flash (e.g. through the APIs provided by the `esp_secure_cert_mgr <https://github.com/espressif/esp_secure_cert_mgr>`_ component; see the `component/README <https://github.com/espressif/esp_secure_cert_mgr#readme>`_ for more details). For using the RSA_DS peripheral with ESP-TLS, see :ref:`digital-signature-with-esp-tls`.
+The encrypted private key parameters obtained after the RSA_DS peripheral configuration should be stored in flash. The application needs to read the RSA_DS data from flash (e.g., through the APIs provided by the `esp_secure_cert_mgr <https://github.com/espressif/esp_secure_cert_mgr>`_ component; see the `component/README <https://github.com/espressif/esp_secure_cert_mgr#readme>`_ for more details). For using the RSA_DS peripheral with ESP-TLS, see :ref:`digital-signature-with-esp-tls`.
 
 Using RSA_DS with PSA Crypto
 -----------------------------
@@ -120,7 +116,7 @@ To use the RSA_DS peripheral for signing or decryption in application code (outs
 Example for SSL Mutual Authentication Using RSA_DS
 ---------------------------------------------------
 
-The SSL mutual authentication example that previously lived under ``examples/protocols/mqtt/ssl_ds`` is now shipped with the standalone `espressif/mqtt <https://components.espressif.com/components/espressif/mqtt>`__ component. Follow the component documentation to fetch the SSL DS example and build it together with ESP-MQTT. The example continues to use ``mqtt_client`` (implemented by ESP-MQTT) to connect to ``test.mosquitto.org`` over mutual-authenticated TLS, with the TLS portion handled by ESP-TLS.
+The SSL mutual authentication example that previously lived under ``examples/protocols/mqtt/ssl_ds`` is now shipped with the standalone `espressif/mqtt <https://components.espressif.com/components/espressif/mqtt>`__ component. Follow the component documentation to fetch the SSL RSA_DS example and build it together with ESP-MQTT. The example continues to use ``mqtt_client`` (implemented by ESP-MQTT) to connect to ``test.mosquitto.org`` over mutual-authenticated TLS, with the TLS portion handled by ESP-TLS.
 
 .. only:: SOC_KEY_MANAGER_SUPPORTED
 
