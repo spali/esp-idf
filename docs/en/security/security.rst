@@ -101,6 +101,24 @@ Flash Encryption Best Practices
 
         Please refer to the :doc:`../api-reference/peripherals/ecdsa` and :doc:`../api-reference/peripherals/ds` guides for detailed documentation.
 
+.. only:: SOC_KEY_MANAGER_SUPPORTED
+
+    Key Manager
+    ~~~~~~~~~~~
+
+    The Key Manager peripheral in {IDF_TARGET_NAME} provides hardware-assisted **key deployment and recovery** for cryptographic keys. Keys are cryptographically bound to a Hardware Unique Key (HUK) that is unique to each chip, ensuring that key material is never exposed in software-accessible memory.
+
+    The Key Manager supports key management for the following cryptographic peripherals: :doc:`ECDSA <../api-reference/peripherals/ecdsa>`, :doc:`HMAC <../api-reference/peripherals/hmac>`, :doc:`Digital Signature (DS) <../api-reference/peripherals/ds>`, and Flash Encryption.
+
+    Please refer to :doc:`../api-reference/peripherals/key_manager` for detailed documentation.
+
+    Key Manager Best Practices
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+    * Protect the ``key_recovery_info`` of a Key Manager-deployed key against unauthorized modification or loss.
+    * Lock Key Manager's security-related eFuses after successful key deployment to prevent re-deployment of a key of the same type.
+    * Avoid deploying new XTS-AES keys when Flash Encryption is already enabled unless explicitly intended.
+
 .. only:: SOC_MEMPROT_SUPPORTED or SOC_CPU_IDRAM_SPLIT_USING_PMP
 
     Memory Protection

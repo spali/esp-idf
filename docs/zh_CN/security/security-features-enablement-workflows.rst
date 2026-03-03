@@ -130,13 +130,51 @@
 
             espsecure generate-flash-encryption-key --keylen 128 my_flash_encryption_key.bin
 
-3. 将 flash 加密密钥烧录到 eFuse 中
+3. 将生成的 Flash 加密密钥编程到设备中
+
+    .. only:: SOC_KEY_MANAGER_SUPPORTED
+
+        a. 如果打算使用 Key Manager 存储 Flash 加密密钥，请使用脚本 `generate_km_test_cases.py` 生成密钥部署参数，并使用该参数将密钥部署到 Key Manager 中。密钥部署到 Key Manager 后，使用以下命令将生成的密钥恢复信息存储到 flash 存储器地址 0x0 处：
+
+        .. code-block:: bash
+
+            esptool --port PORT write-flash 0x0 key_recovery_info.bin
+
+        将密钥恢复信息存储到 flash 存储器后，还需要编程 ``KM_XTS_KEY_LENGTH_256`` 和 ``FORCE_USE_KEY_MANAGER_KEY`` eFuse。
+
+        .. warning::
+
+            这个操作 **无法回退**。
+
+        ``FORCE_USE_KEY_MANAGER_KEY`` eFuse 的第 1 位用于强制使用基于 Key Manager 的 XTS-AES 密钥。
+
+        .. code-block:: bash
+
+            espefuse --port PORT burn-efuse FORCE_USE_KEY_MANAGER_KEY 2
+
+        ``KM_XTS_KEY_LENGTH_256`` eFuse 用于控制基于 Key Manager 的 XTS-AES 密钥的长度。将该 eFuse 设置为 1 表示使用 128 位密钥，设置为 0 表示使用 256 位密钥。
+
+        如果使用 128 位密钥，将 ``KM_XTS_KEY_LENGTH_256`` eFuse 设置为 1。
+
+        .. code-block:: bash
+
+            espefuse --port PORT burn-efuse KM_XTS_KEY_LENGTH_256 1
+
+        如果使用 256 位密钥，将 ``KM_XTS_KEY_LENGTH_256`` eFuse 设置为 0。
+
+        .. code-block:: bash
+
+            espefuse --port PORT burn-efuse KM_XTS_KEY_LENGTH_256 0
+
+        b. 如需将 Flash 加密密钥存储在 eFuse 中，请运行以下命令：
+
+    .. only:: not SOC_KEY_MANAGER_SUPPORTED
+
+        如需将 Flash 加密密钥存储在 eFuse 中，请运行以下命令：
 
     .. warning::
 
         这个操作 **无法回退**。
-
-    运行以下命令进行烧录：
 
     .. only:: not SOC_FLASH_ENCRYPTION_XTS_AES
 
