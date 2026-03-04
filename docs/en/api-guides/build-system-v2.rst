@@ -276,6 +276,34 @@ LINKER_SCRIPTS:
 
 Also ensure that the ``esp_chip_info`` function is retained in the final binary even when section garbage collection, ``--gc-sections``, is enabled. This is required because ``esp_target_info.ld`` defines ``esp_target_chip_info`` as an alias for ``esp_chip_info``, and without forcing the linker to include it, the underlying ``esp_chip_info`` function could be discarded as unused.
 
+.. _cmakev2-build-event-callbacks:
+
+Build Event Callback Framework
+==============================
+
+The build system allows components to register callbacks that are invoked at specific points in the build lifecycle. This provides a generic way for components to run custom steps (for example, running a tool on the executable or adding dependencies) without relying on internal build targets or properties.
+
+Components register a callback in their ``project_include.cmake`` using :cmakev2:ref:`idf_component_register_build_event_callback`. The callback must be a CMake function defined in the same file. At the specified event, the build system invokes the callback and passes the relevant CMake target as the first argument (for example, the executable target for ``POST_ELF``).
+
+Currently supported events:
+
+- **POST_ELF** — Fired after the executable target is created and linked, but before the binary (``.bin``) image is generated. The callback receives the executable target name. Use this to perform actions on the ELF by attaching a ``POST_BUILD`` command to the executable with ``add_custom_command(TARGET ... POST_BUILD ...)``.
+
+Example: perform actions on the ELF after linking:
+
+.. code-block:: cmake
+
+    # In project_include.cmake
+    function(my_post_elf_hook target)
+        add_custom_command(TARGET ${target} POST_BUILD
+            COMMAND my_tool "$<TARGET_FILE:${target}>"
+            COMMENT "Running my_tool on the executable")
+    endfunction()
+
+    idf_component_register_build_event_callback(EVENT POST_ELF CALLBACK my_post_elf_hook)
+
+Additional build events may be added in future when required.
+
 .. _cmakev2-breaking-changes:
 
 Breaking Changes for v1 Components
@@ -327,6 +355,13 @@ The hello_world example ``CMakeLists_v2.txt`` for v2.
     target_link_libraries(${COMPONENT_TARGET} PRIVATE
         idf::spi_flash
     )
+
+``idf_build_add_post_elf_dependency`` and ``idf_build_get_post_elf_dependencies`` are Unavailable
+-------------------------------------------------------------------------------------------------
+
+In v1, components that need to run a step after the executable is linked but before the binary image is generated use ``idf_build_add_post_elf_dependency`` to register a dependency and ``idf_build_get_post_elf_dependencies`` to retrieve the list of such dependencies (see the :doc:`build system </api-guides/build-system>` API). These functions are **not available** in v2.
+
+In v2, use the :ref:`Build Event Callback Framework <cmakev2-build-event-callbacks>` instead. Register a **POST_ELF** callback with :cmakev2:ref:`idf_component_register_build_event_callback` in your component's ``project_include.cmake``. The callback receives the executable target name; use it to attach a ``POST_BUILD`` command (e.g. with ``add_custom_command(TARGET ... POST_BUILD ...)``) or to add custom targets that depend on the executable. This achieves the same ordering (run after ELF, before binary) without relying on internal build properties.
 
 The ``BUILD_COMPONENTS`` Build Property is Unavailable
 ------------------------------------------------------
