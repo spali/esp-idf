@@ -33,5 +33,5 @@ if(CONFIG_PM_POWER_DOWN_CPU_IN_LIGHT_SLEEP AND CONFIG_IEEE802154_ENABLED)
 endif()
 
 idf_component_register(SRCS ${srcs}
-                       PRIV_REQUIRES unity driver test_utils ieee802154
+                       PRIV_REQUIRES unity driver test_utils ieee802154 esp_psram
                        WHOLE_ARCHIVE)
