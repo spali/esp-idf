@@ -183,7 +183,6 @@ Now we can calculate an HMAC for software usage with the saved key through the P
 
     // Create opaque key reference
     esp_hmac_opaque_key_t opaque_key = {
-        .use_km_key = false,
         .efuse_key_id = HMAC_KEY4,
     };
 

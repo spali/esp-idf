@@ -639,7 +639,9 @@ static esp_err_t set_pki_context(esp_tls_t *tls, const esp_tls_pki_t *pki)
             esp_ecdsa_opaque_key_t opaque_key = {
                 .curve = curve,
                 .efuse_block = tls->ecdsa_efuse_blk,
-                .use_km_key = false,
+#if SOC_KEY_MANAGER_SUPPORTED
+                .key_recovery_info = NULL,
+#endif /* SOC_KEY_MANAGER_SUPPORTED */
             };
 
             // Import opaque key reference
