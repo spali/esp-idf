@@ -52,8 +52,8 @@ def test_light_sleep(dut: Dut) -> None:
     dut.expect_exact(ENTERING_SLEEP_STR)
     logging.info('Went to sleep again')
 
-    # Write 'a' to uart, 'a' in ascii is 0x61 which contains 3 rising edges in total (including the stop bit)
-    dut.write('a')
+    # Write 'tt' to uart, 'tt' in ascii is 0x74 0x74 which contains 6 rising edges in total (including the stop bit)
+    dut.serial.proc.write(b'tt')
     time.sleep(1)
     match = dut.expect(EXIT_SLEEP_UART_REGEX)
     logging.info('Got third sleep period, wakeup from {}, slept for {}'.format(match.group(1), match.group(3)))

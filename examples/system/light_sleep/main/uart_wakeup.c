@@ -24,7 +24,8 @@
 #define EXAMPLE_UART_BAUDRATE  115200
 #endif
 
-#define EXAMPLE_UART_WAKEUP_THRESHOLD   3
+/* In ESP32, the min wakeup threshold is 2; in ESP32P4, the min wakeup threshold is 6; in other targets, the min wakeup threshold is 3.*/
+#define EXAMPLE_UART_WAKEUP_THRESHOLD   6
 
 #define EXAMPLE_READ_BUF_SIZE   1024
 #define EXAMPLE_UART_BUF_SIZE   (EXAMPLE_READ_BUF_SIZE * 2)
