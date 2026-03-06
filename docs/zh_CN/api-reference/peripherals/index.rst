@@ -11,6 +11,7 @@
     :SOC_GDMA_SUPPORT_CRC: async_crc
     :SOC_ASYNC_MEMCPY_SUPPORTED: async_memcpy
     :SOC_BITSCRAMBLER_SUPPORTED: bitscrambler
+    :SOC_MIPI_CSI_SUPPORTED: camera_driver
     :SOC_CLK_TREE_SUPPORTED: clk_tree
     :SOC_CORDIC_SUPPORTED: cordic
     :SOC_DAC_SUPPORTED: dac
@@ -25,11 +26,11 @@
     :SOC_I2S_SUPPORTED: i2s
     :SOC_I3C_MASTER_SUPPORTED: i3c_master
     :SOC_ISP_SUPPORTED: isp
+    :SOC_JPEG_CODEC_SUPPORTED: jpeg
     :SOC_KEY_MANAGER_SUPPORTED: key_manager
     lcd/index
     :SOC_GP_LDO_SUPPORTED: ldo_regulator
     ledc
-    :SOC_MIPI_CSI_SUPPORTED: camera_driver
     :SOC_MCPWM_SUPPORTED: mcpwm
     :SOC_PARLIO_SUPPORTED: parlio/index
     :SOC_PCNT_SUPPORTED: pcnt
@@ -46,7 +47,6 @@
     :SOC_SPI_SUPPORT_SLAVE_HD_VER2: spi_slave_hd
     :SOC_LP_I2S_SUPPORTED: lp_i2s
     :SOC_LP_VAD_SUPPORTED: vad
-    :SOC_JPEG_CODEC_SUPPORTED: jpeg
     :SOC_TEMP_SENSOR_SUPPORTED: temp_sensor
     :SOC_TOUCH_SENSOR_SUPPORTED: cap_touch_sens
     :SOC_TWAI_SUPPORTED: twai
