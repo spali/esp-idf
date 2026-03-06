@@ -1434,7 +1434,7 @@ static esp_err_t esp_mbedtls_init_pk_ctx_for_ds(const void *pki)
     psa_set_key_bits(&ds_key_attributes, rsa_ds_opaque_key.ds_data_ctx->rsa_length_bits);
     psa_set_key_usage_flags(&ds_key_attributes, PSA_KEY_USAGE_SIGN_HASH);
     psa_set_key_algorithm(&ds_key_attributes, alg);
-    psa_set_key_lifetime(&ds_key_attributes, PSA_KEY_LIFETIME_ESP_RSA_DS);
+    psa_set_key_lifetime(&ds_key_attributes, PSA_KEY_LIFETIME_ESP_RSA_DS_VOLATILE);
     status = psa_import_key(&ds_key_attributes,
                             (const uint8_t *)&rsa_ds_opaque_key,
                             sizeof(rsa_ds_opaque_key),
