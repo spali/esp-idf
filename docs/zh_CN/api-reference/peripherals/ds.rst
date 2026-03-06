@@ -3,7 +3,7 @@
 
 :link_to_translation:`en:[English]`
 
-数字签名 (DS) 模块利用 RSA 硬件加速器为信息签名。HMAC 作为密钥派生函数，使用 eFuse 作为输入密钥，输出一组加密参数。随后，数字签名模块利用这组预加密的参数，计算出签名。
+数字签名 (DS) 模块提供基于 RSA 的消息签名硬件加速，并使用预加密参数来计算签名。这些参数通过 HMAC 作为密钥派生函数进行加密，而 HMAC 则以 eFuse 作为输入密钥。
 
 .. only:: SOC_KEY_MANAGER_SUPPORTED
 

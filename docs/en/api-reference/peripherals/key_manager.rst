@@ -6,6 +6,7 @@ Key Manager
 :link_to_translation:`zh_CN:[中文]`
 
 The {IDF_TARGET_NAME}'s Key Manager peripheral provides hardware-assisted **key deployment and recovery** for cryptographic keys. It allows cryptographic keys to be provisioned and used without storing plaintext key material in flash, RAM, or eFuses.
+
 The Key Manager is intended for applications that require secure handling of long-term cryptographic keys.
 
 .. only:: esp32p4
@@ -28,7 +29,7 @@ Key Manager provides the following properties:
 
 - **No plaintext key storage**
 
-  Key material is never exposed in software accessible memory.
+  Key material is never exposed to software accessible memory.
 
 - **Flexible key lifecycle**
 
@@ -41,18 +42,18 @@ Key Manager provides the following properties:
 Hardware Unique Key (HUK)
 -------------------------
 
-The Hardware Unique Key (HUK) is a device-specific unique key generated entirely in hardware HUK peripheral. It is generated using SRAM Physical Unclonable Function (PUF) and is reconstructed using the HUK recovery info stored in the key recovery info of a Key Manager deployed key. See *{IDF_TARGET_NAME} Technical Reference Manual* > *Chapter Key Manager* [`PDF <{IDF_TARGET_TRM_EN_URL}>`__] > *HUK Generator* for more details about the HUK peripheral.
+The Hardware Unique Key (HUK) is a device-specific unique key generated entirely in hardware HUK peripheral. It is generated using SRAM Physical Unclonable Function (PUF) and is reconstructed using the HUK recovery info stored in the key recovery info of a Key Manager deployed key. See **{IDF_TARGET_NAME} Technical Reference Manual** > **Chapter Key Manager** [`PDF <{IDF_TARGET_TRM_EN_URL}>`__] > **HUK Generator** for more details about the HUK peripheral.
 
 The HUK acts as the root of trust for all keys deployed through the Key Manager.
 
-Key deployment and key recovery
+Key Deployment and Key Recovery
 -------------------------------
 
 The Key Manager operates in two distinct phases:
 
 - **Key deployment**
 
-  A cryptographic key is generated or securely introduced into the chip and it gets bound to the HUK. This step is usually performed during manufacturing, first boot up or when generating transient or persistent keys during the application runtime.
+  A cryptographic key is generated or securely introduced into the chip, and it gets bound to the HUK. This step is usually performed during manufacturing, first boot up or when generating transient or persistent keys during the application runtime.
 
 - **Key recovery**
 
@@ -60,7 +61,7 @@ The Key Manager operates in two distinct phases:
 
 During deployment, the Key Manager generates a data structure referred to as :cpp:type:`esp_key_mgr_key_recovery_info_t`. In case of persistent keys, the applications must store this data in non-volatile storage (for example, flash) in order to recover the key on later boots.
 
-Supported key types
+Supported Key Types
 -------------------
 
 The Key Manager can manage keys for the following key types:
@@ -68,14 +69,14 @@ The Key Manager can manage keys for the following key types:
 .. list::
 
     :SOC_KEY_MANAGER_ECDSA_KEY_DEPLOY: - ECDSA
-    :SOC_KEY_MANAGER_FE_KEY_DEPLOY: - Flash encryption (XTS-AES)
+    :SOC_KEY_MANAGER_FE_KEY_DEPLOY: - Flash Encryption (XTS-AES)
     :SOC_KEY_MANAGER_HMAC_KEY_DEPLOY: - HMAC
-    :SOC_KEY_MANAGER_DS_KEY_DEPLOY: - Digital signature peripherals
-    :SOC_KEY_MANAGER_FE_KEY_DEPLOY: - PSRAM encryption
+    :SOC_KEY_MANAGER_DS_KEY_DEPLOY: - Digital Signature peripherals
+    :SOC_KEY_MANAGER_FE_KEY_DEPLOY: - PSRAM Encryption
 
 Each key is associated with a :cpp:type:`esp_key_mgr_key_purpose_t`, which defines how the key can be used by hardware peripherals.
 
-Key deployment modes
+Key Deployment Modes
 --------------------
 
 The Key Manager provides multiple key deployment modes to support different provisioning and security requirements.
@@ -85,29 +86,29 @@ Random Deploy Mode
 
 In this mode, the Key Manager generates a random private key internally.
 
-- The key value is never known to the application software
-- No external key material is required
-- Intended for use cases where the key does not need to be backed up or exported
+- The key value is never known to the application software.
+- No external key material is required.
+- Intended for use cases where the key does not need to be backed up or exported.
 
 AES Deploy Mode
 ^^^^^^^^^^^^^^^
 
 In this mode, a user-specified private key is securely deployed.
 
-- The key is encrypted before being transmitted to the chip
-- Auxiliary key material is used to protect the deployment process
-- Intended for factory provisioning scenarios where the key value must be predefined
+- The key is encrypted before being transmitted to the chip.
+- Auxiliary key material is used to protect the deployment process.
+- Intended for factory provisioning scenarios where the key value must be predefined.
 
 ECDH0 Deploy Mode
 ^^^^^^^^^^^^^^^^^
 
 In this mode, a private key is negotiated using Elliptic Curve Diffie-Hellman (ECDH).
 
-- The final private key is never transmitted
-- The deployment process can occur over an untrusted channel
-- Intended for high-security provisioning environments
+- The final private key is never transmitted.
+- The deployment process can occur over an untrusted channel.
+- Intended for high-security provisioning environments.
 
-For detailed information various deployment modes, see *{IDF_TARGET_NAME} Technical Reference Manual* > *Chapter Key Manager* [`PDF <{IDF_TARGET_TRM_EN_URL}>`__] > *Key Manager*.
+For detailed information various deployment modes, see **{IDF_TARGET_NAME} Technical Reference Manual** > **Chapter Key Manager** [`PDF <{IDF_TARGET_TRM_EN_URL}>`__] > **Section Key Manager**.
 
 .. ECDH1 Deploy Mode
 .. ~~~~~~~~~~~~~~~~~
@@ -118,7 +119,7 @@ For detailed information various deployment modes, see *{IDF_TARGET_NAME} Techni
 .. - Allows updating deployed keys by replacing auxiliary information
 .. - Intended for large-scale manufacturing with controlled trust assumptions
 
-Typical workflows
+Typical Workflows
 -----------------
 
 First Boot or Manufacturing
@@ -138,19 +139,19 @@ Normal Boot
 
 During a normal boot:
 
-1. The application provides the previously generated and stored ``key_recovery_info`` of a Key Manager-deployed key
-2. The HUK is reconstructed automatically by hardware
-3. The Key Manager recovers the deployed key internally
-4. Cryptographic peripherals can use the recovered key
+1. The application provides the previously generated and stored ``key_recovery_info`` of a Key Manager-deployed key.
+2. The HUK is reconstructed automatically by hardware.
+3. The Key Manager recovers the deployed key internally.
+4. Cryptographic peripherals can use the recovered key.
 
-Security considerations
+Security Considerations
 -----------------------
 
 Applications using the Key Manager should consider the following:
 
-- Protect the ``key_recovery_info`` of a Key Manager-deployed key against unauthorized modification or loss
-- Lock Key Manager's security-related eFuses after successful key deployment to prevent re-deployment of a key of the same type
-- Avoid deploying new XTS-AES keys when Flash Encryption is already enabled unless explicitly intended
+- Protect the ``key_recovery_info`` of a Key Manager-deployed key against unauthorized modification or loss.
+- Lock Key Manager's security-related eFuses after successful key deployment to prevent re-deployment of a key of the same type.
+- Avoid deploying new XTS-AES keys when Flash Encryption is already enabled unless explicitly intended.
 
 API Reference
 -------------
@@ -161,13 +162,10 @@ API Reference
 Examples
 --------
 
-An example demonstrating key deployment using the Key Manager and using the deployed key to perform signing operations is available at:
-
-See :example:`security/key_manager` for the example.
+See :example:`security/key_manager` for an example demonstrating key deployment using the Key Manager and using the deployed key to perform signing operations.
 
 This example shows how to:
 
 - Initialize the Key Manager
 - Deploy keys using the AES deployment mode
-- Uses the PSA interface to perform signing operations using the Key Manager deployed key
-
+- Use the PSA interface to perform signing operations using the Key Manager deployed key

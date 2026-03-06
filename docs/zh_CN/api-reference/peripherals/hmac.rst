@@ -26,7 +26,7 @@
 {IDF_TARGET_NAME} 上的 HMAC
 -----------------------------
 
-在 {IDF_TARGET_NAME} HMAC 模块的 eFuse 中会烧录一个密钥。
+在 {IDF_TARGET_NAME} 上，HMAC 模块会使用烧录到 eFuse 中的密钥。
 
 .. only:: SOC_KEY_MANAGER_SUPPORTED
 
