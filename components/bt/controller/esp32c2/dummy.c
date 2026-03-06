@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 #include "esp_bt_cfg.h"
+#include "esp_attr.h"
 
 #define BLE_ERR_UNKNOWN_HCI_CMD         (0x01)
 /* LL Features */
@@ -423,7 +424,7 @@ void r_ble_ll_scan_rxed(void){}
 void r_ble_ll_scan_rxed_eco4(void){}
 void r_ble_ll_scan_set_perfer_addr(void){}
 void r_ble_ll_scan_set_perfer_addr_eco4(void){}
-int r_ble_lll_scan_chk_resume_eco4(void){return -1;}
+IRAM_ATTR int r_ble_lll_scan_chk_resume_eco4(void){return -1;}
 int r_ble_ll_scan_status_check(void){return 0;}
 int r_ble_ll_scan_status_check_eco4(void){return 0;}
 #endif // !DEFAULT_BT_LE_ROLE_OBSERVER
