@@ -275,7 +275,7 @@ The ESP-IDF MCP (Model Context Protocol) server enables AI integration with ESP-
 Starting the MCP Server
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
-To use the MCP server with an AI assistant, configure your agent or IDE to start the server (the sections below show how). You can do that in two ways:
+To use the MCP server with an AI assistant, configure your agent or IDE to start the server. You can do that in two ways:
 
 1. Using ``eim run`` (recommended): Use the ESP-IDF Installation Manager (EIM) to start a new process with an active ESP-IDF environment. This feature is available from EIM 0.8.1 and **ESP-IDF must be installed via the EIM installer**. This is the easiest option and does not require you to activate ESP-IDF in your shell first.
 
