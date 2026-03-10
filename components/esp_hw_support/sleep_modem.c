@@ -174,6 +174,13 @@ typedef struct sleep_modem_config {
 
 static sleep_modem_config_t s_sleep_modem = { .wifi.phy_link = NULL, .wifi.flags = 0 };
 
+typedef struct {
+#define DESC_IDX_I2C_MST_ENA (0)
+#define DESC_IDX_I2C_MST_SEL (1)
+#define DESC_IDX_I2C_MST_DIS (2)
+    void *regdma_desc[DESC_IDX_I2C_MST_DIS + 1];
+} sleep_modem_state_phy_link_context_t;
+
 esp_err_t sleep_modem_wifi_modem_state_init(void)
 {
     esp_err_t err = ESP_OK;
@@ -254,11 +261,40 @@ esp_err_t sleep_modem_wifi_modem_state_init(void)
         }
         if (err == ESP_OK) {
             pau_regdma_set_modem_link_addr(link);
-            s_sleep_modem.wifi.phy_link = link;
-            s_sleep_modem.wifi.flags = 0;
+
+            const int id_array[] = { REGDMA_PHY_LINK(0x00), REGDMA_PHY_LINK(0x01), REGDMA_PHY_LINK(0x1b) };
+            static DRAM_ATTR sleep_modem_state_phy_link_context_t phy_link_context;
+
+            for (int i = 0; (err == ESP_OK) && (i < ARRAY_SIZE(phy_link_context.regdma_desc)); i++) {
+                void *desc = regdma_find_link_by_id(link, 0, id_array[i]);
+                if (desc) {
+                    phy_link_context.regdma_desc[i] = desc;
+                } else {
+                    err = ESP_ERR_NOT_FOUND;
+                }
+            }
+            if (err == ESP_OK) {
+                s_sleep_modem.wifi.phy_link = (void *)&phy_link_context;
+                s_sleep_modem.wifi.flags = 0;
+            }
         }
     }
     return err;
+}
+
+static void IRAM_ATTR sleep_modem_state_phy_link_config(void *link_context, uint32_t flags)
+{
+    sleep_modem_state_phy_link_context_t *phy_link_context = (sleep_modem_state_phy_link_context_t *)link_context;
+
+    if (flags & BIT(0)) {
+        regdma_link_set_skip_flag(phy_link_context->regdma_desc[DESC_IDX_I2C_MST_ENA], true, true);
+        regdma_link_set_skip_flag(phy_link_context->regdma_desc[DESC_IDX_I2C_MST_SEL], true, true);
+        regdma_link_set_skip_flag(phy_link_context->regdma_desc[DESC_IDX_I2C_MST_DIS], true, true);
+    } else {
+        regdma_link_set_skip_flag(phy_link_context->regdma_desc[DESC_IDX_I2C_MST_ENA], true, false);
+        regdma_link_set_skip_flag(phy_link_context->regdma_desc[DESC_IDX_I2C_MST_SEL], true, false);
+        regdma_link_set_skip_flag(phy_link_context->regdma_desc[DESC_IDX_I2C_MST_DIS], false, true);
+    }
 }
 
 __attribute__((unused)) void sleep_modem_wifi_modem_state_deinit(void)
@@ -272,12 +308,14 @@ __attribute__((unused)) void sleep_modem_wifi_modem_state_deinit(void)
 
 void IRAM_ATTR sleep_modem_wifi_do_phy_retention(bool restore)
 {
+    sleep_modem_state_phy_link_config(s_sleep_modem.wifi.phy_link, 1);
     if (restore) {
         pau_regdma_trigger_modem_link_restore();
     } else {
         pau_regdma_trigger_modem_link_backup();
         s_sleep_modem.wifi.modem_state_phy_done = 1;
     }
+    sleep_modem_state_phy_link_config(s_sleep_modem.wifi.phy_link, 0);
 }
 
 inline __attribute__((always_inline)) bool sleep_modem_wifi_modem_state_enabled(void)
