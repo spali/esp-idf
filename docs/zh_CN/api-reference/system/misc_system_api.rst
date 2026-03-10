@@ -213,6 +213,18 @@ SDK 版本
       #endif
 
 
+调试辅助功能
+-----------------
+
+``esp_debug_helpers.h`` 中的调试辅助 API 提供了运行时调试和堆栈回溯输出相关功能。
+
+- :cpp:func:`esp_backtrace_print` 用于打印当前堆栈回溯。
+- :cpp:func:`esp_backtrace_print_all_tasks` 用于打印所有任务的堆栈回溯。
+- :cpp:func:`esp_backtrace_get_start` 和 :cpp:func:`esp_backtrace_get_next_frame` 用于手动遍历回溯帧。
+
+这些 API 适用于诊断崩溃、看门狗超时或异常控制流等问题。
+
+
 .. _app-version:
 
 应用程序版本
@@ -237,4 +249,5 @@ API 参考
 .. include-build-file:: inc/esp_mac.inc
 .. include-build-file:: inc/esp_chip_info.inc
 .. include-build-file:: inc/esp_cpu.inc
+.. include-build-file:: inc/esp_debug_helpers.inc
 .. include-build-file:: inc/esp_app_desc.inc
