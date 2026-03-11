@@ -92,6 +92,8 @@ INPUT = \
     $(PROJECT_PATH)/components/esp_driver_ana_cmpr/include/driver/ana_cmpr.h \
     $(PROJECT_PATH)/components/esp_driver_ana_cmpr/include/driver/ana_cmpr_etm.h \
     $(PROJECT_PATH)/components/esp_driver_ana_cmpr/include/driver/ana_cmpr_types.h \
+    $(PROJECT_PATH)/components/esp_driver_cordic/include/driver/cordic.h \
+    $(PROJECT_PATH)/components/esp_driver_cordic/include/driver/cordic_types.h \
     $(PROJECT_PATH)/components/esp_driver_dac/include/driver/dac_continuous.h \
     $(PROJECT_PATH)/components/esp_driver_dac/include/driver/dac_cosine.h \
     $(PROJECT_PATH)/components/esp_driver_dac/include/driver/dac_oneshot.h \
@@ -172,6 +174,7 @@ INPUT = \
     $(PROJECT_PATH)/components/esp_hal_ana_conv/include/hal/adc_types.h \
     $(PROJECT_PATH)/components/esp_hal_ana_conv/include/hal/dac_types.h \
     $(PROJECT_PATH)/components/esp_hal_ana_conv/include/hal/temperature_sensor_types.h \
+    $(PROJECT_PATH)/components/esp_hal_cordic/include/hal/cordic_types.h \
     $(PROJECT_PATH)/components/esp_hal_emac/include/hal/eth_types.h \
     $(PROJECT_PATH)/components/esp_hal_gpio/$(IDF_TARGET)/include/soc/gpio_num.h \
     $(PROJECT_PATH)/components/esp_hal_gpio/include/hal/gpio_types.h \
