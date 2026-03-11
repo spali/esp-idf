@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: 2015-2025 Espressif Systems (Shanghai) CO LTD
+ * SPDX-FileCopyrightText: 2015-2026 Espressif Systems (Shanghai) CO LTD
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -16,6 +16,7 @@
 #include "esp_attr.h"
 #include "sdkconfig.h"
 #include "esp_heap_caps.h"
+#include "esp_private/esp_vfs_cdcacm.h"
 #include "esp_private/esp_vfs_cdcacm_select.h"
 #include "esp_private/usb_console.h"
 #include "esp_private/startup_internal.h"
@@ -533,6 +534,24 @@ ESP_SYSTEM_INIT_FN(init_vfs_usb_cdc_rom_console, CORE, BIT(0), 113)
 
     return esp_vfs_dev_cdcacm_register();
 }
+
+esp_err_t cdcacm_vfs_dev_port_init(const esp_console_dev_usb_cdc_config_t *config,
+                                   esp_line_endings_t rx_mode,
+                                   esp_line_endings_t tx_mode)
+{
+    (void)config;
+
+    esp_vfs_dev_cdcacm_set_rx_line_endings(rx_mode);
+    esp_vfs_dev_cdcacm_set_tx_line_endings(tx_mode);
+
+    return ESP_OK;
+}
+
+void cdcacm_vfs_dev_port_deinit(const esp_console_dev_usb_cdc_config_t *config)
+{
+    (void)config;
+}
+
 #endif
 
 void esp_vfs_dev_cdcacm_include_dev_init(void)
