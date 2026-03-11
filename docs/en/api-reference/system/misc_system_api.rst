@@ -39,7 +39,22 @@ To fetch the MAC address for a specific network interface (e.g., Wi-Fi, Bluetoot
 
 In ESP-IDF, the MAC addresses for the various network interfaces are calculated from a single **base MAC address**. By default, the Espressif base MAC address is used. This base MAC address is pre-programmed into the {IDF_TARGET_NAME} eFuse in the factory during production.
 
-.. only:: not esp32s2
+.. only:: esp32p4
+
+    .. list-table::
+        :widths: 20 80
+        :header-rows: 1
+
+        * - Interface
+          - MAC Address (1 universally administered, default)
+        * - Ethernet
+          - base_mac
+
+    .. note::
+
+        On ESP32-P4, :ref:`CONFIG_{IDF_TARGET_CFG_PREFIX}_UNIVERSAL_MAC_ADDRESSES` is fixed to one universally administered MAC address.
+
+.. only:: (not esp32s2) and (not esp32p4)
 
     .. list-table::
         :widths: 20 40 40
