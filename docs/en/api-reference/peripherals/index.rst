@@ -50,7 +50,7 @@ Peripherals API
     :SOC_TOUCH_SENSOR_SUPPORTED: cap_touch_sens
     :SOC_TWAI_SUPPORTED: twai
     uart
-    :SOC_USB_OTG_SUPPORTED: usb_device
-    :SOC_USB_OTG_SUPPORTED: usb_host
+    :SOC_USB_OTG_SUPPORTED: USB Device Stack <https://docs.espressif.com/projects/esp-usb/en/latest/{IDF_TARGET_PATH_NAME}/usb_device.html>
+    :SOC_USB_OTG_SUPPORTED: USB Host <https://docs.espressif.com/projects/esp-usb/en/latest/{IDF_TARGET_PATH_NAME}/usb_host.html>
 
 Code examples for this API section are provided in the :example:`peripherals` directory of ESP-IDF examples.
