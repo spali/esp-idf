@@ -5,6 +5,7 @@ import os.path as path
 import sys
 from collections.abc import Callable
 from typing import Any
+from typing import Dict
 from typing import Optional
 
 import pytest
@@ -29,7 +30,7 @@ def start_gdb(dut: PanicTestDut) -> None:
     dut.start_gdb_for_gdbstub()
 
 
-def run_and_break(dut: PanicTestDut, cmd: str) -> dict[Any, Any]:
+def run_and_break(dut: PanicTestDut, cmd: str) -> Dict[Any, Any]:
     responses = dut.gdb_write(cmd)
     assert dut.find_gdb_response('running', 'result', responses) is not None
     if not dut.find_gdb_response('stopped', 'notify', responses):  # have not stopped on breakpoint yet

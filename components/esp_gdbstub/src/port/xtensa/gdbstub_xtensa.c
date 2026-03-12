@@ -7,7 +7,7 @@
 #include <string.h>
 #include "esp_gdbstub_common.h"
 #include "soc/soc_memory_layout.h"
-#include "xtensa/config/xt_specreg.h"
+#include "xtensa/config/specreg.h"
 #include "sdkconfig.h"
 #include "esp_cpu.h"
 #include "esp_ipc_isr.h"
@@ -35,8 +35,8 @@ static void update_regfile_common(esp_gdbstub_gdb_regfile_t *dst)
     }
     dst->windowbase = 0;
     dst->windowstart = 0x1;
-    RSR(XT_REG_CONFIGID0, dst->configid0);
-    RSR(XT_REG_CONFIGID1, dst->configid1);
+    RSR(CONFIGID0, dst->configid0);
+    RSR(CONFIGID1, dst->configid1);
 }
 
 #if XCHAL_HAVE_FP
@@ -131,14 +131,14 @@ static uint32_t enable_coproc(int coproc)
     bool fpu_enabled = false;
     uint32_t cp_enabled;
 
-    RSR(XT_REG_CPENABLE, cp_enabled);
+    RSR(CPENABLE, cp_enabled);
     if (cp_enabled & (1 << coproc)) {
         fpu_enabled = true;
     }
 
     if (!fpu_enabled) {
         uint32_t new_cp_enabled = cp_enabled | (1 << coproc);
-        WSR(XT_REG_CPENABLE, new_cp_enabled);
+        WSR(CPENABLE, new_cp_enabled);
     }
 
     return cp_enabled;
@@ -162,7 +162,7 @@ static void write_fpu_regs_to_regfile(void *tcb, esp_gdbstub_gdb_regfile_t *dst)
         gdbstub_read_fpu_regs(&dst->fpu);
 
         /* Restore FPU enabled state */
-        WSR(XT_REG_CPENABLE, cp_enabled);
+        WSR(CPENABLE, cp_enabled);
     } else {
         /* FPU registers was stored to thread TCB, copy them to the register file */
         memcpy (&dst->fpu, fpu_save_area, sizeof(dst->fpu));
@@ -311,12 +311,12 @@ void esp_gdbstub_init_dports(void)
 bool esp_gdbstub_get_watchpoint_trigger_addr(uint32_t *addr)
 {
     uint32_t debugcause;
-    RSR(XT_REG_DEBUGCAUSE, debugcause);
+    RSR(DEBUGCAUSE, debugcause);
     if (debugcause & XCHAL_DEBUGCAUSE_DBREAK_MASK) {
         if (debugcause & (1 << 8)) {
-            RSR(XT_REG_DBREAKA_1, *addr);
+            RSR(DBREAKA_1, *addr);
         } else {
-            RSR(XT_REG_DBREAKA_0, *addr);
+            RSR(DBREAKA_0, *addr);
         }
         return true;
     }
@@ -359,8 +359,8 @@ void esp_gdbstub_stall_other_cpus_end(void)
  * */
 void esp_gdbstub_clear_step(void)
 {
-    WSR(XT_REG_ICOUNT, 0);
-    WSR(XT_REG_ICOUNTLEVEL, 0);
+    WSR(ICOUNT, 0);
+    WSR(ICOUNTLEVEL, 0);
 }
 
 /** @brief GDB do step
@@ -376,8 +376,8 @@ void esp_gdbstub_do_step( esp_gdbstub_frame_t *frame)
     level &= 0x7;
     level += 1;
 
-    WSR(XT_REG_ICOUNTLEVEL, level);
-    WSR(XT_REG_ICOUNT, -2);
+    WSR(ICOUNTLEVEL, level);
+    WSR(ICOUNT, -2);
 }
 
 /** @brief GDB trigger other CPU
@@ -461,7 +461,7 @@ static void gdbstub_write_fpu_regs(esp_gdbstub_frame_t *frame, uint32_t reg_inde
 
         gdbstub_set_fpu_register(fpu_reg_index, (float *)value_ptr);
 
-        WSR(XT_REG_CPENABLE, cp_enabled);
+        WSR(CPENABLE, cp_enabled);
     } else {
         fpu_save_area[fpu_reg_index] = *value_ptr;
     }
