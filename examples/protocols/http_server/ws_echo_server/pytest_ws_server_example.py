@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# SPDX-FileCopyrightText: 2021-2025 Espressif Systems (Shanghai) CO LTD
+# SPDX-FileCopyrightText: 2021-2026 Espressif Systems (Shanghai) CO LTD
 # SPDX-License-Identifier: Apache-2.0
 import logging
 import os
@@ -8,6 +8,7 @@ import os
 import pytest
 from common_test_methods import get_env_config_variable
 from pytest_embedded import Dut
+from pytest_embedded_idf.utils import idf_parametrize
 
 try:
     import websocket
@@ -18,7 +19,7 @@ except ImportError:
 OPCODE_TEXT = 0x1
 OPCODE_BIN = 0x2
 OPCODE_PING = 0x9
-OPCODE_PONG = 0xa
+OPCODE_PONG = 0xA
 
 
 class WsClient:
@@ -32,13 +33,13 @@ class WsClient:
         self.ws.connect('ws://{}:{}/{}'.format(self.ip, self.port, self.uri))
         return self
 
-    def __exit__(self, exc_type, exc_value, traceback):     # type: ignore
+    def __exit__(self, exc_type, exc_value, traceback):  # type: ignore
         self.ws.close()
 
-    def read(self):     # type: ignore
+    def read(self):  # type: ignore
         return self.ws.recv_data(control_frame=True)
 
-    def write(self, data='', opcode=OPCODE_TEXT):   # type: ignore
+    def write(self, data='', opcode=OPCODE_TEXT):  # type: ignore
         if opcode == OPCODE_BIN:
             return self.ws.send_binary(data.encode())
         if opcode == OPCODE_PING:
@@ -46,8 +47,8 @@ class WsClient:
         return self.ws.send(data)
 
 
-@pytest.mark.esp32
 @pytest.mark.wifi_router
+@idf_parametrize('target', ['esp32'], indirect=['target'])
 def test_examples_protocol_http_ws_echo_server(dut: Dut) -> None:
     # Get binary file
     binary_file = os.path.join(dut.app.binary_path, 'ws_echo_server.bin')
@@ -96,8 +97,8 @@ def test_examples_protocol_http_ws_echo_server(dut: Dut) -> None:
             raise RuntimeError('Failed to receive correct opcode:{} or data:{}'.format(opcode, data))
 
 
-@pytest.mark.esp32
 @pytest.mark.wifi_router
+@idf_parametrize('target', ['esp32'], indirect=['target'])
 def test_ws_auth_handshake(dut: Dut) -> None:
     """
     Test that connecting to /ws does NOT print the handshake success log.
