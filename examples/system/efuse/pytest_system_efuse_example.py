@@ -608,13 +608,13 @@ def example_efuse_with_virt_secure_boot_v2_esp32xx(dut: Dut) -> None:
         signed_scheme = 'ECDSA'
     else:
         signed_scheme = 'RSA-PSS'
-    dut.expect('secure_boot_v2: Verifying with %s...' % signed_scheme)
+    dut.expect(f'secure_boot_v2: Verifying with {signed_scheme}...')
     dut.expect('secure_boot_v2: Signature verified successfully!')
 
     dut.expect('secure_boot_v2: enabling secure boot v2...')
     dut.expect('Verifying image signature...')
     dut.expect('secure_boot_v2: Secure boot V2 is not enabled yet and eFuse digest keys are not set')
-    dut.expect('secure_boot_v2: Verifying with %s...' % signed_scheme)
+    dut.expect(f'secure_boot_v2: Verifying with {signed_scheme}...')
     dut.expect('secure_boot_v2: Signature verified successfully!')
     dut.expect('secure_boot_v2: Secure boot digests absent, generating..')
     dut.expect('secure_boot_v2: Digests successfully calculated, 1 valid signatures')
@@ -643,7 +643,7 @@ def example_efuse_with_virt_secure_boot_v2_esp32xx(dut: Dut) -> None:
     dut.serial.hard_reset()
     dut.expect('Loading virtual efuse blocks from flash')
     dut.expect('Verifying image signature...')
-    dut.expect('secure_boot_v2: Verifying with %s...' % signed_scheme)
+    dut.expect(f'secure_boot_v2: Verifying with {signed_scheme}...')
     dut.expect('secure_boot_v2: Signature verified successfully!')
     dut.expect('secure_boot_v2: enabling secure boot v2...')
     dut.expect('secure_boot_v2: secure boot v2 is already enabled, continuing..')
@@ -710,7 +710,7 @@ def test_example_efuse_with_virt_secure_boot_v2_esp32xx_pre_loaded(dut: Dut) -> 
     else:
         signed_scheme = 'RSA-PSS'
 
-    dut.expect('secure_boot_v2: Verifying with %s...' % signed_scheme)
+    dut.expect(f'secure_boot_v2: Verifying with {signed_scheme}...')
     dut.expect('secure_boot_v2: Signature verified successfully!')
     dut.expect('secure_boot_v2: Secure boot digests already present')
     dut.expect('secure_boot_v2: Using pre-loaded public key digest in eFuse')
@@ -733,7 +733,7 @@ def test_example_efuse_with_virt_secure_boot_v2_esp32xx_pre_loaded(dut: Dut) -> 
     dut.serial.hard_reset()
     dut.expect('Loading virtual efuse blocks from flash')
     dut.expect('Verifying image signature...')
-    dut.expect('secure_boot_v2: Verifying with %s...' % signed_scheme)
+    dut.expect(f'secure_boot_v2: Verifying with {signed_scheme}...')
     dut.expect('secure_boot_v2: Signature verified successfully!')
     dut.expect('secure_boot_v2: enabling secure boot v2...')
     dut.expect('secure_boot_v2: secure boot v2 is already enabled, continuing..')
@@ -1011,13 +1011,13 @@ def example_efuse_with_virt_sb_v2_and_fe(dut: Dut) -> None:
         signed_scheme = 'ECDSA'
     else:
         signed_scheme = 'RSA-PSS'
-    dut.expect('secure_boot_v2: Verifying with %s...' % signed_scheme)
+    dut.expect(f'secure_boot_v2: Verifying with {signed_scheme}...')
     dut.expect('secure_boot_v2: Signature verified successfully!')
 
     dut.expect('secure_boot_v2: enabling secure boot v2...')
     dut.expect('Verifying image signature...')
     dut.expect('secure_boot_v2: Secure boot V2 is not enabled yet and eFuse digest keys are not set')
-    dut.expect('secure_boot_v2: Verifying with %s...' % signed_scheme)
+    dut.expect(f'secure_boot_v2: Verifying with {signed_scheme}...')
     dut.expect('secure_boot_v2: Signature verified successfully!')
     dut.expect('secure_boot_v2: Secure boot digests absent, generating..')
     dut.expect('secure_boot_v2: Digests successfully calculated, 1 valid signatures')
@@ -1056,20 +1056,20 @@ def example_efuse_with_virt_sb_v2_and_fe(dut: Dut) -> None:
         dut.expect('boot: Secure boot permanently enabled')
 
     dut.expect('Verifying image signature...')
-    dut.expect('secure_boot_v2: Verifying with %s...' % signed_scheme)
+    dut.expect(f'secure_boot_v2: Verifying with {signed_scheme}...')
     dut.expect('secure_boot_v2: Signature verified successfully!')
     dut.expect('flash_encrypt: bootloader encrypted successfully')
     dut.expect('flash_encrypt: partition table encrypted and loaded successfully')
 
     dut.expect('Verifying image signature...')
-    dut.expect('secure_boot_v2: Verifying with %s...' % signed_scheme)
+    dut.expect(f'secure_boot_v2: Verifying with {signed_scheme}...')
     dut.expect('secure_boot_v2: Signature verified successfully!')
     dut.expect('flash_encrypt: Flash encryption completed', timeout=90)
     dut.expect('Resetting with flash encryption enabled...')
 
     dut.expect('Loading virtual efuse blocks from flash')
     dut.expect('Verifying image signature...')
-    dut.expect('secure_boot_v2: Verifying with %s...' % signed_scheme)
+    dut.expect(f'secure_boot_v2: Verifying with {signed_scheme}...')
     dut.expect('secure_boot_v2: Signature verified successfully!')
     dut.expect('secure_boot_v2: enabling secure boot v2...')
     dut.expect('secure_boot_v2: secure boot v2 is already enabled, continuing..')
