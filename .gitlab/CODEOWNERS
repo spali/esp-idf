@@ -1,5 +1,7 @@
 # For the syntax of this file, see:
 #
-#    https://docs.gitlab.com/ee/user/project/code_owners.html#the-syntax-of-code-owners-files
+#    https://docs.gitlab.com/ee/user/project/code_owners.html#the-syntax-of-code_owners-files
 #
 * @esp-idf-codeowners/all-maintainers
+
+/components/esp_blockdev_util/        @esp-idf-codeowners/storage
