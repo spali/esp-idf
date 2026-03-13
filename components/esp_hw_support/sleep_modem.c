@@ -175,6 +175,7 @@ typedef struct sleep_modem_config {
 static sleep_modem_config_t s_sleep_modem = { .wifi.phy_link = NULL, .wifi.flags = 0 };
 
 typedef struct {
+    void *link_head;
 #define DESC_IDX_I2C_MST_ENA (0)
 #define DESC_IDX_I2C_MST_SEL (1)
 #define DESC_IDX_I2C_MST_DIS (2)
@@ -274,6 +275,7 @@ esp_err_t sleep_modem_wifi_modem_state_init(void)
                 }
             }
             if (err == ESP_OK) {
+                phy_link_context.link_head = link;
                 s_sleep_modem.wifi.phy_link = (void *)&phy_link_context;
                 s_sleep_modem.wifi.flags = 0;
             }
@@ -300,7 +302,7 @@ static void IRAM_ATTR sleep_modem_state_phy_link_config(void *link_context, uint
 __attribute__((unused)) void sleep_modem_wifi_modem_state_deinit(void)
 {
     if (s_sleep_modem.wifi.phy_link) {
-        regdma_link_destroy(s_sleep_modem.wifi.phy_link, 0);
+        regdma_link_destroy(((sleep_modem_state_phy_link_context_t *)(s_sleep_modem.wifi.phy_link))->link_head, 0);
         s_sleep_modem.wifi.phy_link = NULL;
         s_sleep_modem.wifi.flags = 0;
     }
