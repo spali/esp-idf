@@ -1307,6 +1307,10 @@ config SOC_PM_PAU_LINK_NUM
     int
     default 4
 
+config SOC_PM_MODEM_RF_FLAG_UPDATE_WORKAROUND
+    bool
+    default y
+
 config SOC_PM_PAU_REGDMA_UPDATE_CACHE_BEFORE_WAIT_COMPARE
     bool
     default y
