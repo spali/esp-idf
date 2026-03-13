@@ -604,6 +604,15 @@ macro(idf_project_init)
         # Ensure this is done after including the sdkconfig.
         __init_idf_target_arch()
 
+        # Make build properties available as CMake variables for backward
+        # compatibility with project_include.cmake files (e.g. ULP component
+        # references ${SDKCONFIG_HEADER} and ${SDKCONFIG_CMAKE} directly).
+        idf_build_get_property(build_properties BUILD_PROPERTIES)
+        foreach(build_property IN LISTS build_properties)
+            idf_build_get_property(val ${build_property})
+            set(${build_property} "${val}")
+        endforeach()
+
         # Include all project_include.cmake files for the components that have
         # been discovered.
         idf_build_get_property(component_interfaces COMPONENT_INTERFACES)
