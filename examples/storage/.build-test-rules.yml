@@ -19,6 +19,13 @@ examples/storage/emmc:
     - if: IDF_TARGET == "esp32s3"
       reason: only support on esp32s3
 
+examples/storage/nvs_iteration:
+  depends_components:
+    - nvs_flash
+  disable_test:
+    - if: IDF_TARGET not in ["esp32", "esp32c3"]
+      reason: only one target per arch needed
+
 examples/storage/nvs_rw_blob:
   depends_components:
     - nvs_flash
@@ -35,6 +42,13 @@ examples/storage/nvs_rw_value:
       reason: only one target per arch needed
 
 examples/storage/nvs_rw_value_cxx:
+  depends_components:
+    - nvs_flash
+  disable_test:
+    - if: IDF_TARGET not in ["esp32", "esp32c3"]
+      reason: only one target per arch needed
+
+examples/storage/nvs_statistics:
   depends_components:
     - nvs_flash
   disable_test:

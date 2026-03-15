@@ -17,6 +17,8 @@ The examples are grouped into sub-directories by category. Each category directo
 * `nvs_rw_blob` example demonstrates how to read and write a single integer value and a blob (binary large object) using NVS to preserve them between ESP module restarts.
 * `nvs_rw_value` example demonstrates how to read and write a single integer value using NVS.
 * `nvs_rw_value_cxx` example demonstrates how to read and write a single integer value using NVS (it uses the C++ NVS handle API).
+* `nvs_statistics` example demonstrates how to obtain and interpret stats about used/available NVS storage entries in given NVS partition.
+* `nvs_iteration` example demonstrates iterating over entries of specific (or any) data type in given namespace, and the info to be obtained about the entries while doing so.
 * `partition_api` examples demonstrate how to use different partition APIs.
 * `parttool` example demonstrates common operations the partitions tool allows the user to perform.
 * `sd_card` examples demonstrate how to use an SD card with an ESP device.
