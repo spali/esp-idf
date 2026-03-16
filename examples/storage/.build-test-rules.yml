@@ -62,6 +62,20 @@ examples/storage/nvs_rw_value_cxx:
     - if: IDF_TARGET not in ["esp32", "esp32c3"]
       reason: only one target per arch needed
 
+examples/storage/nvs_statistics:
+  depends_components:
+    - nvs_flash
+  disable_test:
+    - if: IDF_TARGET not in ["esp32", "esp32c3"]
+      reason: only one target per arch needed
+
+examples/storage/nvs_iteration:
+  depends_components:
+    - nvs_flash
+  disable_test:
+    - if: IDF_TARGET not in ["esp32", "esp32c3"]
+      reason: only one target per arch needed
+
 examples/storage/nvsgen:
   depends_components:
     - nvs_flash
