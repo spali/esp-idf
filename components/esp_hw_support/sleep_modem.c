@@ -173,12 +173,14 @@ __attribute__((unused)) void sleep_modem_wifi_modem_state_deinit(void)
 
 void IRAM_ATTR sleep_modem_wifi_do_phy_retention(bool restore)
 {
+    sleep_modem_state_phy_link_config(s_sleep_modem.wifi.phy_link, 1);
     if (restore) {
         pau_regdma_trigger_modem_link_restore();
     } else {
         pau_regdma_trigger_modem_link_backup();
         s_sleep_modem.wifi.modem_state_phy_done = 1;
     }
+    sleep_modem_state_phy_link_config(s_sleep_modem.wifi.phy_link, 0);
 }
 
 inline __attribute__((always_inline)) bool sleep_modem_wifi_modem_state_enabled(void)
