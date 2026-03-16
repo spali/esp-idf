@@ -1,7 +1,7 @@
 #include "ld.common"
   .spm.text :
   {
-    /* Code marked as running out of SPM */
+    /* Code marked as running out of spm */
     _spm_text_start = ABSOLUTE(.);
     SECTION_MAPPINGS(spm_text)
     _spm_text_end = ABSOLUTE(.);
