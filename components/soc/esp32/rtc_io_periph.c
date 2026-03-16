@@ -4,10 +4,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+#include "esp_attr.h"
 #include "soc/rtc_periph.h"
 #include "soc/rtc_io_reg.h"
 
-const int8_t rtc_io_num_map[SOC_GPIO_PIN_COUNT] = {
+DRAM_ATTR const int8_t rtc_io_num_map[SOC_GPIO_PIN_COUNT] = {
     RTCIO_GPIO0_CHANNEL,    //GPIO0
     -1,//GPIO1
     RTCIO_GPIO2_CHANNEL,    //GPIO2

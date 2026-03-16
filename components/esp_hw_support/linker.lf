@@ -52,3 +52,6 @@ archive: libsoc.a
 entries:
     if PM_POWER_DOWN_PERIPHERAL_IN_LIGHT_SLEEP && ESP_SLEEP_FLASH_LEAKAGE_WORKAROUND:
         gpio_periph: GPIO_HOLD_MASK (noflash)
+    if PM_SLP_IRAM_OPT = y:
+        if IDF_TARGET_ESP32 = y:
+            rtc_io_periph:rtc_io_desc (noflash_data)
