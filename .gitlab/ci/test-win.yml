@@ -94,7 +94,9 @@ pytest_build_system_win:
     - .test_build_system_template_win
     - .rules:labels:windows_pytest_build_system
   parallel: 6
-  needs: []
+  needs:
+    - job: manual_gate
+      optional: true
   tags: [windows-build, brew]
   artifacts:
     paths:
@@ -109,7 +111,9 @@ pytest_build_system_win_minimal_cmake:
   extends:
     - .test_build_system_template_win
     - .rules:labels:windows_pytest_build_system
-  needs: []
+  needs:
+    - job: manual_gate
+      optional: true
   tags: [windows-build, brew]
   artifacts:
     paths:
@@ -142,7 +146,9 @@ pytest_buildv2_system_win:
     - .test_build_system_template_win
     - .rules:labels:buildv2
   parallel: 2
-  needs: []
+  needs:
+    - job: manual_gate
+      optional: true
   tags: [windows-build, brew]
   artifacts:
     paths:

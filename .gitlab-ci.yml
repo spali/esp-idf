@@ -20,6 +20,7 @@ include:
   - ".gitlab/ci/danger.yml"
   - ".gitlab/ci/common.yml"
   - ".gitlab/ci/rules.yml"
+  - ".gitlab/ci/manual_gate.yml"
   - ".gitlab/ci/upload_cache.yml"
   - ".gitlab/ci/static-code-analysis.yml"
   - ".gitlab/ci/pre_commit.yml"
