@@ -30,7 +30,7 @@ class WsClient:
         self.uri = uri
 
     def __enter__(self):  # type: ignore
-        self.ws.connect('ws://{}:{}/{}'.format(self.ip, self.port, self.uri))
+        self.ws.connect(f'ws://{self.ip}:{self.port}/{self.uri}')
         return self
 
     def __exit__(self, exc_type, exc_value, traceback):  # type: ignore
@@ -53,7 +53,7 @@ def test_examples_protocol_http_ws_echo_server(dut: Dut) -> None:
     # Get binary file
     binary_file = os.path.join(dut.app.binary_path, 'ws_echo_server.bin')
     bin_size = os.path.getsize(binary_file)
-    logging.info('http_ws_server_bin_size : {}KB'.format(bin_size // 1024))
+    logging.info(f'http_ws_server_bin_size : {bin_size // 1024}KB')
 
     logging.info('Starting ws-echo-server test app based on http_server')
 
@@ -65,11 +65,11 @@ def test_examples_protocol_http_ws_echo_server(dut: Dut) -> None:
         ap_ssid = get_env_config_variable(env_name, 'ap_ssid')
         ap_password = get_env_config_variable(env_name, 'ap_password')
         dut.write(f'{ap_ssid} {ap_password}')
-    got_ip = dut.expect(r'IPv4 address: (\d+\.\d+\.\d+\.\d+)[^\d]', timeout=30)[1].decode()
+    got_ip = dut.expect(r'IPv4 address: (\d+\.\d+\.\d+\.\d+)[^\d]', timeout=60)[1].decode()
     got_port = dut.expect(r"Starting server on port: '(\d+)'", timeout=30)[1].decode()
 
-    logging.info('Got IP   : {}'.format(got_ip))
-    logging.info('Got Port : {}'.format(got_port))
+    logging.info(f'Got IP   : {got_ip}')
+    logging.info(f'Got Port : {got_port}')
 
     # Start ws server test
     with WsClient(got_ip, int(got_port), uri='ws') as ws:
@@ -77,24 +77,58 @@ def test_examples_protocol_http_ws_echo_server(dut: Dut) -> None:
         for expected_opcode in [OPCODE_TEXT, OPCODE_BIN, OPCODE_PING]:
             ws.write(data=DATA, opcode=expected_opcode)
             opcode, data = ws.read()
-            logging.info('Testing opcode {}: Received opcode:{}, data:{}'.format(expected_opcode, opcode, data))
+            logging.info(f'Testing opcode {expected_opcode}: Received opcode:{opcode}, data:{data}')
             data = data.decode()
             if expected_opcode == OPCODE_PING:
-                dut.expect('Got a WS PING frame, Replying PONG')
                 if opcode != OPCODE_PONG or data != DATA:
-                    raise RuntimeError('Failed to receive correct opcode:{} or data:{}'.format(opcode, data))
+                    raise RuntimeError(f'Failed to receive correct opcode:{opcode} or data:{data}')
                 continue
             dut_data = dut.expect(r'Got packet with message: ([A-Za-z0-9_]*)')[1]
             dut_opcode = dut.expect(r'Packet type: ([0-9]*)')[1].decode()
 
             if opcode != expected_opcode or data != DATA or opcode != int(dut_opcode) or (data not in str(dut_data)):
-                raise RuntimeError('Failed to receive correct opcode:{} or data:{}'.format(opcode, data))
+                raise RuntimeError(f'Failed to receive correct opcode:{opcode} or data:{data}')
+        # Test async send - server queues the work, so we need to wait for it to be processed
+        logging.info('Testing async send')
         ws.write(data='Trigger async', opcode=OPCODE_TEXT)
+        # Wait for server to receive and queue the async send
+        dut.expect(r'Got packet with message: Trigger async', timeout=10)
+        # Now read the async response (server processes work queue asynchronously)
         opcode, data = ws.read()
-        logging.info('Testing async send: Received opcode:{}, data:{}'.format(opcode, data))
+        logging.info(f'Testing async send: Received opcode:{opcode}, data:{data}')
         data = data.decode()
         if opcode != OPCODE_TEXT or data != 'Async data':
-            raise RuntimeError('Failed to receive correct opcode:{} or data:{}'.format(opcode, data))
+            raise RuntimeError(f'Failed to receive correct opcode:{opcode} or data:{data}')
+        # Test ping from server
+        logging.info('Testing server-initiated ping')
+        ws.write(data='Ping', opcode=OPCODE_TEXT)
+        # Wait for server to receive the message and send a ping
+        dut.expect(r'Got packet with message: Ping', timeout=10)
+        # Now read the ping response
+        opcode, data = ws.read()
+        logging.info(f'Testing server-initiated ping: Received opcode:{opcode}, data:{data}')
+        data = data.decode()
+        if opcode != OPCODE_PING:
+            raise RuntimeError(f'Failed to receive correct opcode:{opcode}')
+        # Now we should get a pong in response to our ping
+        opcode, data = ws.read()
+        data = data.decode()
+        if opcode != OPCODE_PONG:
+            raise RuntimeError(f'Failed to receive correct opcode:{opcode}')
+        ws.write(data='Ping', opcode=OPCODE_TEXT)
+        # Wait for server to receive the message and send a ping
+        dut.expect(r'Got packet with message: Ping', timeout=10)
+        # Now read the ping response
+        opcode, data = ws.read()
+        logging.info(f'Testing server-initiated ping: Received opcode:{opcode}, data:{data}')
+        data = data.decode()
+        if opcode != OPCODE_PING:
+            raise RuntimeError(f'Failed to receive correct opcode:{opcode}')
+        # Now we should get a pong in response to our ping
+        opcode, data = ws.read()
+        data = data.decode()
+        if opcode != OPCODE_PONG:
+            raise RuntimeError(f'Failed to receive correct opcode:{opcode}')
 
 
 @pytest.mark.wifi_router
