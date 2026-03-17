@@ -33,13 +33,19 @@ RSA 签名的私钥参数存储在 flash 中。为防止发生未经授权的访
 #. 加密私钥参数的位置
 #. 待签名的数据或信息
 
-由于签名计算需要一些时间，ESP-IDF 提供了两种可用的 API。第一种是 :cpp:func:`esp_ds_sign`，调用此 API 后，程序会在计算完成前保持阻塞状态。如果在计算过程中，软件需要执行其他操作，则可以调用 :cpp:func:`esp_ds_start_sign`，用另一种方式启动签名计算，然后周期性地调用 :cpp:func:`esp_ds_is_busy`，检查计算是否已完成。一旦计算完成，即可调用 :cpp:func:`esp_ds_finish_sign` 来获取签名结果。
+**底层 API（原始 RSA）**
 
-API :cpp:func:`esp_ds_sign` 和 :cpp:func:`esp_ds_start_sign` 会借助 DS 外设计算明文 RSA 签名。RSA 签名需要转换成合适的格式，以供进一步使用。例如，MbedTLS SSL 栈支持 PKCS#1 格式，使用 API :cpp:func:`esp_ds_rsa_sign` 可以直接获得 PKCS#1 v1.5 格式的签名，该 API 内部调用了 :cpp:func:`esp_ds_start_sign` 函数，并将签名转换成 PKCS#1 v1.5 格式。
+签名计算需要一些时间，因此 ESP-IDF 提供了两种可用的 API：第一种是 :cpp:func:`esp_ds_sign`，调用此 API 后，程序会在计算完成前保持阻塞状态。如果在计算过程中，软件需要执行其他操作，则可以调用 :cpp:func:`esp_ds_start_sign`，用另一种方式启动签名计算，然后周期性地调用 :cpp:func:`esp_ds_is_busy`，检查计算是否已完成。一旦计算完成，即可调用 :cpp:func:`esp_ds_finish_sign` 来获取签名结果。
+
+API 函数 :cpp:func:`esp_ds_sign` 和 :cpp:func:`esp_ds_start_sign` 在 DS 外设的帮助下计算原始 RSA 签名。该签名必须转换为合适的格式（例如 PKCS#1 v1.5 或 PSS），以用于 TLS 或其他协议。
 
 .. note::
 
-    此处只是最基本的 DS 构造块，其消息必须是固定长度。为在任意消息上创建签名，通常会将实际消息的哈希值作为输入，并将其填充到所需长度。乐鑫计划在未来提供一个 API 来实现这个功能。
+    上述为 DS 的基本构件，其消息长度是固定的。为了对任意消息生成签名，通常会将实际消息的哈希值作为输入，并将其填充到所需长度。
+
+**PSA 密码学驱动程序**
+
+DS 外设也通过 **PSA Crypto RSA DS 驱动程序** 对外提供访问接口，因此可以使用标准 PSA API 执行签名（PKCS#1 v1.5 或 PSS）和 RSA 解密（PKCS#1 v1.5 或 OAEP）。在 ``Component config`` > ``mbedTLS`` 中启用 ``CONFIG_MBEDTLS_HARDWARE_RSA_DS_PERIPHERAL``。要在 ESP-TLS 中配合使用 DS 外设（例如 TLS 客户端认证），请参阅 ESP-TLS 文档中的 :ref:`digital-signature-with-esp-tls`。
 
 .. _configure-the-ds-peripheral:
 
@@ -57,16 +63,54 @@ TLS 连接所需的 DS 外设配置
 
 如果要以开发为目的配置 DS 外设，可以使用 `esp-secure-cert-tool <https://pypi.org/project/esp-secure-cert-tool>`_。
 
-配置完 DS 外设后获取的加密私钥参数需要保存在 flash 中并传递给 DS 外设，DS 外设将使用这些参数完成数字签名。随后，应用程序需要从 flash 中读取 DS 数据，这可以通过 `esp_secure_cert_mgr <https://github.com/espressif/esp_secure_cert_mgr>`_ 组件提供的 API 完成。更多细节，请参阅 `component/README <https://github.com/espressif/esp_secure_cert_mgr#readme>`_。
+在完成 DS 外设配置后获得的加密私钥参数应保存在 flash 中。应用需要从 flash 读取 DS 数据（例如，通过 `esp_secure_cert_mgr <https://github.com/espressif/esp_secure_cert_mgr>`_ 组件提供的 API。详情请参阅 `component/README <https://github.com/espressif/esp_secure_cert_mgr#readme>`_）。关于在 ESP-TLS 中使用 DS 外设的方法，请参阅 :ref:`digital-signature-with-esp-tls`。
 
-在 esp_tls 仓库内部，`ESP-TLS` 负责完成初始化 DS 外设、执行数字签名的过程。更多细节，请参阅 :ref:`digital-signature-with-esp-tls`。
+通过 PSA Crypto 使用 DS 外设
+----------------------------
 
-如 `ESP-TLS` 文档所述，应用程序只需将加密私钥参数作为 `ds_data` 传递给 esp_tls 上下文，esp_tls 仓库内部就会执行所有必要操作，以初始化 DS 外设，并执行数字签名。
+要在应用代码（不使用 ESP-TLS）中将 DS 外设用于签名或解密，请启用 ``CONFIG_MBEDTLS_HARDWARE_RSA_DS_PERIPHERAL``。使用加密的密钥数据 (:cpp:type:`esp_ds_data_t`)、eFuse 密钥块 ID 以及以 bit 为单位的 RSA 密钥长度填充 ``esp_ds_data_ctx_t``。确保在创建密钥时（例如通过 :cpp:func:`esp_ds_encrypt_params` 或 DS 配置工具）设置 :cpp:type:`esp_ds_data_t` 的 ``rsa_length`` 字段，然后将该上下文封装到 ``esp_rsa_ds_opaque_key_t`` 中，使用 ``PSA_KEY_LIFETIME_ESP_RSA_DS_VOLATILE`` 将其作为 PSA 不透明密钥导入，并调用 ``psa_sign_hash()`` 或 ``psa_asymmetric_decrypt()``：
+
+.. code-block:: c
+
+    #include "psa/crypto.h"
+    #include "psa_crypto_driver_esp_rsa_ds.h"
+
+    // ds_ctx 指向 esp_ds_data_ctx_t（例如来自安全证书或 NVS）
+    esp_ds_data_ctx_t *ds_ctx = ...;
+    esp_rsa_ds_opaque_key_t rsa_ds_opaque_key = {
+        .ds_data_ctx = ds_ctx,
+    };
+
+    psa_key_attributes_t attrs = PSA_KEY_ATTRIBUTES_INIT;
+    psa_set_key_type(&attrs, PSA_KEY_TYPE_RSA_KEY_PAIR);
+    psa_set_key_bits(&attrs, ds_ctx->rsa_length_bits);
+    psa_set_key_usage_flags(&attrs, PSA_KEY_USAGE_SIGN_HASH);
+    psa_set_key_algorithm(&attrs, PSA_ALG_RSA_PKCS1V15_SIGN(PSA_ALG_SHA_256));
+    psa_set_key_lifetime(&attrs, PSA_KEY_LIFETIME_ESP_RSA_DS_VOLATILE);
+
+    psa_key_id_t key_id;
+    psa_status_t status = psa_import_key(&attrs,
+                                         (const uint8_t *)&rsa_ds_opaque_key,
+                                         sizeof(rsa_ds_opaque_key),
+                                         &key_id);
+    psa_reset_key_attributes(&attrs);
+    if (status != PSA_SUCCESS) {
+        // 处理错误
+    }
+
+    // 对哈希值进行签名（例如消息的 SHA-256）
+    uint8_t hash[32] = { ... };
+    uint8_t signature[256];
+    size_t sig_len;
+    status = psa_sign_hash(key_id, PSA_ALG_RSA_PKCS1V15_SIGN(PSA_ALG_SHA_256),
+                           hash, sizeof(hash), signature, sizeof(signature), &sig_len);
+
+    psa_destroy_key(key_id);
 
 使用 DS 外设进行 SSL 双向认证
 -----------------------------
 
-此前位于 ``examples/protocols/mqtt/ssl_ds`` 目录下的 SSL 双向认证示例现已随独立的 `espressif/mqtt <https://components.espressif.com/components/espressif/mqtt>`__ 组件一同提供。请参照该组件文档获取 SSL DS 示例，并与 ESP-MQTT 一起构建。该示例仍使用 `mqtt_client`（由 ESP-MQTT 实现），通过双向认证 TLS 连接至 ``test.mosquitto.org``，其中 TLS 通信层仍由 `ESP-TLS` 实现。
+此前位于 ``examples/protocols/mqtt/ssl_ds`` 目录下的 SSL 双向认证示例现已随独立的 `espressif/mqtt <https://components.espressif.com/components/espressif/mqtt>`__ 组件一同提供。请参照该组件文档获取 SSL DS 示例，并与 ESP-MQTT 一同构建。该示例仍使用 ``mqtt_client`` （由 ESP-MQTT 实现），通过双向认证 TLS 连接至 ``test.mosquitto.org``，其中 TLS 通信层仍由 ESP-TLS 实现。
 
 API 参考
 --------
