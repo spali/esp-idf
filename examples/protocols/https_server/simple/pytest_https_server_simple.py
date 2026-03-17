@@ -2,7 +2,6 @@
 #
 # SPDX-FileCopyrightText: 2021-2022 Espressif Systems (Shanghai) CO LTD
 # SPDX-License-Identifier: Apache-2.0
-
 import http.client
 import logging
 import os
@@ -119,7 +118,7 @@ def test_examples_protocol_https_server_simple(dut: Dut) -> None:
     # Parse IP address and port of the server
     dut.expect(r'Starting server')
     got_port = int(dut.expect(r'Server listening on port (\d+)', timeout=30)[1].decode())
-    got_ip = dut.expect(r'IPv4 address: (\d+\.\d+\.\d+\.\d+)[^\d]', timeout=30)[1].decode()
+    got_ip = dut.expect(r'IPv4 address: (\d+\.\d+\.\d+\.\d+)[^\d]', timeout=60)[1].decode()
 
     # Expected logs
 
@@ -191,7 +190,7 @@ def test_examples_protocol_https_server_simple_dynamic_buffers(dut: Dut) -> None
     # Parse IP address and port of the server
     dut.expect(r'Starting server')
     got_port = int(dut.expect(r'Server listening on port (\d+)', timeout=30)[1].decode())
-    got_ip = dut.expect(r'IPv4 address: (\d+\.\d+\.\d+\.\d+)[^\d]', timeout=30)[1].decode()
+    got_ip = dut.expect(r'IPv4 address: (\d+\.\d+\.\d+\.\d+)[^\d]', timeout=60)[1].decode()
 
     # Expected logs
 

@@ -1,16 +1,19 @@
 # SPDX-FileCopyrightText: 2022-2023 Espressif Systems (Shanghai) CO LTD
 # SPDX-License-Identifier: Unlicense OR CC0-1.0
 import http.server
+import logging
 import multiprocessing
 import os
 import ssl
 import subprocess
 import sys
+from typing import Optional
 from typing import Tuple
 
 import pexpect
 import pytest
-from common_test_methods import get_env_config_variable, get_host_ip4_by_dest_ip
+from common_test_methods import get_env_config_variable
+from common_test_methods import get_host_ip4_by_dest_ip
 from pytest_embedded import Dut
 
 server_cert = '-----BEGIN CERTIFICATE-----\n' \
@@ -64,7 +67,13 @@ server_key = '-----BEGIN PRIVATE KEY-----\n'\
              '-----END PRIVATE KEY-----\n'
 
 
-def start_https_server(ota_image_dir: str, server_ip: str, server_port: int, server_file: str = None, key_file: str = None) -> None:
+def start_https_server(
+    ota_image_dir: str,
+    server_ip: str,
+    server_port: int,
+    server_file: Optional[str] = None,
+    key_file: Optional[str] = None,
+) -> None:
     os.chdir(ota_image_dir)
 
     if server_file is None:
@@ -104,12 +113,12 @@ def start_tls1_3_server(ota_image_dir: str, server_port: int) -> subprocess.Pope
 
 
 def check_sha256(sha256_expected: str, sha256_reported: str) -> None:
-    print('sha256_expected: %s' % (sha256_expected))
-    print('sha256_reported: %s' % (sha256_reported))
+    logging.info('sha256_expected: %s', sha256_expected)
+    logging.info('sha256_reported: %s', sha256_reported)
     if sha256_expected not in sha256_reported:
         raise ValueError('SHA256 mismatch')
     else:
-        print('SHA256 expected and reported are the same')
+        logging.info('SHA256 expected and reported are the same')
 
 
 def calc_all_sha256(dut: Dut) -> Tuple[str, str]:
