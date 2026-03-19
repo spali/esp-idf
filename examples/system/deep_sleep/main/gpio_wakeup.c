@@ -22,6 +22,8 @@ void example_deep_sleep_register_gpio_wakeup(void)
     const gpio_config_t config = {
         .pin_bit_mask = BIT64(DEFAULT_WAKEUP_PIN),
         .mode = GPIO_MODE_INPUT,
+        .pull_up_en = !DEFAULT_WAKEUP_LEVEL,
+        .pull_down_en = DEFAULT_WAKEUP_LEVEL
     };
 
     ESP_ERROR_CHECK(gpio_config(&config));
