@@ -27,6 +27,7 @@ Peripherals API
     :SOC_I3C_MASTER_SUPPORTED: i3c_master
     :SOC_ISP_SUPPORTED: isp
     :SOC_JPEG_CODEC_SUPPORTED: jpeg
+    :SOC_KEY_MANAGER_SUPPORTED: key_manager
     lcd/index
     :SOC_GP_LDO_SUPPORTED: ldo_regulator
     ledc

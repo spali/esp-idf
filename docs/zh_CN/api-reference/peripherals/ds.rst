@@ -3,7 +3,13 @@
 
 :link_to_translation:`en:[English]`
 
-数字签名 (DS) 模块利用 RSA 硬件加速器为信息签名。HMAC 作为密钥派生函数，使用 eFuse 作为输入密钥，输出一组加密参数。随后，数字签名模块利用这组预加密的参数，计算出签名。以上过程均在硬件中完成，因此在计算签名时，软件无法获取 RSA 参数的解密密钥，也无法获取 HMAC 密钥派生函数的输入密钥。
+数字签名 (DS) 模块提供基于 RSA 的消息签名硬件加速，并使用预加密参数来计算签名。这些参数通过 HMAC 作为密钥派生函数进行加密，而 HMAC 则以 eFuse 作为输入密钥。
+
+.. only:: SOC_KEY_MANAGER_SUPPORTED
+
+    在 {IDF_TARGET_NAME} 上，数字签名 (DS) 模块也可以使用存储在密钥管理器中的密钥，而非 eFuse 密钥块。AES 加密密钥可以通过密钥管理器直接部署，类型为 :cpp:enumerator:`ESP_KEY_MGR_DS_KEY`。详情请参阅 :ref:`key-manager`。
+
+以上过程均在硬件中完成，因此在计算签名时，软件无法获取 RSA 参数的解密密钥，也无法获取 HMAC 密钥派生函数的输入密钥。
 
 签名计算所涉及的硬件信息以及所用寄存器的有关信息，请参阅 **{IDF_TARGET_NAME} 技术参考手册** > **数字签名 (DS)** [`PDF <{IDF_TARGET_TRM_CN_URL}#digsig>`__]。
 
@@ -112,7 +118,11 @@ TLS 连接所需的 DS 外设配置
 
 此前位于 ``examples/protocols/mqtt/ssl_ds`` 目录下的 SSL 双向认证示例现已随独立的 `espressif/mqtt <https://components.espressif.com/components/espressif/mqtt>`__ 组件一同提供。请参照该组件文档获取 SSL DS 示例，并与 ESP-MQTT 一同构建。该示例仍使用 ``mqtt_client`` （由 ESP-MQTT 实现），通过双向认证 TLS 连接至 ``test.mosquitto.org``，其中 TLS 通信层仍由 ESP-TLS 实现。
 
+.. only:: SOC_KEY_MANAGER_SUPPORTED
+
+    如果 :cpp:member:`esp_ds_data_ctx_t::efuse_key_id` 和 :cpp:member:`esp_rsa_ds_opaque_key_t::key_recovery_info` 均已设置，ESP-DS PSA 驱动程序将优先使用基于密钥管理器的 DS 密钥，而非基于 eFuse 的 DS 密钥。
+
 API 参考
 --------
 
-.. include-build-file:: inc/esp_ds.inc
+.. include-build-file:: inc/psa_crypto_driver_esp_rsa_ds_contexts.inc

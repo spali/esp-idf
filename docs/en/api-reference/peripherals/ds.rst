@@ -3,7 +3,13 @@ Digital Signature (DS)
 
 :link_to_translation:`zh_CN:[中文]`
 
-The Digital Signature (DS) module provides hardware acceleration of signing messages based on RSA. It uses pre-encrypted parameters to calculate a signature. The parameters are encrypted using HMAC as a key-derivation function. In turn, the HMAC uses eFuses as the input key. The whole process happens in hardware so that neither the decryption key for the RSA parameters nor the input key for the HMAC key derivation function can be seen by the software while calculating the signature.
+The Digital Signature (DS) module provides hardware acceleration of signing messages based on RSA. It uses pre-encrypted parameters to calculate a signature. The parameters are encrypted using HMAC as a key-derivation function. In turn, the HMAC uses eFuses as the input key.
+
+.. only:: SOC_KEY_MANAGER_SUPPORTED
+
+    On {IDF_TARGET_NAME}, the Digital Signature (DS) module can also use a key stored in the Key Manager instead of an eFuse key block. The AES encryption key can be directly deployed in the Key Manager with the type :cpp:enumerator:`ESP_KEY_MGR_DS_KEY`. Refer to :ref:`key-manager` for more details.
+
+The whole process happens in hardware so that neither the decryption key for the RSA parameters nor the input key for the HMAC key derivation function can be seen by the software while calculating the signature.
 
 For more detailed information on the hardware involved in the signature calculation and the registers used, see **{IDF_TARGET_NAME} Technical Reference Manual** > **Digital Signature (DS)** [`PDF <{IDF_TARGET_TRM_EN_URL}#digsig>`__].
 
@@ -112,7 +118,11 @@ Example for SSL Mutual Authentication Using DS
 
 The SSL mutual authentication example that previously lived under ``examples/protocols/mqtt/ssl_ds`` is now shipped with the standalone `espressif/mqtt <https://components.espressif.com/components/espressif/mqtt>`__ component. Follow the component documentation to fetch the SSL DS example and build it together with ESP-MQTT. The example continues to use ``mqtt_client`` (implemented by ESP-MQTT) to connect to ``test.mosquitto.org`` over mutual-authenticated TLS, with the TLS portion handled by ESP-TLS.
 
+.. only:: SOC_KEY_MANAGER_SUPPORTED
+
+    In case both the :cpp:member:`esp_ds_data_ctx_t::efuse_key_id` and :cpp:member:`esp_rsa_ds_opaque_key_t::key_recovery_info` are set, the ESP-DS PSA driver prefers using the Key Manager-based DS key over the eFuse-based DS key.
+
 API Reference
 -------------
 
-.. include-build-file:: inc/esp_ds.inc
+.. include-build-file:: inc/psa_crypto_driver_esp_rsa_ds_contexts.inc
