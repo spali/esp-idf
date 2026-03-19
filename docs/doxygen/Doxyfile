@@ -374,6 +374,8 @@ PREDEFINED             = \
     configTASKLIST_INCLUDE_COREID=1 \
     configUSE_SB_COMPLETED_CALLBACK=1 \
     PRIVILEGED_FUNCTION= \
+    PACKED_ATTR= \
+    WORD_ALIGNED_ATTR= \
     "ESP_EVENT_DECLARE_BASE(x)=extern esp_event_base_t x"
 
 ## Do not complain about not having dot
