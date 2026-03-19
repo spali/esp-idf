@@ -119,6 +119,13 @@ esp_err_t bootloader_flash_erase_sector(size_t sector);
  */
 esp_err_t bootloader_flash_erase_range(uint32_t start_addr, uint32_t size);
 
+/**
+ * @brief Reset the flash chip (66H + 99H).
+ *
+ * @return ESP_OK if success, otherwise ESP_FAIL.
+ */
+esp_err_t bootloader_flash_reset_chip(void);
+
 /* Cache MMU block size */
 #define MMU_BLOCK_SIZE    0x00010000
 

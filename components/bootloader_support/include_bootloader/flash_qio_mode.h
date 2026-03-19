@@ -58,6 +58,16 @@ uint32_t bootloader_flash_read_sfdp(uint32_t sfdp_addr, unsigned int miso_byte_n
  */
 esp_err_t bootloader_flash_xmc_startup(void);
 
+/**
+ * @brief Execute a flash command (for use in brownout reset flow).
+ * @param command Command byte
+ * @param mosi_data MOSI data
+ * @param mosi_len MOSI length in bits
+ * @param miso_len MISO length in bits
+ * @return MISO data read
+ */
+uint32_t bootloader_execute_flash_command(uint8_t command, uint32_t mosi_data, uint8_t mosi_len, uint8_t miso_len);
+
 #ifdef __cplusplus
 }
 #endif

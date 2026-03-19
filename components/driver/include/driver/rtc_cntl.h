@@ -22,6 +22,8 @@
 extern "C" {
 #endif
 
+#define RTC_INTR_FLAG_IRAM   (BIT(0))  /*< Some rtc interrupts can be called with cache disabled */
+
 /**
  * @brief Register a handler for specific RTC_CNTL interrupts
  *
@@ -33,13 +35,15 @@ extern "C" {
  * @param handler_arg  argument to be passed to the handler
  * @param rtc_intr_mask  combination of RTC_CNTL_*_INT_ENA bits indicating the
  *                       sources to call the handler for
+ * @param flags  An ORred mask of the RTC_INTR_FLAG_* defines. Pass 0 for default.
+ *               RTC_INTR_FLAG_IRAM: interrupt can be triggered with cache disabled.
  * @return
  *      - ESP_OK on success
  *      - ESP_ERR_NO_MEM not enough memory to allocate handler structure
  *      - other errors returned by esp_intr_alloc
  */
 esp_err_t rtc_isr_register(intr_handler_t handler, void* handler_arg,
-                            uint32_t rtc_intr_mask);
+                            uint32_t rtc_intr_mask, uint32_t flags);
 /**
  * @brief Deregister the handler previously registered using rtc_isr_register
  * @param handler  handler function to call (as passed to rtc_isr_register)
@@ -50,6 +54,16 @@ esp_err_t rtc_isr_register(intr_handler_t handler, void* handler_arg,
  *        handler_arg isn't registered
  */
 esp_err_t rtc_isr_deregister(intr_handler_t handler, void* handler_arg);
+
+/**
+ * @brief Disable the RTC interrupt that is allowed to be executed when cache is disabled.
+ */
+void rtc_isr_noniram_disable(uint32_t cpu);
+
+/**
+ * @brief Enable the RTC interrupt that is allowed to be executed when cache is disabled.
+ */
+void rtc_isr_noniram_enable(uint32_t cpu);
 
 #ifdef __cplusplus
 }

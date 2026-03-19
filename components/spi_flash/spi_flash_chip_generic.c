@@ -17,6 +17,13 @@
 #include "spi_flash_chip_generic.h"
 #include "spi_flash_defs.h"
 #include "esp_log.h"
+#include "esp_private/spi_flash_os.h"
+
+#define SET_FLASH_ERASE_STATUS(chip, status) do { \
+    if ((chip)->os_func->set_flash_op_status) { \
+        (chip)->os_func->set_flash_op_status(status); \
+    } \
+} while (0)
 
 static const char TAG[] = "chip_generic";
 
@@ -86,15 +93,18 @@ esp_err_t spi_flash_chip_generic_erase_chip(esp_flash_t *chip)
         err = chip->chip_drv->wait_idle(chip, SPI_FLASH_DEFAULT_IDLE_TIMEOUT_MS * 1000);
     }
     if (err == ESP_OK) {
+        SET_FLASH_ERASE_STATUS(chip, SPI_FLASH_OS_IS_ERASING_STATUS_FLAG);
         chip->host->erase_chip(chip->host);
         //to save time, flush cache here
         if (chip->host->flush_cache) {
             err = chip->host->flush_cache(chip->host, 0, chip->size);
             if (err != ESP_OK) {
+                SET_FLASH_ERASE_STATUS(chip, 0);
                 return err;
             }
         }
         err = chip->chip_drv->wait_idle(chip, SPI_FLASH_GENERIC_CHIP_ERASE_TIMEOUT_MS * 1000);
+        SET_FLASH_ERASE_STATUS(chip, 0);
     }
     return err;
 }
@@ -106,15 +116,18 @@ esp_err_t spi_flash_chip_generic_erase_sector(esp_flash_t *chip, uint32_t start_
         err = chip->chip_drv->wait_idle(chip, SPI_FLASH_DEFAULT_IDLE_TIMEOUT_MS * 1000);
     }
     if (err == ESP_OK) {
+        SET_FLASH_ERASE_STATUS(chip, SPI_FLASH_OS_IS_ERASING_STATUS_FLAG);
         chip->host->erase_sector(chip->host, start_address);
         //to save time, flush cache here
         if (chip->host->flush_cache) {
             err = chip->host->flush_cache(chip->host, start_address, chip->chip_drv->sector_size);
             if (err != ESP_OK) {
+                SET_FLASH_ERASE_STATUS(chip, 0);
                 return err;
             }
         }
         err = chip->chip_drv->wait_idle(chip, SPI_FLASH_GENERIC_SECTOR_ERASE_TIMEOUT_MS * 1000);
+        SET_FLASH_ERASE_STATUS(chip, 0);
     }
     return err;
 }
@@ -126,15 +139,18 @@ esp_err_t spi_flash_chip_generic_erase_block(esp_flash_t *chip, uint32_t start_a
         err = chip->chip_drv->wait_idle(chip, SPI_FLASH_DEFAULT_IDLE_TIMEOUT_MS * 1000);
     }
     if (err == ESP_OK) {
+        SET_FLASH_ERASE_STATUS(chip, SPI_FLASH_OS_IS_ERASING_STATUS_FLAG);
         chip->host->erase_block(chip->host, start_address);
         //to save time, flush cache here
         if (chip->host->flush_cache) {
             err = chip->host->flush_cache(chip->host, start_address, chip->chip_drv->block_erase_size);
             if (err != ESP_OK) {
+                SET_FLASH_ERASE_STATUS(chip, 0);
                 return err;
             }
         }
         err = chip->chip_drv->wait_idle(chip, SPI_FLASH_GENERIC_BLOCK_ERASE_TIMEOUT_MS * 1000);
+        SET_FLASH_ERASE_STATUS(chip, 0);
     }
     return err;
 }

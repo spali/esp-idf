@@ -122,6 +122,26 @@ menu "SPI Flash driver"
             Enable this option to override flash size with latest ESPTOOLPY_FLASHSIZE value from
             the app header if the size in the bootloader header is incorrect.
 
+    menu "SPI Flash behavior when brownout"
+
+        config SPI_FLASH_BROWNOUT_RESET_XMC
+            bool "Enable sending reset when brownout for XMC flash chips"
+            default y
+            select SPI_FLASH_BROWNOUT_RESET
+            help
+                When this option is selected, the patch will be enabled for XMC.
+                Follow the recommended flow by XMC for better stability.
+
+        config SPI_FLASH_BROWNOUT_RESET
+            bool
+            default n
+            select ESP_SYSTEM_BROWNOUT_INTR
+            help
+                When brownout happens during flash erase/write operations,
+                send reset command to stop the flash operations to improve stability.
+
+    endmenu
+
     menu "Auto-detect flash chips"
 
         config SPI_FLASH_SUPPORT_ISSI_CHIP

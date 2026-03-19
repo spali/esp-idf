@@ -14,6 +14,8 @@ menu "ESP32-specific"
 
         config ESP32_REV_MIN_0
             bool "Rev 0"
+            # Brownout on Rev 0 is bugged, must use interrupt
+            select ESP_SYSTEM_BROWNOUT_INTR
         config ESP32_REV_MIN_1
             bool "Rev 1"
         config ESP32_REV_MIN_2
@@ -586,6 +588,11 @@ menu "ESP32-specific"
         default 6 if ESP32_BROWNOUT_DET_LVL_SEL_6
         default 7 if ESP32_BROWNOUT_DET_LVL_SEL_7
 
+    config ESP_SYSTEM_BROWNOUT_INTR
+        bool
+        default n
+        help
+            Brownout restart via interrupt (for ESP32 Rev0 or XMC flash brownout reset).
 
         #Reduce PHY TX power when brownout reset
     config ESP32_REDUCE_PHY_TX_POWER

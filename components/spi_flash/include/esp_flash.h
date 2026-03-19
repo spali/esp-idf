@@ -53,6 +53,10 @@ typedef struct {
 
     /** Yield to other tasks. Called during erase operations. */
     esp_err_t (*yield)(void *arg);
+
+#define SPI_FLASH_OS_IS_ERASING_STATUS_FLAG   (1u << 0)
+    /** Call to set flash operation status (e.g. erasing). */
+    void (*set_flash_op_status)(uint32_t op_status);
 } esp_flash_os_functions_t;
 
 /** @brief Structure to describe a SPI flash chip connected to the system.

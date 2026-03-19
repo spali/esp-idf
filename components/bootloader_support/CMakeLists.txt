@@ -24,7 +24,7 @@ else()
     list(APPEND srcs 
         "src/idf/bootloader_sha.c"
         "src/idf/secure_boot_signatures.c")
-    set(include_dirs "include")
+    set(include_dirs "include" "include_bootloader")
     set(priv_include_dirs "include_bootloader")
     set(requires soc) #unfortunately the header directly uses SOC registers
     set(priv_requires spi_flash mbedtls efuse)

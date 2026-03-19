@@ -4,6 +4,9 @@
 
 COMPONENT_SRCDIRS := .
 
+# Access bootloader_support private headers (bootloader_flash.h) used by brownout.c
+COMPONENT_PRIV_INCLUDEDIRS += ../bootloader_support/include_bootloader
+
 ifdef CONFIG_SPIRAM_ALLOW_BSS_SEG_EXTERNAL_MEMORY
    # This linker script must come before esp32.project.ld
    LINKER_SCRIPTS += esp32.extram.bss.ld

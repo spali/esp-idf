@@ -345,6 +345,11 @@ static uint32_t IRAM_ATTR execute_flash_command(uint8_t command, uint32_t mosi_d
             dummy_len, mosi_len, mosi_data, miso_len);
 }
 
+uint32_t IRAM_ATTR bootloader_execute_flash_command(uint8_t command, uint32_t mosi_data, uint8_t mosi_len, uint8_t miso_len)
+{
+    return execute_flash_command(command, mosi_data, mosi_len, miso_len);
+}
+
 // cmd(0x5A) + 24bit address + 8 cycles dummy
 uint32_t IRAM_ATTR bootloader_flash_read_sfdp(uint32_t sfdp_addr, unsigned int miso_byte_num)
 {

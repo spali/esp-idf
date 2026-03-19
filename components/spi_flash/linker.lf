@@ -2,6 +2,7 @@
 archive: libspi_flash.a
 entries:
     spi_flash_rom_patch (noflash_text)
+    flash_brownout_hook (noflash)
     spi_flash_chip_generic (noflash)
     spi_flash_chip_issi (noflash)
     spi_flash_chip_gd(noflash)

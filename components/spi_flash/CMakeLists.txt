@@ -13,6 +13,7 @@ else()
     set(srcs
         "partition.c"
         "spi_flash_rom_patch.c"
+        "flash_brownout_hook.c"
     )
     # New implementation after IDF v4.0
     list(APPEND cache_srcs

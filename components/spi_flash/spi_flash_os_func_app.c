@@ -18,6 +18,7 @@
 #include "esp_spi_flash.h"   //for ``g_flash_guard_default_ops``
 #include "esp_flash.h"
 #include "esp_flash_partitions.h"
+#include "esp_private/spi_flash_os.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 
@@ -103,6 +104,14 @@ static IRAM_ATTR esp_err_t main_flash_region_protected(void* arg, size_t start_a
     }
 }
 
+#if CONFIG_SPI_FLASH_BROWNOUT_RESET
+static IRAM_ATTR void main_flash_op_status(uint32_t op_status)
+{
+    bool is_erasing = (op_status & SPI_FLASH_OS_IS_ERASING_STATUS_FLAG) != 0;
+    spi_flash_set_erasing_flag(is_erasing);
+}
+#endif
+
 static DRAM_ATTR spi1_app_func_arg_t spi1_arg = {
     .host_id = 0,   //for SPI1,
     .no_protect = true,
@@ -128,13 +137,19 @@ const DRAM_ATTR esp_flash_os_functions_t esp_flash_spi1_default_os_functions = {
     .region_protected = main_flash_region_protected,
     .delay_us = delay_us,
     .yield = spi_flash_os_yield,
+#if CONFIG_SPI_FLASH_BROWNOUT_RESET
+    .set_flash_op_status = main_flash_op_status,
+#else
+    .set_flash_op_status = NULL,
+#endif
 };
 
 const esp_flash_os_functions_t esp_flash_spi23_default_os_functions = {
     .start = spi23_start,
     .end = spi23_end,
     .delay_us = delay_us,
-    .yield = spi_flash_os_yield
+    .yield = spi_flash_os_yield,
+    .set_flash_op_status = NULL,
 };
 
 esp_err_t esp_flash_init_os_functions(esp_flash_t *chip, int host_id)

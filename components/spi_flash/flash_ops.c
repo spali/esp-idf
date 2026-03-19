@@ -36,6 +36,9 @@
 #include "cache_utils.h"
 #include "esp_flash.h"
 #include "esp_timer.h"
+#if CONFIG_SPI_FLASH_BROWNOUT_RESET
+#include "esp_private/spi_flash_os.h"
+#endif
 
 /* bytes erased by SPIEraseBlock() ROM function */
 #define BLOCK_ERASE_SIZE 65536
@@ -246,6 +249,9 @@ esp_err_t IRAM_ATTR spi_flash_erase_range(size_t start_addr, size_t size)
             int64_t start_time_us = esp_timer_get_time();
 #endif
             spi_flash_guard_start();
+#if CONFIG_SPI_FLASH_BROWNOUT_RESET
+            spi_flash_set_erasing_flag(true);
+#endif
 #ifndef CONFIG_SPI_FLASH_BYPASS_BLOCK_ERASE
             if (sector % sectors_per_block == 0 && end - sector >= sectors_per_block) {
                 rc = esp_rom_spiflash_erase_block(sector / sectors_per_block);
@@ -258,6 +264,9 @@ esp_err_t IRAM_ATTR spi_flash_erase_range(size_t start_addr, size_t size)
                 ++sector;
                 COUNTER_ADD_BYTES(erase, SPI_FLASH_SEC_SIZE);
             }
+#if CONFIG_SPI_FLASH_BROWNOUT_RESET
+            spi_flash_set_erasing_flag(false);
+#endif
             spi_flash_guard_end();
 #ifdef CONFIG_SPI_FLASH_YIELD_DURING_ERASE
             no_yield_time_us += (esp_timer_get_time() - start_time_us);

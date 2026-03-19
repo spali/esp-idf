@@ -28,6 +28,7 @@
 #include "esp_log.h"
 #include "esp_intr_alloc.h"
 #include "esp_attr.h"
+#include "driver/rtc_cntl.h"
 #include <limits.h>
 #include <assert.h>
 #if !CONFIG_FREERTOS_UNICORE
@@ -866,6 +867,7 @@ void IRAM_ATTR esp_intr_noniram_disable()
 {
     int oldint;
     int cpu=xPortGetCoreID();
+    rtc_isr_noniram_disable(cpu);
     int intmask=~non_iram_int_mask[cpu];
     if (non_iram_int_disabled_flag[cpu]) abort();
     non_iram_int_disabled_flag[cpu]=true;
@@ -884,6 +886,7 @@ void IRAM_ATTR esp_intr_noniram_disable()
 void IRAM_ATTR esp_intr_noniram_enable()
 {
     int cpu=xPortGetCoreID();
+    rtc_isr_noniram_enable(cpu);
     int intmask=non_iram_int_disabled[cpu];
     if (!non_iram_int_disabled_flag[cpu]) abort();
     non_iram_int_disabled_flag[cpu]=false;

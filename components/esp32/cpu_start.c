@@ -62,6 +62,7 @@
 #include "esp_app_trace.h"
 #include "esp_private/dbg_stubs.h"
 #include "esp_flash_encrypt.h"
+#include "esp_private/spi_flash_os.h"
 #include "esp32/spiram.h"
 #include "esp_clk_internal.h"
 #include "esp_timer.h"
@@ -431,6 +432,9 @@ void start_cpu0_default(void)
     esp_flash_app_init();
     esp_err_t flash_ret = esp_flash_init_default_chip();
     assert(flash_ret == ESP_OK);
+#if CONFIG_SPI_FLASH_BROWNOUT_RESET
+    spi_flash_needs_reset_check();
+#endif
 
 #ifdef CONFIG_PM_ENABLE
     esp_pm_impl_init();

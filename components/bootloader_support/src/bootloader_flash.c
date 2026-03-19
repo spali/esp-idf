@@ -18,6 +18,8 @@
 #include <esp_spi_flash.h> /* including in bootloader for error values */
 #include <esp_flash_encrypt.h>
 #include "flash_qio_mode.h"
+#include "esp_attr.h"
+#include "soc/spi_struct.h"
 
 #ifndef BOOTLOADER_BUILD
 /* Normal app version maps to esp_spi_flash.h operations...
@@ -292,3 +294,27 @@ esp_err_t bootloader_flash_erase_range(uint32_t start_addr, uint32_t size)
     return spi_to_esp_err(rc);
 }
 #endif
+
+/* ESP32-only: brownout flash reset (66H+99H) - built for both app and bootloader */
+static inline void bootloader_mspi_reset(void)
+{
+    SPI1.slave.sync_reset = 0;
+    SPI0.slave.sync_reset = 0;
+    SPI1.slave.sync_reset = 1;
+    SPI0.slave.sync_reset = 1;
+    SPI1.slave.sync_reset = 0;
+    SPI0.slave.sync_reset = 0;
+}
+
+esp_err_t IRAM_ATTR bootloader_flash_reset_chip(void)
+{
+    bootloader_mspi_reset();
+    /* Send extra command so host is idle before reset command */
+    bootloader_execute_flash_command(0x05, 0, 0, 0);
+    if (SPI1.ext2.st != 0) {
+        return ESP_FAIL;
+    }
+    bootloader_execute_flash_command(0x66, 0, 0, 0);
+    bootloader_execute_flash_command(0x99, 0, 0, 0);
+    return ESP_OK;
+}
