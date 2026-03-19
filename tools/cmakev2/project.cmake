@@ -757,6 +757,9 @@ function(__project_default)
 
     idf_create_save_defconfig()
 
+    idf_create_config_report("${executable}"
+                             TARGET config-report)
+
     idf_create_uf2("${executable}"
                    TARGET uf2)
     idf_create_uf2("${executable}"
