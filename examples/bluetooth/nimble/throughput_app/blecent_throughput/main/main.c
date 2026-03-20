@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: 2015-2025 Espressif Systems (Shanghai) CO LTD
+ * SPDX-FileCopyrightText: 2015-2026 Espressif Systems (Shanghai) CO LTD
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -49,8 +49,8 @@
 #define WRITE_THROUGHPUT                   2
 #define NOTIFY_THROUGHPUT                  3
 
-#define READ_THROUGHPUT_PAYLOAD            500
-#define WRITE_THROUGHPUT_PAYLOAD           495
+#define READ_THROUGHPUT_PAYLOAD            510 /* MTU(512) - ATT read rsp header(1) - 1 (avoid Read Blob) */
+#define WRITE_THROUGHPUT_PAYLOAD           509 /* MTU(512) - ATT write cmd header(3) */
 #define LL_PACKET_TIME                     2120
 #define LL_PACKET_LENGTH                   251
 static const char *tag = "blecent_throughput";
@@ -59,7 +59,7 @@ static SemaphoreHandle_t xSemaphore;
 static int mbuf_len_total;
 static int failure_count;
 static TaskHandle_t throughput_task_handle = NULL;
-static int conn_params_def[] = {40, 40, 0, 500, 80, 80};
+static int conn_params_def[] = {6, 6, 0, 500, 12, 24};
 /* test_data accepts test_name and test_time from CLI */
 static int test_data[6] = {1, 600, 0, 0, 0, 0};
 static int mtu_def = 512;
@@ -572,6 +572,7 @@ ext_blecent_should_connect(const struct ble_gap_ext_disc_desc *disc)
     uint8_t test_addr[6];
     uint32_t peer_addr[6];
     uint8_t phy_uuid_found = 0;
+
     if (disc->legacy_event_type != BLE_HCI_ADV_RPT_EVTYPE_ADV_IND &&
             disc->legacy_event_type != BLE_HCI_ADV_RPT_EVTYPE_DIR_IND) {
         return 0;
@@ -595,17 +596,21 @@ ext_blecent_should_connect(const struct ble_gap_ext_disc_desc *disc)
     /* The device has to advertise support LE PHY UUID (0xABF2).
     */
     do {
-        ad_struct_len = disc->data[offset];
-
-        if (!ad_struct_len) {
+        if (offset + 1 >= (int)disc->length_data) {  /* At least read length and type */
             break;
         }
+        ad_struct_len = disc->data[offset];
+
+        if (!ad_struct_len || offset + ad_struct_len + 1 > (int)disc->length_data) {
+            break;
+        }
+
         /* Search for Complete Local Name (AD type 0x09) */
         if (disc->data[offset + 1] == 0x09 && phy_uuid_found) {
             int name_len = disc->data[offset] - 1;  /* Length minus type byte */
             char serv_name[] = "nimble_prph";
             if (name_len > 0) {
-                ESP_LOGI(tag, "Device Name = %.*s",name_len, (char *)&disc->data[offset + 2]);
+                ESP_LOGI(tag, "Device Name = %.*s", name_len, (char *)&disc->data[offset + 2]);
                 if (name_len == strlen(serv_name) &&
                     memcmp(&disc->data[offset + 2], serv_name, name_len) == 0) {
                     ESP_LOGI(tag, "central connect to `nimble_prph` success");
@@ -613,22 +618,21 @@ ext_blecent_should_connect(const struct ble_gap_ext_disc_desc *disc)
                 }
                 return 0;
             }
-         }
+        }
 
-         /* Search if LE PHY UUID is advertised */
-         if (disc->data[offset] == 0x03 && disc->data[offset + 1] == 0x03) {
-             if ( disc->data[offset + 2] == 0xAB && disc->data[offset + 3] == 0xF2 ) {
-                 phy_uuid_found = 1;
-             }
-         }
+        /* Search if LE PHY UUID is advertised */
+        if (disc->data[offset] == 0x03 && disc->data[offset + 1] == 0x03 &&
+            offset + 3 < (int)disc->length_data &&
+            disc->data[offset + 2] == 0xAB && disc->data[offset + 3] == 0xF2) {
+            phy_uuid_found = 1;
+        }
 
         offset += ad_struct_len + 1;
 
-    } while ( offset < disc->length_data );
+    } while (offset < (int)disc->length_data);
 
     return phy_uuid_found;
 }
-
  #else
 /**
  * Indicates whether we should try to connect to the sender of the specified
