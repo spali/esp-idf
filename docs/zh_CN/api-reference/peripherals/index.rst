@@ -18,7 +18,7 @@
     :SOC_ECDSA_SUPPORTED: ecdsa
     :SOC_ETM_SUPPORTED: etm
     gpio
-    gptimer
+    :SOC_GPTIMER_SUPPORTED: gptimer
     :SOC_DEDICATED_GPIO_SUPPORTED: dedic_gpio
     :SOC_HMAC_SUPPORTED: hmac
     :SOC_DIG_SIGN_SUPPORTED: ds
@@ -30,7 +30,7 @@
     :SOC_KEY_MANAGER_SUPPORTED: key_manager
     lcd/index
     :SOC_GP_LDO_SUPPORTED: ldo_regulator
-    ledc
+    :SOC_LEDC_SUPPORTED: ledc
     :SOC_MCPWM_SUPPORTED: mcpwm
     :SOC_PARLIO_SUPPORTED: parlio/index
     :SOC_PCNT_SUPPORTED: pcnt
@@ -50,7 +50,7 @@
     :SOC_TEMP_SENSOR_SUPPORTED: temp_sensor
     :SOC_TOUCH_SENSOR_SUPPORTED: cap_touch_sens
     :SOC_TWAI_SUPPORTED: twai
-    uart
+    :SOC_UART_SUPPORTED: uart
     :SOC_USB_OTG_SUPPORTED: USB 设备栈 <https://docs.espressif.com/projects/esp-usb/zh_CN/latest/{IDF_TARGET_PATH_NAME}/usb_device.html>
     :SOC_USB_OTG_SUPPORTED: USB 主机 <https://docs.espressif.com/projects/esp-usb/zh_CN/latest/{IDF_TARGET_PATH_NAME}/usb_host.html>
 
