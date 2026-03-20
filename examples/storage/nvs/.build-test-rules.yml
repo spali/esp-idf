@@ -2,6 +2,7 @@
 
 examples/storage/nvs/nvs_bootloader:
   depends_components:
+    - *common_components
     - nvs_flash
     - nvs_sec_provider
   disable:
@@ -14,6 +15,7 @@ examples/storage/nvs/nvs_bootloader:
 
 examples/storage/nvs/nvs_console:
   depends_components:
+    - *common_components
     - nvs_flash
     - console
     - vfs
@@ -22,12 +24,14 @@ examples/storage/nvs/nvs_console:
       reason: only one target per arch needed
 examples/storage/nvs/nvs_iteration:
   depends_components:
+    - *common_components
     - nvs_flash
   disable_test:
     - if: IDF_TARGET not in ["esp32", "esp32c3"]
       reason: only one target per arch needed
 examples/storage/nvs/nvs_rw_blob:
   depends_components:
+    - *common_components
     - nvs_flash
   disable_test:
     - if: IDF_TARGET not in ["esp32", "esp32c3"]
@@ -35,6 +39,7 @@ examples/storage/nvs/nvs_rw_blob:
 
 examples/storage/nvs/nvs_rw_value:
   depends_components:
+    - *common_components
     - nvs_flash
   disable_test:
     - if: IDF_TARGET not in ["esp32", "esp32c3"]
@@ -42,6 +47,7 @@ examples/storage/nvs/nvs_rw_value:
 
 examples/storage/nvs/nvs_rw_value_cxx:
   depends_components:
+    - *common_components
     - nvs_flash
   disable_test:
     - if: IDF_TARGET not in ["esp32", "esp32c3"]
@@ -49,6 +55,7 @@ examples/storage/nvs/nvs_rw_value_cxx:
 
 examples/storage/nvs/nvs_statistics:
   depends_components:
+    - *common_components
     - nvs_flash
   disable_test:
     - if: IDF_TARGET not in ["esp32", "esp32c3"]
@@ -56,6 +63,7 @@ examples/storage/nvs/nvs_statistics:
 
 examples/storage/nvs/nvsgen:
   depends_components:
+    - *common_components
     - nvs_flash
   disable_test:
     - if: IDF_TARGET != "esp32"

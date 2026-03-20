@@ -2,6 +2,7 @@
 
 .wifi_depends_default: &wifi_depends_default
   depends_components:
+    - *common_components
     - esp_wifi
     - esp_phy
     - esp_netif
@@ -57,6 +58,7 @@ examples/wifi/iperf:
       temporary: true
       reason: lack of runners
   depends_components:
+    - *common_components
     - esp_wifi
     - esp_phy
     - esp_netif
@@ -77,6 +79,7 @@ examples/wifi/power_save:
       temporary: true
       reason: requires hardware support
   depends_components:
+    - *common_components
     - esp_wifi
     - esp_phy
     - esp_netif
@@ -103,6 +106,7 @@ examples/wifi/wifi_aware/nan_console:
     - if: SOC_WIFI_NAN_SUPPORT != 1
       reason: targets esp32c3, esp32s3, esp32c2 and esp32c6 are not supported
   depends_components:
+    - *common_components
     - esp_wifi
     - esp_phy
     - esp_netif
@@ -120,6 +124,7 @@ examples/wifi/wifi_aware/nan_publisher:
     - if: SOC_WIFI_NAN_SUPPORT != 1
       reason: targets esp32c3, esp32s3, esp32c2 and esp32c6 are not supported
   depends_components:
+    - *common_components
     - esp_wifi
     - esp_phy
     - esp_netif
@@ -135,6 +140,7 @@ examples/wifi/wifi_aware/nan_subscriber:
     - if: SOC_WIFI_NAN_SUPPORT != 1
       reason: targets esp32c3, esp32s3, esp32c2 and esp32c6 are not supported
   depends_components:
+    - *common_components
     - esp_wifi
     - esp_phy
     - esp_netif
