@@ -145,6 +145,12 @@ The following function has been deprecated:
 
 - :cpp:func:`esp_flash_encryption_enabled` – Use :cpp:func:`esp_efuse_is_flash_encryption_enabled` instead. The component dependency has been changed from ``bootloader_support`` to ``efuse``.
 
+**Secure Boot ECDSA curve selection**
+
+- In ESP-IDF v6.0, secure boot ECDSA should use NISTP256/NISTP384.
+- Legacy NISTP192 support is deprecated and is only available when explicitly enabled via ``CONFIG_SECURE_BOOT_ECDSA_KEY_LEN_192_BITS``.
+- Legacy NISTP192 support may be disabled in the next ESP-IDF release, so migration to NISTP256/NISTP384 is strongly recommended.
+
 **Removed Deprecated APIs**
 
 The following deprecated functions have been removed:
