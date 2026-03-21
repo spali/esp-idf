@@ -69,6 +69,32 @@ function(__init_kconfig)
 endfunction()
 
 #[[
+    __create_sdkconfig_orig_copy()
+
+    Create a copy of the sdkconfig file in the build directory to preserve
+    all original options, including those from managed components that are
+    not yet known to kconfgen. The copy is referenced via __SDKCONFIG_ORIG
+    and used as the --config input for kconfgen, so that unknown options
+    are not dropped during intermediate sdkconfig regeneration rounds.
+
+    After the component manager has fetched all components (and their Kconfig
+    definitions are available), __SDKCONFIG_ORIG is reset to point to the
+    real sdkconfig so that subsequent operations (menuconfig, etc.) read
+    and write the actual file.
+#]]
+function(__create_sdkconfig_orig_copy)
+    idf_build_get_property(sdkconfig SDKCONFIG)
+    idf_build_get_property(build_dir BUILD_DIR)
+    set(sdkconfig_orig "${build_dir}/sdkconfig.orig")
+    if(EXISTS "${sdkconfig}")
+        file(COPY_FILE "${sdkconfig}" "${sdkconfig_orig}" ONLY_IF_DIFFERENT)
+    else()
+        set(sdkconfig_orig "${sdkconfig}")
+    endif()
+    idf_build_set_property(__SDKCONFIG_ORIG "${sdkconfig_orig}")
+endfunction()
+
+#[[
 .. cmakev2:function:: __should_generate_sdkconfig
 
     .. code-block:: cmake
@@ -407,9 +433,10 @@ function(__create_executable_config_env_file executable)
     foreach(component_interface IN LISTS component_interfaces)
         __idf_component_get_property_unchecked(component_kconfig "${component_interface}" __KCONFIG)
         __idf_component_get_property_unchecked(component_projbuild "${component_interface}" __KCONFIG_PROJBUILD)
+        __idf_component_get_property_unchecked(component_real_target "${component_interface}" COMPONENT_REAL_TARGET)
 
         if(component_kconfig)
-            if("${component_interface}" IN_LIST component_interfaces_linked)
+            if("${component_interface}" IN_LIST component_interfaces_linked AND component_real_target)
                 list(APPEND kconfigs "${component_kconfig}")
             else()
                 list(APPEND kconfigs_excluded "${component_kconfig}")
@@ -417,7 +444,7 @@ function(__create_executable_config_env_file executable)
         endif()
 
         if(component_projbuild)
-            if("${component_interface}" IN_LIST component_interfaces_linked)
+            if("${component_interface}" IN_LIST component_interfaces_linked AND component_real_target)
                 list(APPEND kconfigs_projbuild "${component_projbuild}")
             else()
                 list(APPEND kconfigs_projbuild_excluded "${component_projbuild}")
@@ -629,11 +656,17 @@ function(__generate_kconfig_outputs)
     set_property(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}" APPEND PROPERTY
                 ADDITIONAL_CLEAN_FILES "${sdkconfig_header}" "${sdkconfig_cmake}")
 
-    # Store output paths in build properties
+    # Store output paths in build properties (internal)
     idf_build_set_property(__SDKCONFIG_HEADER "${sdkconfig_header}")
     idf_build_set_property(__SDKCONFIG_CMAKE "${sdkconfig_cmake}")
     idf_build_set_property(__SDKCONFIG_JSON "${sdkconfig_json}")
     idf_build_set_property(__SDKCONFIG_JSON_MENUS "${sdkconfig_json_menus}")
+
+    # Public aliases for backward compatibility with components (e.g. ULP)
+    idf_build_set_property(SDKCONFIG_HEADER "${sdkconfig_header}")
+    idf_build_set_property(SDKCONFIG_CMAKE "${sdkconfig_cmake}")
+    idf_build_set_property(SDKCONFIG_JSON "${sdkconfig_json}")
+    idf_build_set_property(SDKCONFIG_JSON_MENUS "${sdkconfig_json_menus}")
 
     idf_msg("Generated Kconfig outputs in ${config_dir}")
 endfunction()
@@ -670,12 +703,20 @@ function(__create_base_kconfgen_command sdkconfig sdkconfig_defaults)
         endforeach()
     endif()
 
+    # Use __SDKCONFIG_ORIG for --config so that unknown options from managed
+    # components are preserved during intermediate kconfgen runs. Falls back
+    # to the real sdkconfig when __SDKCONFIG_ORIG is not yet set.
+    idf_build_get_property(sdkconfig_orig __SDKCONFIG_ORIG)
+    if(NOT sdkconfig_orig)
+        set(sdkconfig_orig "${sdkconfig}")
+    endif()
+
     # Create base kconfgen command
     set(base_kconfgen_cmd ${python} -m kconfgen
         --list-separator=semicolon
         --kconfig "${root_kconfig}"
         --sdkconfig-rename "${root_sdkconfig_rename}"
-        --config "${sdkconfig}"
+        --config "${sdkconfig_orig}"
         ${defaults_args}
         --env "IDF_BUILD_V2=y")
 
