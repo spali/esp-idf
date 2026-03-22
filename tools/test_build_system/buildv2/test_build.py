@@ -6,8 +6,10 @@ import subprocess
 from pathlib import Path
 
 import pytest
+from test_build_system_helpers import EnvDict
 from test_build_system_helpers import IdfPyFunc
 from test_build_system_helpers import replace_in_file
+from test_build_system_helpers import run_idf_py
 
 
 @pytest.mark.usefixtures('test_app_copy')
@@ -377,3 +379,18 @@ def test_depgraph_generation(idf_py: IdfPyFunc) -> None:
     dot_content = dot_file.read_text()
     assert 'digraph' in dot_content, 'component_deps.dot should contain a digraph definition'
     assert '->' in dot_content, 'component_deps.dot should contain at least one dependency edge (->)'
+
+
+@pytest.mark.usefixtures('test_app_copy')
+def test_build_with_component_manager_disabled(default_idf_env: EnvDict) -> None:
+    """Setting IDF_COMPONENT_MANAGER=0 should skip the component manager
+    flow entirely and still produce a successful build."""
+    logging.info('Testing build with IDF_COMPONENT_MANAGER=0')
+
+    default_idf_env['IDF_COMPONENT_MANAGER'] = '0'
+    ret = run_idf_py('build', env=default_idf_env)
+
+    assert 'Component manager round' not in (ret.stdout or ''), (
+        'Component manager should not run when IDF_COMPONENT_MANAGER=0'
+    )
+    assert Path('build/build_test_app.elf').exists(), 'Build should succeed with component manager disabled'
