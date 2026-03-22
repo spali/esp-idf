@@ -382,6 +382,7 @@ function(__project_info test_components)
     # file with cmake's variables substituted and unprocessed generator expressions. The second
     # step, with file(GENERATE), processes the temporary file and substitute generator expression
     # into the final project_description.json file.
+    set(HINTS_FILE "${build_dir}/hints.yml")
     configure_file("${idf_path}/tools/cmake/project_description.json.in"
         "${build_dir}/project_description.json.templ")
     file(READ "${build_dir}/project_description.json.templ" project_description_json_templ)
@@ -391,6 +392,25 @@ function(__project_info test_components)
 
     # Generate component dependency graph
     depgraph_generate("${build_dir}/component_deps.dot")
+
+    # Assumption: all hints.yml files are bare YAML lists (no "---" document
+    # separators). Plain string concatenation is safe under this assumption.
+    # Note for consumers: yaml.safe_load() only parses the first YAML document,
+    # so document separators in source files would cause data loss.
+    set(_merged_hints "")
+    set(_global_hints_file "${idf_path}/tools/idf_py_actions/hints.yml")
+    if(EXISTS "${_global_hints_file}")
+        file(READ "${_global_hints_file}" _hints_content)
+        string(APPEND _merged_hints "${_hints_content}\n")
+    endif()
+    foreach(_comp_dir ${build_component_paths} ${test_component_paths})
+        set(_hints_file "${_comp_dir}/hints.yml")
+        if(EXISTS "${_hints_file}")
+            file(READ "${_hints_file}" _hints_content)
+            string(APPEND _merged_hints "${_hints_content}\n")
+        endif()
+    endforeach()
+    file(WRITE "${build_dir}/hints.yml" "${_merged_hints}")
 
     # We now have the following component-related variables:
     #
