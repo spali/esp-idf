@@ -594,6 +594,9 @@ __init_python()
 # Initialize Kconfig system infrastructure.
 __init_kconfig()
 
+# Initialize component manager build properties (IDF_COMPONENT_MANAGER, etc.).
+__init_component_manager()
+
 # Set IDF_TARGET.
 __init_idf_target()
 
