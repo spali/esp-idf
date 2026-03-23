@@ -671,7 +671,7 @@ Enabling **Log V2** increases IRAM usage while reducing the overall application 
     - Normal ``ESP_LOGx`` calls in constrained environments (ISR, cache disabled) will use the standard ``vprintf`` function. If ``vprintf`` resides in flash, such calls may crash. Use ``ESP_DRAM_LOGx`` for any logging that must work with cache disabled or from an ISR.
     - ``esp_rom_vprintf`` is never referenced, so the linker excludes it from the binary.
 
-    When enabled, the original **Log V2** behavior is preserved: all constrained-environment logs route through ``esp_log()`` and use ``esp_rom_vprintf`` as the formatter, supporting features like binary log format for early/DRAM logs.
+    When enabled, the original **Log V2** behavior is preserved: all constrained-environment logs route through ``esp_log()`` and use ``esp_rom_vprintf`` as the formatter for early/DRAM logs.
 
 Logging to Host via JTAG
 ------------------------
