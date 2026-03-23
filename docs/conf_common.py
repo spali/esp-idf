@@ -200,6 +200,14 @@ I3C_DOCS = [
     'api-reference/peripherals/i3c_master.rst',
 ]
 
+LEDC_DOCS = [
+    'api-reference/peripherals/ledc.rst',
+]
+
+GPTIMER_DOCS = [
+    'api-reference/peripherals/gptimer.rst',
+]
+
 CORDIC_DOCS = ['api-reference/peripherals/cordic.rst']
 
 SPI_DOCS = [
@@ -376,6 +384,8 @@ conditional_include_dict = {
     'SOC_TWAI_SUPPORTED': TWAI_DOCS,
     'SOC_I2C_SUPPORTED': I2C_DOCS,
     'SOC_I3C_MASTER_SUPPORTED': I3C_DOCS,
+    'SOC_LEDC_SUPPORTED': LEDC_DOCS,
+    'SOC_GPTIMER_SUPPORTED': GPTIMER_DOCS,
     'SOC_GPSPI_SUPPORTED': SPI_DOCS,
     'SOC_I2S_SUPPORTED': I2S_DOCS,
     'SOC_LP_I2S_SUPPORTED': LP_I2S_DOCS,
