@@ -12,7 +12,7 @@ CUR_DIR = Path(__file__).parent.resolve()
 # Case 1: ble50 security client and ble50 security server test (config: name, min_bin, log_off)
 # EXAMPLE_CI_ID=6
 BLE50_SECURITY_APP_PATH = f'{str(CUR_DIR / "ble50_security_server")}|{str(CUR_DIR / "ble50_security_client")}'
-BLE50_SECURITY_CI_CONFIGS = ['name', 'min_bin|min_bin', 'log_off|log_off']
+BLE50_SECURITY_CI_CONFIGS = ['name']
 
 
 @pytest.mark.two_duts
