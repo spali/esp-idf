@@ -216,7 +216,7 @@ TEST_CASE("LoadStore: 8/16-bit field access in IRAM from ISRs when pending inter
     esp_rom_printf("test passed\n");
 
     heap_caps_free((void *)s_iram);
-    vTaskDelay(pdMS_TO_TICKS(100)); // Wait for memory to be freed, to avoid affecting other tests.
+    vTaskDelay(100); // Wait in ticks for memory to be freed, to avoid affecting other tests.
 }
 
 TEST_CASE("LoadStore: zero-overhead loop continues after IRAM 8-bit store", "[freertos]")
@@ -273,6 +273,6 @@ TEST_CASE("LoadStore: zero-overhead loop continues after IRAM 8-bit store", "[fr
     heap_caps_free(dst);
     heap_caps_free(src);
 
-    vTaskDelay(pdMS_TO_TICKS(100)); // Wait for free to complete before running other tests.
+    vTaskDelay(100); // Wait for free to complete before running other tests.
 }
 #endif // CONFIG_IDF_TARGET_ARCH_XTENSA && CONFIG_ESP32_IRAM_AS_8BIT_ACCESSIBLE_MEMORY
