@@ -788,3 +788,5 @@ In this case we generate NVS Encryption keys on a host. This key is then flashed
     The NVS partition (``nvs_encr_partition.bin``) and NVS encryption key (``nvs_encr_key.bin``) can then be flashed to their respective offset using ``esptool``. To see all of the command line options recommended for ``esptool``, check the output print when ``idf.py build`` succeeds.
 
     If Flash Encryption is enabled for the chip, then please encrypt the NVS key partition first before flashing. You may refer the flashing related steps of `Flash Encryption workflow <enable-flash-encryption-externally_>`_.
+
+For a complete example demonstrating the enablement of all security features (Secure Boot v2, flash encryption, NVS encryption, and JTAG with HMAC), see :example:`security/security_features_app`.
