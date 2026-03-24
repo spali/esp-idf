@@ -332,6 +332,11 @@ esp_err_t sdmmc_fix_host_flags(sdmmc_card_t* card)
             card->host.flags |= width_4bit;
         }
     }
+
+    if (card->host.flags & SDMMC_HOST_FLAG_SPI_IGNORE_DATA_CRC) {
+        ESP_LOGW(TAG, "SDMMC_HOST_FLAG_SPI_IGNORE_DATA_CRC flag is set on non-SPI host");
+    }
+
     return ESP_OK;
 }
 
