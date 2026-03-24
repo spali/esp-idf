@@ -531,7 +531,7 @@ Restrictions After Secure Boot Is Enabled
 
 .. only:: SOC_ECDSA_P192_CURVE_DEFAULT_DISABLED
 
-    When Secure Boot is enabled, the ECDSA curve mode becomes write-protected. This means that if the curve mode was not previously set to use the ECDSA-P192 key before enabling Secure Boot, it will no longer be possible to configure or use the ECDSA-P192 curve on the ECDSA peripheral afterward.
+    When Secure Boot is enabled, the ECDSA curve mode becomes write-protected. This means that if the curve mode was not previously set to use the ECDSA-P192 key before enabling Secure Boot, it will no longer be possible to configure or use the ECDSA-P192 curve on the ECDSA_DS peripheral afterward.
 
 Burning read-protected keys
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~

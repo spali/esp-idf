@@ -37,7 +37,7 @@ This key can be made completely inaccessible for any resources outside the crypt
 Furthermore, {IDF_TARGET_NAME} has three different application scenarios for its HMAC module:
 
 #. HMAC is generated for software use
-#. HMAC is used as a key for the Digital Signature (DS) module
+#. HMAC is used as a key for the RSA Digital Signature Peripheral (RSA_DS)
 #. HMAC is used for enabling the soft-disabled JTAG interface
 
 The first mode is called **Upstream** mode, while the last two modes are called **Downstream** modes.
@@ -58,11 +58,11 @@ Each key has a corresponding eFuse parameter **key purpose** determining for whi
    * - 8
      - HMAC generated for software use
    * - 7
-     - HMAC used as a key for the Digital Signature (DS) module
+     - HMAC used as a key for the RSA Digital Signature Peripheral (RSA_DS)
    * - 6
      - HMAC used for enabling the soft-disabled JTAG interface
    * - 5
-     - HMAC both as a key for the DS module and for enabling JTAG
+     - HMAC both as a key for the RSA_DS module and for enabling JTAG
 
 This is to prevent the usage of a key for a different function than originally intended.
 
@@ -79,16 +79,16 @@ In this case, the HMAC is given out to the software, e.g., to authenticate a mes
 
 The API to calculate the HMAC is :cpp:func:`psa_mac_compute`, which takes an opaque PSA key referencing an eFuse key block that contains the secret and has its purpose set to Upstream mode.
 
-HMAC for Digital Signature
-^^^^^^^^^^^^^^^^^^^^^^^^^^
+HMAC for RSA Digital Signature
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Key purpose values: 7, 5
 
-The HMAC can be used as a key derivation function to decrypt private key parameters which are used by the Digital Signature module. A standard message is used by the hardware in that case. You only need to provide the eFuse key block and purpose on the HMAC side, additional parameters are required for the Digital Signature component in that case.
+The HMAC can be used as a key derivation function to decrypt private key parameters which are used by the RSA Digital Signature module. A standard message is used by the hardware in that case. You only need to provide the eFuse key block and purpose on the HMAC side, additional parameters are required for the RSA Digital Signature component in that case.
 
-Neither the key nor the actual HMAC is ever exposed outside the HMAC module and DS component. The calculation of the HMAC and its handover to the DS component happen internally.
+Neither the key nor the actual HMAC is ever exposed outside the HMAC module and RSA_DS component. The calculation of the HMAC and its handover to the RSA_DS component happen internally.
 
-For more details, see **{IDF_TARGET_NAME} Technical Reference Manual** > **Digital Signature (DS)** [`PDF <{IDF_TARGET_TRM_EN_URL}#digsig>`__].
+For more details, see **{IDF_TARGET_NAME} Technical Reference Manual** > **RSA Digital Signature Peripheral (RSA_DS)** [`PDF <{IDF_TARGET_TRM_EN_URL}#digsig>`__].
 
 .. _hmac_for_enabling_jtag:
 
