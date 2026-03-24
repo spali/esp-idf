@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: 2015-2025 Espressif Systems (Shanghai) CO LTD
+ * SPDX-FileCopyrightText: 2015-2026 Espressif Systems (Shanghai) CO LTD
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -10,26 +10,26 @@
 #include "esp_rom_sys.h"
 #include "esp_stdio.h"
 #include <sys/errno.h>
+
 #if CONFIG_VFS_SUPPORT_IO
 
 #if CONFIG_ESP_CONSOLE_USB_CDC
 #include "esp_vfs_cdcacm.h"
-#include "esp_private/usb_console.h"
-#endif
-#if CONFIG_ESP_CONSOLE_USB_CDC
 #include "esp_private/esp_vfs_cdcacm.h"
-#endif
+#endif // CONFIG_ESP_CONSOLE_USB_CDC
 
 #if CONFIG_ESP_CONSOLE_USB_SERIAL_JTAG_ENABLED
 #include "driver/esp_private/usb_serial_jtag_vfs.h"
-#endif
+#include "driver/usb_serial_jtag_vfs.h"
+#endif // CONFIG_ESP_CONSOLE_USB_SERIAL_JTAG_ENABLED
+
 #if CONFIG_ESP_CONSOLE_UART
 #include "driver/esp_private/uart_vfs.h"
-#endif
+#include "driver/uart_vfs.h"
+#endif // CONFIG_ESP_CONSOLE_UART
 
 #include "esp_private/startup_internal.h"
 #include "esp_private/nullfs.h"
-#endif
 
 #define STRINGIFY(s) STRINGIFY2(s)
 #define STRINGIFY2(s) #s
@@ -46,8 +46,6 @@ typedef struct {
     int fd_primary;
     int fd_secondary;
 } vfs_console_context_t;
-
-#if CONFIG_VFS_SUPPORT_IO
 
 // Secondary register part.
 #if CONFIG_ESP_CONSOLE_SECONDARY_USB_SERIAL_JTAG
