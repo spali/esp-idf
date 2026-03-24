@@ -42,6 +42,7 @@ from idf_pytest.plugin import IDF_LOCAL_PLUGIN_KEY
 from idf_pytest.plugin import IdfLocalPlugin
 from idf_pytest.plugin import requires_elf_or_map
 from idf_pytest.utils import format_case_id
+from pytest_embedded.plugin import _request_param_or_config_option_or_default
 from pytest_embedded.plugin import multi_dut_fixture
 from pytest_embedded.utils import to_bytes
 from pytest_embedded.utils import to_str
@@ -456,12 +457,12 @@ def log_minimum_free_heap_size(dut: IdfDut, config: str, idf_path: str) -> t.Cal
 
 @pytest.fixture(scope='session')
 def dev_password(request: FixtureRequest) -> str:
-    return request.config.getoption('dev_passwd') or ''
+    return _request_param_or_config_option_or_default(request, 'dev_password', '')  # type: ignore
 
 
 @pytest.fixture(scope='session')
 def dev_user(request: FixtureRequest) -> str:
-    return request.config.getoption('dev_user') or ''
+    return _request_param_or_config_option_or_default(request, 'dev_user', '')  # type: ignore
 
 
 ##################
