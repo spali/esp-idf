@@ -556,6 +556,7 @@ static int esp_transport_read_exact_size(transport_ws_t *ws, char *buffer, int r
 
 
 /* Read and parse the WS header, determine length of payload */
+
 static int ws_read_header(esp_transport_handle_t t, char *buffer, int len, int timeout_ms)
 {
     transport_ws_t *ws = esp_transport_get_context_data(t);
@@ -635,6 +636,16 @@ static int ws_read_header(esp_transport_handle_t t, char *buffer, int len, int t
     if ((ws->frame_state.opcode & WS_OPCODE_CONTROL_FRAME) && payload_len > 125) {
         ESP_LOGE(TAG, "Control frame with excessive payload detected (opcode=0x%02X, payload_len=%d) - protocol violation",
                  ws->frame_state.opcode, payload_len);
+        // Consume the payload bytes from the TCP stream to keep it in sync before returning error
+        int remaining = payload_len;
+        while (remaining > 0 && len > 0) {
+            int to_read = remaining < len ? remaining : len;
+            int bytes_read = esp_transport_read_internal(ws, buffer, to_read, timeout_ms);
+            if (bytes_read <= 0) {
+                break;
+            }
+            remaining -= bytes_read;
+        }
         return -1;
     }
     if (mask) {
