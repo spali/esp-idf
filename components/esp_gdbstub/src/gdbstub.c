@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: 2015-2025 Espressif Systems (Shanghai) CO LTD
+ * SPDX-FileCopyrightText: 2015-2026 Espressif Systems (Shanghai) CO LTD
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -26,6 +26,10 @@
 #define GDBSTUB_QXFER_SUPPORTED_STR ";qXfer:features:read+"
 #else
 #define GDBSTUB_QXFER_SUPPORTED_STR ""
+#endif
+
+#ifdef CONFIG_ESP_SYSTEM_GDBSTUB_RUNTIME
+static void send_watchpoint_reason(void);
 #endif
 
 #ifdef CONFIG_ESP_GDBSTUB_SUPPORT_TASKS
@@ -107,6 +111,9 @@ static void send_reason(void)
     esp_gdbstub_send_start();
     esp_gdbstub_send_char('T');
     esp_gdbstub_send_hex(s_scratch.signal, 8);
+#ifdef CONFIG_ESP_SYSTEM_GDBSTUB_RUNTIME
+    send_watchpoint_reason();
+#endif // CONFIG_ESP_SYSTEM_GDBSTUB_RUNTIME
     esp_gdbstub_send_end();
 }
 
@@ -211,6 +218,35 @@ static volatile bool step_in_progress = false;
 static bool not_send_reason = false;
 static bool process_gdb_kill = false;
 static bool gdb_debug_int = false;
+
+/**
+ * Detect if a watchpoint triggered and append the corresponding
+ * GDB RSP stop-reply field (watch/rwatch/awatch) to the current packet.
+ */
+static void send_watchpoint_reason(void)
+{
+    uint32_t wp_addr = 0;
+    if (!esp_gdbstub_get_watchpoint_trigger_addr(&wp_addr)) {
+        return;
+    }
+
+    const char *type_str = "watch";
+    for (size_t i = 0; i < SOC_CPU_WATCHPOINTS_NUM; i++) {
+        if (wp_list[i] == wp_addr) {
+            if (wp_access[i] == ESP_CPU_WATCHPOINT_LOAD) {
+                type_str = "rwatch";
+            } else if (wp_access[i] == ESP_CPU_WATCHPOINT_ACCESS) {
+                type_str = "awatch";
+            }
+            break;
+        }
+    }
+
+    esp_gdbstub_send_str(type_str);
+    esp_gdbstub_send_char(':');
+    esp_gdbstub_send_hex(wp_addr, 32);
+    esp_gdbstub_send_char(';');
+}
 
 /**
  * @brief Handle UART interrupt
@@ -380,6 +416,36 @@ void esp_gdbstub_init(void)
 #endif /* CONFIG_ESP_SYSTEM_GDBSTUB_RUNTIME */
 
 #ifdef CONFIG_ESP_GDBSTUB_SUPPORT_TASKS
+
+const StaticTask_t *esp_gdbstub_find_tcb_by_frame(const esp_gdbstub_frame_t *frame)
+{
+    /*
+     * Determine which task owns the current frame.
+     * Perform a search across all tasks, as GDBstub may not include task information
+     * if configured with ESP_GDBSTUB_SUPPORT_TASKS disabled.
+     */
+    TaskIterator_t xTaskIter = {0}; /* Point to the first task list */
+
+    while (xTaskGetNext(&xTaskIter) != -1) {
+        StaticTask_t *tcb = (StaticTask_t *)xTaskIter.pxTaskHandle;
+        /*
+         * For the currently running task, pxTopOfStack is not up-to-date — it is only
+         * updated on the next context switch. Therefore we cannot rely on it to match
+         * the frame to a task. Instead, check if the frame lies within the task's stack.
+         */
+        if ((uintptr_t)frame >= (uintptr_t)tcb->pxDummy6 /* pxStack */ &&
+            (uintptr_t)frame <= (uintptr_t)tcb->pxDummy8 /* pxEndOfStack */) {
+            return tcb;
+        }
+    }
+
+    /*
+     * If no task stack contains the frame, it is likely allocated on the interrupt/exception
+     * stack (e.g. during a panic event). In that case, return the current task handle,
+     * which is the task that was running on this core when the exception occurred.
+     */
+    return (const StaticTask_t *)xTaskGetCurrentTaskHandle();
+}
 
 /** Send string as a het to uart */
 static void esp_gdbstub_send_str_as_hex(const char *str)
