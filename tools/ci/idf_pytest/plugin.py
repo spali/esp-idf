@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2023-2025 Espressif Systems (Shanghai) CO LTD
+# SPDX-FileCopyrightText: 2023-2026 Espressif Systems (Shanghai) CO LTD
 # SPDX-License-Identifier: Apache-2.0
 import os
 import typing as t
@@ -9,6 +9,7 @@ import pytest
 import yaml
 from _pytest.config import Config
 from _pytest.python import Function
+from _pytest.python import Metafunc
 from _pytest.runner import CallInfo
 from dynamic_pipelines.constants import KNOWN_GENERATE_TEST_CHILD_PIPELINE_WARNINGS_FILEPATH
 from idf_ci import IdfPytestPlugin
@@ -113,6 +114,40 @@ class IdfLocalPlugin:
             return default
 
         return item.callspec.params.get(key, default) or default
+
+    @staticmethod
+    def _has_parametrized_arg(metafunc: Metafunc, arg_name: str) -> bool:
+        for marker in metafunc.definition.iter_markers(name='parametrize'):
+            if not marker.args:
+                continue
+
+            argnames = marker.args[0]
+            if isinstance(argnames, str):
+                names = [name.strip() for name in argnames.split(',')]
+            else:
+                names = list(argnames)
+
+            if arg_name in names:
+                return True
+
+        for callspec in getattr(metafunc, '_calls', []):
+            if arg_name in callspec.params:
+                return True
+
+        return False
+
+    @pytest.hookimpl(trylast=True)
+    def pytest_generate_tests(self, metafunc: Metafunc) -> None:
+        if 'embedded_services' not in metafunc.fixturenames:
+            return
+
+        if metafunc.definition.get_closest_marker('qemu') is None:
+            return
+
+        if self._has_parametrized_arg(metafunc, 'embedded_services'):
+            return
+
+        metafunc.parametrize('embedded_services', ['idf,qemu'], indirect=True)
 
     @pytest.hookimpl(wrapper=True)
     def pytest_collection_modifyitems(self, config: Config, items: list[Function]) -> t.Generator[None, None, None]:

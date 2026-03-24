@@ -372,7 +372,6 @@ test_pytest_qemu:
     - run_cmd pytest
       --target $IDF_TARGET
       -m qemu
-      --embedded-services idf,qemu
       --junitxml=XUNIT_RESULT.xml
       --ignore-result-files ${KNOWN_FAILURE_CASES_FILE_NAME}
       --qemu-extra-args \"-global driver=timer.$IDF_TARGET.timg,property=wdt_disable,value=true\"
