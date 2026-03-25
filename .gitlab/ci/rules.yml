@@ -86,6 +86,7 @@
   - "tools/idf_tools.py"
   - "tools/test_idf_tools/**/*"
   - "tools/install_util.py"
+  - "tools/idf_extra_components.yml"
 
   - "tools/export_utils/utils.py"
   - "tools/export_utils/shell_types.py"

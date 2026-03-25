@@ -347,3 +347,24 @@ def pytest_report_header(config: Config) -> str:
         return 'Testing ESP-IDF CMake-based build system v2'
     else:
         return 'Testing ESP-IDF CMake-based build system v1'
+
+
+@pytest.fixture(autouse=True)
+def revert_later(request: FixtureRequest) -> typing.Generator[None, None, None]:
+    origin_content_d: dict[str, str] = {}
+
+    _marker = request.node.get_closest_marker('revert_later')
+    if _marker:
+        for filename in _marker.args[0]:
+            if not os.path.isabs(filename):
+                filename = os.path.join(EXT_IDF_PATH, filename)
+
+            with open(filename, encoding='utf-8') as fr:
+                origin_content_d[filename] = fr.read()
+
+    yield
+
+    if origin_content_d:
+        for filename, content in origin_content_d.items():
+            with open(filename, 'w', encoding='utf-8') as fw:
+                fw.write(content)
