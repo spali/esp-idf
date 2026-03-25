@@ -11,6 +11,7 @@ import textwrap
 from pathlib import Path
 
 import pytest
+import yaml
 from test_build_system_helpers import EnvDict
 from test_build_system_helpers import IdfPyFunc
 from test_build_system_helpers import append_to_file
@@ -397,6 +398,49 @@ def test_hints_components_loading(
     assert 'HINT FROM PROJECT COMPONENT' in ret.stderr, (
         'Hint from project component should be displayed in build output'
     )
+
+
+def test_merged_hints_artifact_in_build_dir(idf_py: IdfPyFunc, test_app_copy: Path) -> None:
+    """Check that hints.yml is generated in the build directory and that hints from all components are merged"""
+    # Create a local component with a uniquely identifiable hint entry so we
+    # can verify it ends up in the merged output.
+    test_comp_dir = test_app_copy / 'components' / 'test_hint_comp'
+    test_comp_dir.mkdir(parents=True, exist_ok=True)
+    (test_comp_dir / 'CMakeLists.txt').write_text('idf_component_register()\n')
+    (test_comp_dir / 'hints.yml').write_text(
+        '- re: "UNIQUE_TEST_HINT_MARKER_12345"\n  hint: "This is a test hint for merge verification"\n'
+    )
+    # In buildv2, only components in the REQUIRES chain are included in
+    # build_component_paths. Add test_hint_comp so its hints are merged.
+    # This call is harmless in v1 (all components are auto-discovered).
+    replace_in_file(
+        test_app_copy / 'main' / 'CMakeLists.txt',
+        '# placeholder_inside_idf_component_register',
+        'REQUIRES test_hint_comp',
+    )
+
+    idf_py('reconfigure')
+    hints_file = test_app_copy / 'build' / 'hints.yml'
+    assert hints_file.is_file(), 'hints.yml should exist in the build directory after reconfigure'
+    content = hints_file.read_text(encoding='utf-8')
+    parsed = yaml.safe_load(content)
+    assert isinstance(parsed, list), 'hints.yml should be a valid YAML list'
+    assert len(parsed) > 0, 'hints.yml should be non-empty'
+
+    # Verify hints from the custom component are actually merged in
+    hint_patterns = [entry.get('re', '') for entry in parsed if isinstance(entry, dict)]
+    assert any('UNIQUE_TEST_HINT_MARKER_12345' in p for p in hint_patterns), (
+        'Custom component hint should be present in merged hints.yml'
+    )
+
+
+@pytest.mark.buildv2_skip('hello_world uses cmake/project.cmake (v1 only)')
+def test_merged_hints_artifact_real_project(idf_py: IdfPyFunc, test_app_copy: Path) -> None:
+    """Check that hints.yml is generated in a custom build directory (-B flag)"""
+    # Verify the build dir is dynamic, not hardcoded
+    idf_py('-B', 'custom_build', 'reconfigure')
+    custom_hints_file = test_app_copy / 'custom_build' / 'hints.yml'
+    assert custom_hints_file.is_file(), 'hints.yml should exist in a custom build directory'
 
 
 def test_sbom_create_cmd(idf_py: IdfPyFunc, test_app_copy: Path) -> None:
