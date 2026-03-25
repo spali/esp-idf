@@ -20,7 +20,9 @@
 
 #include "soc/soc_caps.h"
 #include "soc/interrupts.h"
+#if SOC_WDT_SUPPORTED || SOC_RTC_WDT_SUPPORTED
 #include "hal/wdt_hal.h"
+#endif
 
 #if GDBSTUB_QXFER_FEATURES_ENABLED
 #define GDBSTUB_QXFER_SUPPORTED_STR ";qXfer:features:read+"
@@ -125,26 +127,35 @@ static uint32_t gdbstub_hton(uint32_t i)
     return __builtin_bswap32(i);
 }
 
+#if SOC_RTC_WDT_SUPPORTED
 static wdt_hal_context_t rtc_wdt_ctx = RWDT_HAL_CONTEXT_DEFAULT();
 static bool rtc_wdt_ctx_enabled = false;
+#endif
+#if SOC_WDT_SUPPORTED
 static wdt_hal_context_t wdt0_context = {.inst = WDT_MWDT0, .mwdt_dev = &TIMERG0};
 static bool wdt0_context_enabled = false;
 #if TIMG_LL_GET(INST_NUM) >= 2
 static wdt_hal_context_t wdt1_context = {.inst = WDT_MWDT1, .mwdt_dev = &TIMERG1};
 static bool wdt1_context_enabled = false;
 #endif // TIMG_LL_GET(INST_NUM)
+#endif // SOC_WDT_SUPPORTED
 
 /**
  * Disable all enabled WDTs
  */
 static inline void disable_all_wdts(void)
 {
+#if SOC_WDT_SUPPORTED
     wdt0_context_enabled = wdt_hal_is_enabled(&wdt0_context);
     #if TIMG_LL_GET(INST_NUM) >= 2
     wdt1_context_enabled = wdt_hal_is_enabled(&wdt1_context);
     #endif
+#endif // SOC_WDT_SUPPORTED
+#if SOC_RTC_WDT_SUPPORTED
     rtc_wdt_ctx_enabled = wdt_hal_is_enabled(&rtc_wdt_ctx);
+#endif
 
+#if SOC_WDT_SUPPORTED
     /*Task WDT is the Main Watchdog Timer of Timer Group 0 */
     if (true == wdt0_context_enabled) {
         wdt_hal_write_protect_disable(&wdt0_context);
@@ -162,13 +173,16 @@ static inline void disable_all_wdts(void)
         wdt_hal_write_protect_enable(&wdt1_context);
     }
     #endif // TIMG_LL_GET(INST_NUM) >= 2
+#endif // SOC_WDT_SUPPORTED
 
+#if SOC_RTC_WDT_SUPPORTED
     if (true == rtc_wdt_ctx_enabled) {
         wdt_hal_write_protect_disable(&rtc_wdt_ctx);
         wdt_hal_disable(&rtc_wdt_ctx);
         wdt_hal_feed(&rtc_wdt_ctx);
         wdt_hal_write_protect_enable(&rtc_wdt_ctx);
     }
+#endif // SOC_RTC_WDT_SUPPORTED
 }
 
 /**
@@ -176,6 +190,7 @@ static inline void disable_all_wdts(void)
  */
 static inline void enable_all_wdts(void)
 {
+#if SOC_WDT_SUPPORTED
     /* Task WDT is the Main Watchdog Timer of Timer Group 0 */
     if (false == wdt0_context_enabled) {
         wdt_hal_write_protect_disable(&wdt0_context);
@@ -190,12 +205,15 @@ static inline void enable_all_wdts(void)
         wdt_hal_write_protect_enable(&wdt1_context);
     }
     #endif // TIMG_LL_GET(INST_NUM) >= 2
+#endif // SOC_WDT_SUPPORTED
 
+#if SOC_RTC_WDT_SUPPORTED
     if (false == rtc_wdt_ctx_enabled) {
         wdt_hal_write_protect_disable(&rtc_wdt_ctx);
         wdt_hal_enable(&rtc_wdt_ctx);
         wdt_hal_write_protect_enable(&rtc_wdt_ctx);
     }
+#endif // SOC_RTC_WDT_SUPPORTED
 }
 
 int getActiveTaskNum(void);
