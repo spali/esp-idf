@@ -579,14 +579,20 @@ macro(idf_project_init)
         # Discover and initialize components
         __init_components()
 
-        # Save original sdkconfig before kconfgen may drop unknown options
+        # Save original sdkconfig before kconfgen may drop unknown options.
+        # Only creates a backup when the component manager is enabled.
         __create_sdkconfig_orig_copy()
 
         # Generate initial sdkconfig with discovered components
         __generate_sdkconfig()
 
-        # Initialize the component manager and fetch components in a loop
-        __fetch_components_from_registry()
+        # Fetch managed components from registry if the component manager is enabled
+        idf_build_get_property(idf_component_manager IDF_COMPONENT_MANAGER)
+        if(idf_component_manager EQUAL 1)
+            __fetch_components_from_registry()
+        else()
+            __component_manager_warn_if_disabled_and_manifests_exist()
+        endif()
 
         # Include sdkconfig.cmake
         idf_build_get_property(sdkconfig_cmake __SDKCONFIG_CMAKE)

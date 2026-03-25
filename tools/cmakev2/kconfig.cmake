@@ -55,6 +55,7 @@ function(__init_kconfig)
     endforeach()
 
     idf_build_set_property(SDKCONFIG "${sdkconfig}")
+    idf_build_set_property(__SDKCONFIG_ORIG "${sdkconfig}")
     idf_build_set_property(SDKCONFIG_DEFAULTS "${sdkconfig_defaults_checked}")
 
     # Setup ESP-IDF root Kconfig and sdkconfig.rename files.
@@ -83,6 +84,16 @@ endfunction()
     and write the actual file.
 #]]
 function(__create_sdkconfig_orig_copy)
+    # The backup is only needed when the component manager is enabled.
+    # Managed components may introduce Kconfig options unknown to kconfgen
+    # during intermediate sdkconfig regeneration rounds. The backup preserves
+    # those options. When the manager is disabled, __SDKCONFIG_ORIG already
+    # points to the real sdkconfig (set in __init_kconfig).
+    idf_build_get_property(idf_component_manager IDF_COMPONENT_MANAGER)
+    if(NOT idf_component_manager EQUAL 1)
+        return()
+    endif()
+
     idf_build_get_property(sdkconfig SDKCONFIG)
     idf_build_get_property(build_dir BUILD_DIR)
     set(sdkconfig_orig "${build_dir}/sdkconfig.orig")
@@ -704,12 +715,8 @@ function(__create_base_kconfgen_command sdkconfig sdkconfig_defaults)
     endif()
 
     # Use __SDKCONFIG_ORIG for --config so that unknown options from managed
-    # components are preserved during intermediate kconfgen runs. Falls back
-    # to the real sdkconfig when __SDKCONFIG_ORIG is not yet set.
+    # components are preserved during intermediate kconfgen runs.
     idf_build_get_property(sdkconfig_orig __SDKCONFIG_ORIG)
-    if(NOT sdkconfig_orig)
-        set(sdkconfig_orig "${sdkconfig}")
-    endif()
 
     # Create base kconfgen command
     set(base_kconfgen_cmd ${python} -m kconfgen
