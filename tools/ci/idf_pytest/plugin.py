@@ -136,18 +136,33 @@ class IdfLocalPlugin:
 
         return False
 
+    @staticmethod
+    def _is_linux_target_run(config: Config) -> bool:
+        target = config.getoption('target')
+        if not target:
+            return False
+
+        if isinstance(target, str):
+            targets = [_t.strip() for _t in target.split(',')]
+        else:
+            targets = [str(_t).strip() for _t in target]
+
+        return 'linux' in targets
+
     @pytest.hookimpl(trylast=True)
     def pytest_generate_tests(self, metafunc: Metafunc) -> None:
         if 'embedded_services' not in metafunc.fixturenames:
             return
 
-        if metafunc.definition.get_closest_marker('qemu') is None:
-            return
-
         if self._has_parametrized_arg(metafunc, 'embedded_services'):
             return
 
-        metafunc.parametrize('embedded_services', ['idf,qemu'], indirect=True)
+        if metafunc.definition.get_closest_marker('qemu') is not None:
+            metafunc.parametrize('embedded_services', ['idf,qemu'], indirect=True)
+            return
+
+        if self._is_linux_target_run(metafunc.config):
+            metafunc.parametrize('embedded_services', ['idf'], indirect=True)
 
     @pytest.hookimpl(wrapper=True)
     def pytest_collection_modifyitems(self, config: Config, items: list[Function]) -> t.Generator[None, None, None]:

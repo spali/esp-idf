@@ -120,25 +120,51 @@ Next is the environment marker. The ``@pytest.mark.generic`` marker indicates th
 
 Finally, we have the test function. With a ``dut`` fixture. In single-dut test cases, the ``dut`` fixture is an instance of ``IdfDut`` class, for multi-dut test cases, it is a tuple of ``IdfDut`` instances. For more details regarding the ``IdfDut`` class, please refer to `pytest-embedded IdfDut API reference <https://docs.espressif.com/projects/pytest-embedded/en/latest/api.html#pytest_embedded_idf.dut.IdfDut>`__.
 
-Running Tests in QEMU
-^^^^^^^^^^^^^^^^^^^^^
+Running Tests on Linux
+^^^^^^^^^^^^^^^^^^^^^^
 
-To execute a pytest case in QEMU, add the ``@pytest.mark.qemu`` marker to the test function.
+To execute a pytest case on the Linux host, set ``target`` to ``linux``.
 
 .. code-block:: python
 
-    @pytest.mark.qemu
-    @idf_parametrize('target', ['esp32', 'esp32c3'], indirect=['target'])
-    def test_hello_world_qemu(dut) -> None:
+    @idf_parametrize('target', ['linux'], indirect=['target'])
+    def test_hello_world_linux(dut) -> None:
         dut.expect('Hello world!')
 
-This is the simplest way to run the same test flow in QEMU instead of on physical hardware.
+This is the simplest way to run the same test flow on the Linux host instead of on physical hardware.
 
-For a simple QEMU-only test, adding ``pytest.mark.qemu`` is enough and the ``idf,qemu`` embedded services will be selected automatically.
+For a simple Linux-only test, setting ``target`` to ``linux`` is enough and the ``idf`` embedded services will be selected automatically. The ``pytest.mark.host_test`` marker is not required.
 
-For a mixed environment matrix, specify ``embedded_services`` manually for each case. See the later section :ref:`same-app-with-different-running-environments` for a more complex example.
+For a mixed environment matrix, specify ``embedded_services`` manually for each case. See :ref:`Same App With Different Running Environments <pytest-same-app-different-running-environments>` for a more complex example.
 
-For QEMU installation and setup, refer to :doc:`../api-guides/tools/qemu`.
+.. only:: TARGET_SUPPORT_QEMU
+
+    Running Tests in QEMU
+    ^^^^^^^^^^^^^^^^^^^^^
+
+    To execute a pytest case in QEMU, add the ``@pytest.mark.qemu`` marker to the test function.
+
+    .. code-block:: python
+
+        @pytest.mark.qemu
+        @idf_parametrize('target', ['esp32', 'esp32c3'], indirect=['target'])
+        def test_hello_world_qemu(dut) -> None:
+            dut.expect('Hello world!')
+
+    This is the simplest way to run the same test flow in QEMU instead of on physical hardware.
+
+    For a simple QEMU-only test, adding ``pytest.mark.qemu`` is enough and the ``idf,qemu`` embedded services will be selected automatically.
+
+    For a mixed environment matrix, specify ``embedded_services`` manually for each case. See the later section in this guide for a more complex example.
+
+    For QEMU installation and setup, refer to page :doc:`/api-guides/tools/qemu`.
+
+Deprecation of ``pytest.mark.host_test``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+``pytest.mark.host_test`` is no longer needed and should not be added to new test cases.
+
+For Linux target test cases and QEMU test cases, the required behavior is handled dynamically by the test framework. In particular, the embedded services are selected automatically for simple Linux-only and QEMU-only cases.
 
 Same App With Different sdkconfig Files
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -222,6 +248,8 @@ Now this test function would be replicated to 2 test cases (represented as test 
 
 * ``esp32.foo.test_foo_bar``
 * ``esp32s2.bar.test_foo_bar``
+
+.. _pytest-same-app-different-running-environments:
 
 Same App With Different Running Environments
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

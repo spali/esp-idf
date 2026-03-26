@@ -127,15 +127,13 @@ def test_console_help_reverse_registration(dut: Dut) -> None:
 
 @idf_parametrize('config', ['sorted'], indirect=['config'])
 @idf_parametrize('target', ['linux'], indirect=['target'])
-@idf_parametrize('test_on,markers', [('host', (pytest.mark.host_test,))])
-def test_console_sorted_help_sorted_registration(dut: Dut, test_on: str) -> None:
+def test_console_sorted_help_sorted_registration(dut: Dut) -> None:
     do_test_help_generic(dut, 'sorted')
 
 
 @idf_parametrize('config', ['sorted'], indirect=['config'])
 @idf_parametrize('target', ['linux'], indirect=['target'])
-@idf_parametrize('test_on,markers', [('host', (pytest.mark.host_test,))])
-def test_console_sorted_help_reverse_registration(dut: Dut, test_on: str) -> None:
+def test_console_sorted_help_reverse_registration(dut: Dut) -> None:
     do_test_help_generic(dut, 'reverse')
 
 
