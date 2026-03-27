@@ -349,7 +349,7 @@ esp_err_t adc_continuous_start(adc_continuous_handle_t handle)
     ESP_RETURN_ON_FALSE(handle->fsm == ADC_FSM_INIT, ESP_ERR_INVALID_STATE, ADC_TAG, "ADC continuous mode isn't in the init state, it's started already");
 
     //reset ADC digital part to reset ADC sampling EOF counter
-    periph_module_reset(PERIPH_SARADC_MODULE);
+    sar_periph_ctrl_adc_reset();
 
     if (handle->pm_lock) {
         ESP_RETURN_ON_ERROR(esp_pm_lock_acquire(handle->pm_lock), ADC_TAG, "acquire pm_lock failed");
@@ -427,7 +427,7 @@ esp_err_t adc_continuous_stop(adc_continuous_handle_t handle)
     adc_hal_digi_stop(&handle->hal);
 
 #if ADC_LL_WORKAROUND_CLEAR_EOF_COUNTER
-    periph_module_reset(PERIPH_SARADC_MODULE);
+    sar_periph_ctrl_adc_reset();
     adc_hal_digi_clr_eof();
 #endif
 
