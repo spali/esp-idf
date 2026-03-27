@@ -4,8 +4,8 @@ document.addEventListener("DOMContentLoaded", function () {
     script.setAttribute("data-bot-protection-mechanism", "hcaptcha");
     script.setAttribute("data-website-id", "6b18f5e5-d883-4ccd-9a24-371457cc0d7b");
     script.setAttribute("data-mcp-enabled", "true");
-    script.setAttribute("data-mcp-server-url", "https://espressif-cn.mcp.kapa.ai");
-    script.setAttribute("data-mcp-dropdown-description", "更多关于乐鑫技术文档 MCP 服务器的信息请参阅[这篇文章](https://developer.espressif.com/blog/2026/04/doc-mcp-server/)。");
+    script.setAttribute("data-mcp-server-url", "https://mcp.espressif.com/docs");
+    script.setAttribute("data-mcp-dropdown-description", "更多关于乐鑫文档 MCP 服务器的信息请参阅[这篇文章](https://developer.espressif.com/blog/2026/04/doc-mcp-server/)。");
     script.setAttribute("data-modal-title", "ESP-IDF 编程指南文档 AI 助手");
     script.setAttribute("data-project-name", "ESP-IDF 编程指南");
     script.setAttribute("data-project-color", "#C62817");
