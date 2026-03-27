@@ -175,7 +175,7 @@
       - GATT Caching
       - |NA|
       - |experimental|
-      - |developing202512|
+      - |experimental|
     * -
       - Randomized Advertising Channel Indexing
       - .. only:: esp32c2
