@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: 2023-2025 Espressif Systems (Shanghai) CO LTD
+ * SPDX-FileCopyrightText: 2023-2026 Espressif Systems (Shanghai) CO LTD
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -564,9 +564,12 @@
 #define SOC_FLASH_ENCRYPTION_XTS_AES        1
 #define SOC_FLASH_ENCRYPTION_XTS_AES_128    1
 #define SOC_FLASH_ENCRYPTION_XTS_AES_SUPPORT_PSEUDO_ROUND  1
+#define SOC_FLASH_ENCRYPTION_PAGE_CONFIGURABLE  1  /* Flash encryption can be configured on a MMU page basis */
 
 /*-------------------------- PSRAM Encryption CAPS----------------------------*/
-#define SOC_PSRAM_ENCRYPTION_XTS_AES_128    (1)
+#define SOC_PSRAM_ENCRYPTION_XTS_AES_128        1
+#define SOC_PSRAM_ENCRYPTION_SEPARATE_KEY       1  /* PSRAM encryption can use independent key */
+#define SOC_PSRAM_ENCRYPTION_PAGE_CONFIGURABLE  1  /* PSRAM encryption can be configured on a MMU page basis */
 
 /*------------------------Bootloader CAPS---------------------------------*/
 /* Support Recovery Bootloader */
