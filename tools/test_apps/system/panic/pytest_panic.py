@@ -985,9 +985,7 @@ def test_rtc_fast_reg2_execute_violation(dut: PanicTestDut, test_func_name: str)
 
 # TODO: IDF-6820: ESP32-S2 -> Fix multiple panic reasons in different runs
 @pytest.mark.generic
-@pytest.mark.xfail(
-    'config.getvalue("target") == "esp32s2"', reason='Multiple panic reasons for the same test may surface', run=False
-)
+@pytest.mark.xfail(targets=['esp32s2'], reason='Multiple panic reasons for the same test may surface', run=False)
 @idf_parametrize('config, target', CONFIGS_MEMPROT_RTC_FAST_MEM, indirect=['config', 'target'])
 @pytest.mark.temp_skip_ci(targets=['esp32p4'], reason='p4 rev3 migration, IDF-14348')
 def test_rtc_fast_reg3_execute_violation(dut: PanicTestDut, test_func_name: str) -> None:
