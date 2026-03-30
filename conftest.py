@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2021-2025 Espressif Systems (Shanghai) CO LTD
+# SPDX-FileCopyrightText: 2021-2026 Espressif Systems (Shanghai) CO LTD
 # SPDX-License-Identifier: Apache-2.0
 # pylint: disable=W0621  # redefined-outer-name
 #
@@ -36,6 +36,7 @@ from _pytest.config import Config
 from _pytest.fixtures import FixtureRequest
 from idf_ci import PytestCase
 from idf_ci.idf_pytest import IDF_CI_PYTEST_CASE_KEY
+from idf_ci_utils import IDF_PATH
 from idf_ci_utils import idf_relpath
 from idf_pytest.constants import DEFAULT_LOGDIR
 from idf_pytest.plugin import IDF_LOCAL_PLUGIN_KEY
@@ -126,7 +127,7 @@ class AppDownloader:
         self.commit_sha = commit_sha
         self.pipeline_id = pipeline_id
 
-    def download_app(self, app_build_path: str, artifact_type: str | None = None) -> None:
+    def download_app(self, app_dir: str, build_dir: str, artifact_type: str | None = None) -> None:
         args = [
             'idf-ci',
             'gitlab',
@@ -136,18 +137,26 @@ class AppDownloader:
         ]
         if artifact_type:
             args.extend(['--type', artifact_type])
+
         if self.pipeline_id:
             args.extend(['--pipeline-id', self.pipeline_id])
-        args.append(app_build_path)
 
-        subprocess.run(
-            args,
-            stdout=sys.stdout,
-            stderr=sys.stderr,
+        args.extend(
+            [
+                app_dir,
+                '--build-dir',
+                build_dir,
+            ]
         )
-
-
-PRESIGNED_JSON = 'presigned.json'
+        result = subprocess.run(
+            args,
+            capture_output=True,
+            text=True,
+            cwd=IDF_PATH,
+        )
+        logging.info(result.stdout)
+        if result.stderr:
+            logging.info(result.stderr)
 
 
 class OpenOCD:
@@ -323,12 +332,13 @@ def build_dir(
         downloader = app_downloader
 
     if downloader:
+        app_dir = idf_relpath(app_path)
+        build_dir = f'build_{target}_{config}'
         # somehow hardcoded...
-        app_build_path = os.path.join(idf_relpath(app_path), f'build_{target}_{config}')
         if requires_elf_or_map(case):
-            downloader.download_app(app_build_path)
+            downloader.download_app(app_dir, build_dir)
         else:
-            downloader.download_app(app_build_path, 'flash')
+            downloader.download_app(app_dir, build_dir, 'flash')
         check_dirs = [f'build_{target}_{config}']
     else:
         check_dirs = []

@@ -86,7 +86,6 @@
     - run_cmd python $CHECKOUT_REF_SCRIPT ci-test-runner-configs ci-test-runner-configs
     # CI specific options start from "--known-failure-cases-file xxx". could ignore when running locally
     - run_cmd pytest $nodes
-      --pipeline-id $PARENT_PIPELINE_ID
       --junitxml=XUNIT_RESULT_${CI_JOB_ID}.xml
       --ignore-result-files ${KNOWN_FAILURE_CASES_FILE_NAME}
       --parallel-count ${CI_NODE_TOTAL:-1}
