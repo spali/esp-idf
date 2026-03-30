@@ -10,7 +10,13 @@
 /* From ESP Bluetooth */
 #include "esp_bt.h"
 #include "esp_hci_transport.h"
+#if UC_BT_CTRL_BLE_IS_ENABLE
 #include "ble_priv.h"
+#endif
+#if UC_BT_CTRL_BR_EDR_IS_ENABLE
+#include "bredr_priv.h"
+#endif
+#include "btdm_osal.h"
 #include "btdm_coex.h"
 #include "btdm_lp.h"
 #include "btdm_log.h"

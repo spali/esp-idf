@@ -127,6 +127,10 @@ examples/bluetooth/bluedroid/classic_bt:
   <<: *bt_default_depends
   disable:
     - if: SOC_BT_CLASSIC_SUPPORTED != 1
+  disable_test:
+    - if: IDF_TARGET != "esp32"
+      temporary: true
+      reason: temporarily lack of runners
   depends_components+:
     - esp_lcd
     - esp_console
@@ -146,7 +150,8 @@ examples/bluetooth/bluedroid/classic_bt:
 examples/bluetooth/bluedroid/coex/a2dp_gatts_coex:
   <<: *bt_default_depends
   disable:
-    - if: IDF_TARGET != "esp32"
+    - if: SOC_BT_CLASSIC_SUPPORTED != 1
+    - if: SOC_BLE_SUPPORTED != 1
       temporary: true
       reason: the other targets are not tested yet
   depends_components+:
