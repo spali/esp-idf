@@ -62,7 +62,7 @@ variables:
   # Set this variable to the branch of idf-constraints repo in order to test a custom Python constraint file. The
   # branch name must be without the remote part ("origin/"). Keep the variable empty in order to use the constraint
   # file from https://dl.espressif.com/dl/esp-idf.
-  CI_PYTHON_CONSTRAINT_BRANCH: "feat/update-idf-ci-version"
+  CI_PYTHON_CONSTRAINT_BRANCH: ""
 
   # Update the filename for a specific ESP-IDF release. It is used only with CI_PYTHON_CONSTRAINT_BRANCH.
   CI_PYTHON_CONSTRAINT_FILE: "espidf.constraints.v6.1.txt"
