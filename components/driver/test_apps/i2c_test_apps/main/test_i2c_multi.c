@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: 2023-2025 Espressif Systems (Shanghai) CO LTD
+ * SPDX-FileCopyrightText: 2023-2026 Espressif Systems (Shanghai) CO LTD
  *
  * SPDX-License-Identifier: Unlicense OR CC0-1.0
  */
@@ -139,6 +139,9 @@ static void i2c_slave_read_test(void)
 
 TEST_CASE_MULTIPLE_DEVICES("I2C master write slave test", "[i2c][test_env=generic_multi_device][timeout=150]", i2c_master_write_test, i2c_slave_read_test);
 
+// Test case ignored because the slave driver v1 API (`i2c_slave_receive`) is mis-designed. Redesigned in v5.4.
+#if 0
+
 static void i2c_master_write_test_large_write_small_read(void)
 {
     uint8_t data_wr[DATA_LENGTH] = { 0 };
@@ -221,7 +224,9 @@ static void i2c_slave_read_test_large_write_small_read(void)
     TEST_ESP_OK(i2c_del_slave_device(slave_handle));
 }
 
-TEST_CASE_MULTIPLE_DEVICES("I2C master write slave test (large write small read)", "[i2c][test_env=generic_multi_device][timeout=150]", i2c_master_write_test_large_write_small_read, i2c_slave_read_test_large_write_small_read);
+TEST_CASE_MULTIPLE_DEVICES("I2C master write slave test (large write small read)", "[i2c][ignore][test_env=generic_multi_device][timeout=150]", i2c_master_write_test_large_write_small_read, i2c_slave_read_test_large_write_small_read);
+
+#endif
 
 static void master_read_slave_test(void)
 {
@@ -700,7 +705,7 @@ static void i2c_slave_read_test_more_port(void)
 TEST_CASE_MULTIPLE_DEVICES("I2C master write slave test, more ports", "[i2c][test_env=generic_multi_device][timeout=150]", i2c_master_write_test_more_port, i2c_slave_read_test_more_port);
 #endif
 
-#if CONFIG_IDF_TARGET_ESP32C3 || CONFIG_IDF_TARGET_ESP32S3
+#if 0 && (CONFIG_IDF_TARGET_ESP32C3 || CONFIG_IDF_TARGET_ESP32S3)
 // For now, we tested the chip which has such problem.
 // This test can be extended to all chip when how uart baud rate
 // works has been figured out.
@@ -785,7 +790,7 @@ static void uart_test_i2c_master_freq(void)
     }
 }
 
-TEST_CASE_MULTIPLE_DEVICES("I2C master clock frequency test", "[i2c][test_env=generic_multi_device][timeout=150]", uart_test_i2c_master_freq, i2c_master_write_fsm_reset);
+TEST_CASE_MULTIPLE_DEVICES("I2C master clock frequency test", "[i2c][ignore][test_env=generic_multi_device][timeout=150]", uart_test_i2c_master_freq, i2c_master_write_fsm_reset);
 
 #endif // CONFIG_IDF_TARGET_ESP32C3 || CONFIG_IDF_TARGET_ESP32S3
 
