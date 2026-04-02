@@ -5,7 +5,8 @@ document.addEventListener("DOMContentLoaded", function () {
     script.setAttribute("data-website-id", "e569d308-b8f4-43d1-a0d2-bebc1ece63de");
     script.setAttribute("data-mcp-enabled", "true");
     script.setAttribute("data-mcp-server-url", "https://mcp.espressif.com/docs");
-    script.setAttribute("data-mcp-dropdown-description", "Learn more about Espressif Doc MCP server in [this article](https://developer.espressif.com/blog/2026/04/doc-mcp-server/).");
+    script.setAttribute("data-mcp-dropdown-description", "Access ESP-IDF knowledge via [MCP server](https://mcp.espressif.com)");
+    script.setAttribute("data-mcp-button-text", "MCP Server");
     script.setAttribute("data-project-name", "ESP-IDF Programming Guide");
     script.setAttribute("data-project-color", "#C62817");
     script.setAttribute("data-project-logo", "https://dl.espressif.com/public/logo.png");
