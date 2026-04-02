@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: 2023 Espressif Systems (Shanghai) CO LTD
+ * SPDX-FileCopyrightText: 2023-2026 Espressif Systems (Shanghai) CO LTD
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -100,7 +100,7 @@ TEST_CASE("parallel_tx_unit_trans_done_event", "[parlio_tx]")
         .trans_queue_depth = 8,
         .max_transfer_size = 128,
         .bit_pack_order = PARLIO_BIT_PACK_ORDER_LSB,
-        .sample_edge = PARLIO_SAMPLE_EDGE_POS,
+        .shift_edge = PARLIO_SHIFT_EDGE_POS,
     };
     TEST_ESP_OK(parlio_new_tx_unit(&config, &tx_unit));
     TEST_ESP_OK(parlio_tx_unit_enable(tx_unit));
@@ -152,7 +152,7 @@ TEST_CASE("parallel_tx_unit_enable_disable", "[parlio_tx]")
         .trans_queue_depth = 64,
         .max_transfer_size = 256,
         .bit_pack_order = PARLIO_BIT_PACK_ORDER_LSB,
-        .sample_edge = PARLIO_SAMPLE_EDGE_POS,
+        .shift_edge = PARLIO_SHIFT_EDGE_POS,
     };
     TEST_ESP_OK(parlio_new_tx_unit(&config, &tx_unit));
     TEST_ESP_OK(parlio_tx_unit_enable(tx_unit));
@@ -206,7 +206,7 @@ TEST_CASE("parallel_tx_unit_idle_value", "[parlio_tx]")
         .trans_queue_depth = 4,
         .max_transfer_size = 64,
         .bit_pack_order = PARLIO_BIT_PACK_ORDER_LSB,
-        .sample_edge = PARLIO_SAMPLE_EDGE_POS,
+        .shift_edge = PARLIO_SHIFT_EDGE_POS,
         .flags.io_loop_back = 1,   // enable loop back by GPIO matrix, so that we can read the level of the data line by gpio driver
     };
     TEST_ESP_OK(parlio_new_tx_unit(&config, &tx_unit));
@@ -250,7 +250,7 @@ TEST_CASE("parallel_tx_clock_gating", "[paralio_tx]")
         .trans_queue_depth = 4,
         .max_transfer_size = 64,
         .bit_pack_order = PARLIO_BIT_PACK_ORDER_MSB,
-        .sample_edge = PARLIO_SAMPLE_EDGE_POS,
+        .shift_edge = PARLIO_SHIFT_EDGE_POS,
         .flags.clk_gate_en = true, // enable clock gating, controlled by the level of TEST_DATA7_GPIO
         .flags.io_loop_back = true, // for reading the level of the clock line in IDLE state
     };
