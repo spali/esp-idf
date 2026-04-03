@@ -1,12 +1,14 @@
 #!/usr/bin/env python
 #
-# SPDX-FileCopyrightText: 2021-2025 Espressif Systems (Shanghai) CO LTD
+# SPDX-FileCopyrightText: 2021-2026 Espressif Systems (Shanghai) CO LTD
 # SPDX-License-Identifier: Apache-2.0
 #
 import argparse
 import errno
+import hashlib
 import json
 import os
+import re
 import subprocess
 import sys
 import tempfile
@@ -20,6 +22,50 @@ from ldgen.linker_script import LinkerScript
 from ldgen.sdkconfig import SDKConfig
 from pyparsing import ParseException
 from pyparsing import ParseFatalException
+
+_RE_SECTION_NAME = re.compile(r'^\s*\d+\s+(\.\S+)', re.MULTILINE)
+
+
+def _compute_fingerprint(sections_infos, fragment_files, config_file, kconfig_file):
+    """Compute a fingerprint from section names and mtimes of all inputs."""
+    hasher = hashlib.md5()
+
+    # Section names from objdump output
+    for archive, info in sorted(sections_infos.sections.items()):
+        names = _RE_SECTION_NAME.findall(info.content)
+        hasher.update((archive + ':' + ','.join(names)).encode())
+
+    # Mtimes of fragment files, sdkconfig, kconfig
+    input_files = [p.name if hasattr(p, 'name') else p for p in fragment_files]
+    input_files += [p for p in (config_file, kconfig_file) if p]
+    for path in input_files:
+        try:
+            hasher.update(f'{path}:{os.path.getmtime(path)}'.encode())
+        except OSError:
+            return None
+
+    return hasher.hexdigest()
+
+
+def _can_skip_generation(output_path, fingerprint):
+    """Check if fingerprint matches cached value from previous run."""
+    try:
+        with open(output_path + '.fingerprint') as f:
+            if f.read().strip() == fingerprint:
+                os.utime(output_path, None)
+                return True
+    except OSError:
+        pass
+    return False
+
+
+def _save_fingerprint(output_path, fingerprint):
+    """Save fingerprint for next run."""
+    try:
+        with open(output_path + '.fingerprint', 'w') as f:
+            f.write(fingerprint)
+    except OSError:
+        pass
 
 
 def _update_environment(args):
@@ -114,6 +160,10 @@ def main():
     else:
         check_mapping_exceptions = None
 
+    no_cache = os.environ.get('LDGEN_NO_CACHE') == '1'
+    if no_cache:
+        print('Linker script generation caches disabled by LDGEN_NO_CACHE')
+
     try:
         sections_infos = EntityDB()
         for library in libraries_file:
@@ -124,6 +174,20 @@ def main():
                 dump = StringIO(subprocess.check_output([objdump, '-h', library], env=new_env).decode())
                 dump.name = library
                 sections_infos.add_sections_info(dump)
+
+        # Check if we can skip generation entirely — section names and other
+        # inputs unchanged since last run.
+        fingerprint = (
+            None if no_cache else _compute_fingerprint(sections_infos, fragment_files, config_file, kconfig_file)
+        )
+        if (
+            output_path
+            and fingerprint
+            and os.path.exists(output_path)
+            and _can_skip_generation(output_path, fingerprint)
+        ):
+            print('Skipping linker script generation, section names unchanged')
+            sys.exit(0)
 
         mutable_libs = [lib.strip() for lib in mutable_libraries_file]
         generation_model = Generation(check_mapping, check_mapping_exceptions, mutable_libs, args.debug)
@@ -163,6 +227,9 @@ def main():
                 output_path, 'w', encoding='utf-8'
             ) as f:  # only create output file after generation has succeeded
                 f.write(output.read())
+
+        if output_path and fingerprint:
+            _save_fingerprint(output_path, fingerprint)
     except LdGenFailure as e:
         print(f'linker script generation failed for {input_file.name}\nERROR: {e}')
         sys.exit(1)
