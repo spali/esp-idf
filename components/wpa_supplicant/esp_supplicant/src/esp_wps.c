@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: 2019-2025 Espressif Systems (Shanghai) CO LTD
+ * SPDX-FileCopyrightText: 2019-2026 Espressif Systems (Shanghai) CO LTD
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -912,6 +912,15 @@ static void wps_sm_notify_deauth(void)
 {
     if (gWpsSm && gWpsSm->wps->state != WPS_FINISHED &&
             !gWpsSm->intermediate_disconnect) {
+        /* wifi_station_wps_start() calls esp_wifi_disconnect() to leave the
+         * previously connected AP before scanning.  That synchronous disconnect
+         * callback must not be treated as a WPS handshake failure.  Only act
+         * on deauths received while actually negotiating (STATUS_PENDING). */
+        if (wps_get_status() != WPS_STATUS_PENDING) {
+            wpa_printf(MSG_DEBUG, "WPS: Ignoring disconnect, not in WPS-handshake phase (status=%d)",
+                       wps_get_status());
+            return;
+        }
         wps_stop_process(WPS_FAIL_REASON_RECV_DEAUTH);
     }
 }
