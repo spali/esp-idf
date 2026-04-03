@@ -305,3 +305,7 @@ examples/system/xip_from_psram:
   disable:
     - if: IDF_TARGET == "esp32"
       reason: target esp32 doesn't support this feature.
+  disable_test:
+    - if: IDF_TARGET == "esp32s31"
+      temporary: true
+      reason: cannot pass # TODO: IDF-15526

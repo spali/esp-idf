@@ -26,4 +26,3 @@ no_runner_tags:
   - esp32h2,jtag
   - esp32p4,jtag
   - esp32s2,usb_host_flash_disk
-  - esp32s31,generic,rev_default # TODO: IDF-14694
