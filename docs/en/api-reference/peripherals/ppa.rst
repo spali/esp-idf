@@ -139,7 +139,7 @@ The PPA requires certain buffer alignment rules to ensure memory access correctn
 
 - Cache line alignment (output buffer only):
 
-    - The ``out.buffer`` address and ``out.buffer_size`` must be aligned to the cache line size (see Kconfig option :ref:`CONFIG_CACHE_L2_CACHE_LINE_SIZE`).
+    - The ``out.buffer`` address and ``out.buffer_size`` must be aligned to the cache line size, if the buffer is located in a memory region that is cacheable.
 
 - Flash encryption alignment (when flash encryption is enabled and the buffers are located in external memory):
 
