@@ -8,6 +8,7 @@ import errno
 import hashlib
 import json
 import os
+import pickle
 import re
 import subprocess
 import sys
@@ -65,6 +66,55 @@ def _save_fingerprint(output_path, fingerprint):
         with open(output_path + '.fingerprint', 'w') as f:
             f.write(fingerprint)
     except OSError:
+        pass
+
+
+def _compute_lf_cache_key(fragment_files, config_file, kconfig_file):
+    """Compute a cache key for parsed fragment files.
+
+    Keyed on fragment file paths+mtimes plus sdkconfig and kconfig mtimes,
+    because fragment parsing evaluates `if/elif/else` conditional blocks
+    against sdkconfig at parse time — so a sdkconfig change can change the
+    parsed FragmentFile output even if the fragment files themselves are
+    unchanged.
+    """
+    hasher = hashlib.md5()
+    paths = [p.name if hasattr(p, 'name') else p for p in fragment_files]
+    paths += [p for p in (config_file, kconfig_file) if p]
+    for path in sorted(paths):
+        try:
+            hasher.update(f'{path}:{os.path.getmtime(path)}'.encode())
+        except OSError:
+            return None
+    return hasher.hexdigest()
+
+
+def _load_lf_cache(cache_path, key):
+    """Load parsed FragmentFile list from cache if key matches.
+
+    The lf cache is written and read only by ldgen, in the same build
+    directory where sections.ld, compiled object files, and the rest of
+    the build state already live. The trust boundary matches the build
+    system's trust boundary: anyone who can modify <output>.lfcache can
+    also modify sections.ld, *.o, or the toolchain binaries directly.
+    pickle is safe in this context; it is not exposed to untrusted input.
+    """
+    try:
+        with open(cache_path, 'rb') as f:
+            data = pickle.load(f)
+        if isinstance(data, dict) and data.get('key') == key:
+            return data.get('fragments')
+    except (OSError, pickle.UnpicklingError, EOFError, AttributeError, ImportError, ValueError):
+        pass
+    return None
+
+
+def _save_lf_cache(cache_path, key, fragments):
+    """Save parsed FragmentFile list for next run."""
+    try:
+        with open(cache_path, 'wb') as f:
+            pickle.dump({'key': key, 'fragments': fragments}, f, pickle.HIGHEST_PROTOCOL)
+    except (OSError, pickle.PicklingError):
         pass
 
 
@@ -196,15 +246,34 @@ def main():
 
         sdkconfig = SDKConfig(kconfig_file, config_file)
 
-        for fragment_file in fragment_files:
-            try:
-                fragment_file = parse_fragment_file(fragment_file, sdkconfig)
-            except (ParseException, ParseFatalException) as e:
-                # ParseException is raised on incorrect grammar
-                # ParseFatalException is raised on correct grammar, but inconsistent contents (ex. duplicate
-                # keys, key unsupported by fragment, unexpected number of values, etc.)
-                raise LdGenFailure(f'failed to parse {fragment_file}\n{e}')
-            generation_model.add_fragments_from_file(fragment_file)
+        # Try to load parsed fragment files from cache. The lf cache is
+        # complementary to the fingerprint skip above: if we get here, section
+        # names changed, but the fragment files themselves may still be
+        # identical and don't need re-parsing.
+        lf_cache_path = None if no_cache or not output_path else output_path + '.lfcache'
+        lf_cache_key = None if no_cache else _compute_lf_cache_key(fragment_files, config_file, kconfig_file)
+        parsed_fragments = None
+        if lf_cache_path and lf_cache_key:
+            parsed_fragments = _load_lf_cache(lf_cache_path, lf_cache_key)
+            if parsed_fragments is not None:
+                print('Skipping linker fragment parsing, fragment files unchanged')
+
+        if parsed_fragments is None:
+            parsed_fragments = []
+            for fragment_file in fragment_files:
+                try:
+                    parsed = parse_fragment_file(fragment_file, sdkconfig)
+                except (ParseException, ParseFatalException) as e:
+                    # ParseException is raised on incorrect grammar
+                    # ParseFatalException is raised on correct grammar, but inconsistent contents (ex. duplicate
+                    # keys, key unsupported by fragment, unexpected number of values, etc.)
+                    raise LdGenFailure(f'failed to parse {fragment_file}\n{e}')
+                parsed_fragments.append(parsed)
+            if lf_cache_path and lf_cache_key:
+                _save_lf_cache(lf_cache_path, lf_cache_key, parsed_fragments)
+
+        for parsed in parsed_fragments:
+            generation_model.add_fragments_from_file(parsed)
 
         non_contiguous_sram = sdkconfig.evaluate_expression('SOC_MEM_NON_CONTIGUOUS_SRAM')
         mapping_rules = generation_model.generate(sections_infos, non_contiguous_sram)

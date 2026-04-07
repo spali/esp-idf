@@ -174,6 +174,34 @@ def test_rebuild_ldgen_fingerprint(idf_py: IdfPyFunc, test_app_copy: Path) -> No
     assert skip_msg not in result.stdout, f'unexpected {skip_msg!r} in build output after fragment change'
 
 
+def test_rebuild_ldgen_lf_cache(idf_py: IdfPyFunc, test_app_copy: Path) -> None:
+    """Verify the ldgen lf cache: when section names change but fragment files
+    don't, parsed FragmentFile objects are loaded from cache rather than
+    re-parsed, and an informational message is printed.
+    """
+    cache_msg = 'Skipping linker fragment parsing, fragment files unchanged'
+
+    logging.info('initial build')
+    idf_py('build')
+
+    logging.info(
+        'adding a new function changes section names but leaves fragment files unchanged - lf cache should hit'
+    )
+    replace_in_file(
+        test_app_copy / 'main' / 'build_test_app.c',
+        '// placeholder_before_main',
+        'void test_ldgen_lf_cache_extra_func(void) {}',
+    )
+    result = idf_py('build')
+    assert cache_msg in result.stdout, f'expected {cache_msg!r} in build output'
+
+    logging.info('touching a fragment file invalidates the lf cache')
+    idf_path = Path(os.environ['IDF_PATH'])
+    (idf_path / 'components/esp_common/common.lf').touch()
+    result = idf_py('build')
+    assert cache_msg not in result.stdout, f'unexpected {cache_msg!r} in build output after fragment change'
+
+
 @pytest.mark.usefixtures('idf_copy')
 def test_rebuild_version_change(idf_py: IdfPyFunc, test_app_copy: Path) -> None:
     idf_path = Path(os.environ['IDF_PATH'])
