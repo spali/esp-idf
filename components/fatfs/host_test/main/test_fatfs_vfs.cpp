@@ -26,7 +26,7 @@ static char drv[3];
 
 static void test_setup(void)
 {
-    FATFS *fs;
+    FATFS *fs = nullptr;
     esp_err_t ret = ESP_OK;
     FRESULT fr_result;
 
