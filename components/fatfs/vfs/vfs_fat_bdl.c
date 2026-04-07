@@ -116,7 +116,7 @@ esp_err_t esp_vfs_fat_bdl_mount(const char *base_path,
     ESP_GOTO_ON_ERROR(ff_diskio_register_bdl(pdrv, bdl_handle), fail, TAG,
                       "ff_diskio_register_bdl failed pdrv=%i, error - 0x(%x)", pdrv, ret);
 
-    FATFS *fs;
+    FATFS *fs = NULL;
     esp_vfs_fat_conf_t conf = {
         .base_path = base_path,
         .fat_drive = drv,
