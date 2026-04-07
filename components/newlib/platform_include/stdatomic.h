@@ -12,10 +12,15 @@
 extern "C" {
 #endif
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wshadow"
+
 static inline bool __atomic_test_and_set(volatile void *ptr, int memorder)
 {
     return __atomic_exchange_1((bool *)ptr, true, memorder);
 }
+
+#pragma GCC diagnostic pop
 
 #ifdef __cplusplus
 }
