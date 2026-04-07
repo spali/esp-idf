@@ -1,5 +1,6 @@
 INPUT += \
     $(PROJECT_PATH)/components/esp_hal_dma/esp32s31/include/hal/bitscrambler_peri_select.h \
+    $(PROJECT_PATH)/components/esp_lcd/rgb/include/esp_lcd_panel_rgb.h \
     $(PROJECT_PATH)/components/esp_driver_jpeg/include/driver/jpeg_decode.h \
     $(PROJECT_PATH)/components/esp_driver_jpeg/include/driver/jpeg_encode.h \
     $(PROJECT_PATH)/components/esp_driver_jpeg/include/driver/jpeg_types.h \

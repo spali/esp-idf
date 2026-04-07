@@ -12,7 +12,7 @@
 #include "sdkconfig.h"
 #if CONFIG_LCD_ENABLE_DEBUG_LOG
 // The local log level must be defined before including esp_log.h
-// Set the maximum log level for gptimer driver
+// Set the maximum log level for rgb lcd driver
 #define LOG_LOCAL_LEVEL ESP_LOG_VERBOSE
 #endif
 #include "freertos/FreeRTOS.h"
@@ -41,7 +41,6 @@
 #include "esp_cache.h"
 #include "esp_memory_utils.h"
 #include "hal/lcd_periph.h"
-#include "soc/io_mux_reg.h"
 #include "hal/lcd_hal.h"
 #include "hal/lcd_ll.h"
 #include "hal/cache_hal.h"
@@ -95,6 +94,11 @@ static esp_err_t lcd_rgb_panel_configure_gpio(esp_rgb_panel_t *rgb_panel, const 
 static void lcd_rgb_panel_release_gpio(esp_rgb_panel_t *rgb_panel);
 static void lcd_rgb_panel_start_transmission(esp_rgb_panel_t *rgb_panel);
 static void rgb_lcd_default_isr_handler(void *args);
+static esp_err_t lcd_rgb_panel_configure_gpio_matrix(const esp_lcd_rgb_panel_config_t *panel_config, int panel_id, uint64_t *gpio_reserve_mask);
+#if LCD_LL_SUPPORT(IOMUX)
+static bool lcd_rgb_panel_can_use_iomux(const esp_lcd_rgb_panel_config_t *panel_config, const soc_lcd_rgb_iomux_desc_t *iomux_desc);
+static esp_err_t lcd_rgb_panel_configure_iomux(const esp_lcd_rgb_panel_config_t *panel_config, const soc_lcd_rgb_iomux_desc_t *iomux_desc, uint64_t *gpio_reserve_mask);
+#endif // LCD_LL_SUPPORT(IOMUX)
 
 struct esp_rgb_panel_t {
     esp_lcd_panel_t base;  // Base class of generic lcd panel
@@ -207,6 +211,7 @@ static esp_err_t lcd_rgb_panel_alloc_frame_buffers(esp_rgb_panel_t *rgb_panel, c
 
         // flush data from cache to the physical memory
         if (rgb_panel->flags.fb_behind_cache) {
+            ESP_LOGD(TAG, "frame buffer %d at %p is behind the cache", i, rgb_panel->fbs[i]);
             esp_cache_msync(rgb_panel->fbs[i], rgb_panel->fb_size, ESP_CACHE_MSYNC_FLAG_DIR_C2M | ESP_CACHE_MSYNC_FLAG_UNALIGNED);
         }
     }
@@ -245,6 +250,10 @@ static esp_err_t lcd_rgb_panel_destroy(esp_rgb_panel_t *rgb_panel)
     if (rgb_panel->clk_src) {
         esp_clk_tree_enable_src(rgb_panel->clk_src, false);
     }
+    // force power off LCD trans buffer power
+    lcd_ll_mem_force_low_power(rgb_panel->hal.dev);
+    // disable the LCD trans buffer
+    lcd_ll_enable_trans_buffer(rgb_panel->hal.dev, false);
     if (rgb_panel->panel_id >= 0) {
         PERIPH_RCC_RELEASE_ATOMIC(soc_lcd_rgb_signals[rgb_panel->panel_id].module, ref_count) {
             if (ref_count == 0) {
@@ -389,13 +398,19 @@ esp_err_t esp_lcd_new_rgb_panel(const esp_lcd_rgb_panel_config_t *rgb_panel_conf
     PERIPH_RCC_ATOMIC() {
         lcd_ll_enable_clock(hal->dev, true);
     }
+    // power down memory during low power stage
+    lcd_ll_mem_set_low_power_mode(hal->dev, LCD_LL_MEM_LP_MODE_SHUT_DOWN);
+    // let PMU control the LCD trans buffer power
+    lcd_ll_mem_power_by_pmu(hal->dev);
+    // enable the LCD trans buffer to improve the performance and prevent underrun
+    lcd_ll_enable_trans_buffer(hal->dev, true);
     // set clock source
     ret = lcd_rgb_panel_select_clock_src(rgb_panel, rgb_panel_config->clk_src);
     ESP_GOTO_ON_ERROR(ret, err, TAG, "set source clock failed");
 
     // reset peripheral and FIFO after we select a correct clock source
-    lcd_ll_fifo_reset(hal->dev);
     lcd_ll_reset(hal->dev);
+    lcd_ll_fifo_reset(hal->dev);
     // install interrupt service, (LCD peripheral shares the interrupt source with Camera by different mask)
     int isr_flags = LCD_RGB_INTR_ALLOC_FLAGS | ESP_INTR_FLAG_SHARED | ESP_INTR_FLAG_LOWMED;
     ret = esp_intr_alloc_intrstatus(soc_lcd_rgb_signals[panel_id].irq_id, isr_flags,
@@ -592,8 +607,8 @@ static esp_err_t rgb_panel_del(esp_lcd_panel_t *panel)
 static esp_err_t rgb_panel_reset(esp_lcd_panel_t *panel)
 {
     esp_rgb_panel_t *rgb_panel = __containerof(panel, esp_rgb_panel_t, base);
-    lcd_ll_fifo_reset(rgb_panel->hal.dev);
     lcd_ll_reset(rgb_panel->hal.dev);
+    lcd_ll_fifo_reset(rgb_panel->hal.dev);
     return ESP_OK;
 }
 
@@ -809,35 +824,16 @@ static esp_err_t lcd_rgb_panel_configure_gpio(esp_rgb_panel_t *rgb_panel, const 
     int panel_id = rgb_panel->panel_id;
     // Set the number of output data lines
     lcd_ll_set_data_wire_width(rgb_panel->hal.dev, panel_config->data_width);
-    // connect peripheral signals via GPIO matrix
-    for (size_t i = 0; i < panel_config->data_width; i++) {
-        if (GPIO_IS_VALID_OUTPUT_GPIO(panel_config->data_gpio_nums[i])) {
-            gpio_matrix_output(panel_config->data_gpio_nums[i],
-                               soc_lcd_rgb_signals[panel_id].data_sigs[i], false, false);
-            gpio_reserve_mask |= (1ULL << panel_config->data_gpio_nums[i]);
-        }
-    }
-    if (GPIO_IS_VALID_OUTPUT_GPIO(panel_config->hsync_gpio_num)) {
-        gpio_matrix_output(panel_config->hsync_gpio_num,
-                           soc_lcd_rgb_signals[panel_id].hsync_sig, false, false);
-        gpio_reserve_mask |= (1ULL << panel_config->hsync_gpio_num);
-    }
-    if (GPIO_IS_VALID_OUTPUT_GPIO(panel_config->vsync_gpio_num)) {
-        gpio_matrix_output(panel_config->vsync_gpio_num,
-                           soc_lcd_rgb_signals[panel_id].vsync_sig, false, false);
-        gpio_reserve_mask |= (1ULL << panel_config->vsync_gpio_num);
-    }
-    // PCLK may not be necessary in some cases (i.e. VGA output)
-    if (GPIO_IS_VALID_OUTPUT_GPIO(panel_config->pclk_gpio_num)) {
-        gpio_matrix_output(panel_config->pclk_gpio_num,
-                           soc_lcd_rgb_signals[panel_id].pclk_sig, false, false);
-        gpio_reserve_mask |= (1ULL << panel_config->pclk_gpio_num);
-    }
-    // DE signal might not be necessary for some RGB LCD
-    if (GPIO_IS_VALID_OUTPUT_GPIO(panel_config->de_gpio_num)) {
-        gpio_matrix_output(panel_config->de_gpio_num,
-                           soc_lcd_rgb_signals[panel_id].de_sig, false, false);
-        gpio_reserve_mask |= (1ULL << panel_config->de_gpio_num);
+#if LCD_LL_SUPPORT(IOMUX)
+    const soc_lcd_rgb_iomux_desc_t *iomux_desc = &soc_lcd_rgb_iomux_descs[panel_id];
+    if (lcd_rgb_panel_can_use_iomux(panel_config, iomux_desc)) {
+        ESP_RETURN_ON_ERROR(lcd_rgb_panel_configure_iomux(panel_config, iomux_desc, &gpio_reserve_mask), TAG, "configure RGB iomux failed");
+        ESP_LOGD(TAG, "RGB panel uses IOMUX (data_width=%zu)", panel_config->data_width);
+    } else
+#endif // LCD_LL_SUPPORT(IOMUX)
+    {
+        ESP_RETURN_ON_ERROR(lcd_rgb_panel_configure_gpio_matrix(panel_config, panel_id, &gpio_reserve_mask), TAG, "configure RGB GPIO matrix failed");
+        ESP_LOGD(TAG, "RGB panel uses GPIO matrix (data_width=%zu)", panel_config->data_width);
     }
     // disp enable GPIO is optional, it is a general purpose output GPIO
     if (GPIO_IS_VALID_OUTPUT_GPIO(panel_config->disp_gpio_num)) {
@@ -856,6 +852,93 @@ static esp_err_t lcd_rgb_panel_configure_gpio(esp_rgb_panel_t *rgb_panel, const 
     }
 
     rgb_panel->gpio_reserve_mask = gpio_reserve_mask;
+    return ESP_OK;
+}
+
+#if LCD_LL_SUPPORT(IOMUX)
+static bool lcd_rgb_panel_can_use_iomux(const esp_lcd_rgb_panel_config_t *panel_config, const soc_lcd_rgb_iomux_desc_t *iomux_desc)
+{
+    for (size_t i = 0; i < panel_config->data_width; i++) {
+        if (panel_config->data_gpio_nums[i] != iomux_desc->data_pins[i].gpio_num) {
+            return false;
+        }
+    }
+    if (GPIO_IS_VALID_OUTPUT_GPIO(panel_config->hsync_gpio_num) && panel_config->hsync_gpio_num != iomux_desc->hsync_pin.gpio_num) {
+        return false;
+    }
+    if (GPIO_IS_VALID_OUTPUT_GPIO(panel_config->vsync_gpio_num) && panel_config->vsync_gpio_num != iomux_desc->vsync_pin.gpio_num) {
+        return false;
+    }
+    if (GPIO_IS_VALID_OUTPUT_GPIO(panel_config->pclk_gpio_num) && panel_config->pclk_gpio_num != iomux_desc->pclk_pin.gpio_num) {
+        return false;
+    }
+    if (GPIO_IS_VALID_OUTPUT_GPIO(panel_config->de_gpio_num) && panel_config->de_gpio_num != iomux_desc->de_pin.gpio_num) {
+        return false;
+    }
+    return true;
+}
+
+static esp_err_t lcd_rgb_panel_configure_iomux(const esp_lcd_rgb_panel_config_t *panel_config, const soc_lcd_rgb_iomux_desc_t *iomux_desc, uint64_t *gpio_reserve_mask)
+{
+    for (size_t i = 0; i < panel_config->data_width; i++) {
+        const soc_lcd_iomux_pin_desc_t *pin = &iomux_desc->data_pins[i];
+        ESP_RETURN_ON_ERROR(gpio_iomux_output(pin->gpio_num, pin->func), TAG, "set data[%zu] iomux failed", i);
+        *gpio_reserve_mask |= (1ULL << pin->gpio_num);
+    }
+    if (GPIO_IS_VALID_OUTPUT_GPIO(panel_config->hsync_gpio_num)) {
+        ESP_RETURN_ON_ERROR(gpio_iomux_output(iomux_desc->hsync_pin.gpio_num, iomux_desc->hsync_pin.func), TAG, "set hsync iomux failed");
+        *gpio_reserve_mask |= (1ULL << panel_config->hsync_gpio_num);
+    }
+    if (GPIO_IS_VALID_OUTPUT_GPIO(panel_config->vsync_gpio_num)) {
+        ESP_RETURN_ON_ERROR(gpio_iomux_output(iomux_desc->vsync_pin.gpio_num, iomux_desc->vsync_pin.func), TAG, "set vsync iomux failed");
+        *gpio_reserve_mask |= (1ULL << panel_config->vsync_gpio_num);
+    }
+    // PCLK may not be necessary in some cases (i.e. VGA output)
+    if (GPIO_IS_VALID_OUTPUT_GPIO(panel_config->pclk_gpio_num)) {
+        ESP_RETURN_ON_ERROR(gpio_iomux_output(iomux_desc->pclk_pin.gpio_num, iomux_desc->pclk_pin.func), TAG, "set pclk iomux failed");
+        *gpio_reserve_mask |= (1ULL << panel_config->pclk_gpio_num);
+    }
+    // DE signal might not be necessary for some RGB LCD
+    if (GPIO_IS_VALID_OUTPUT_GPIO(panel_config->de_gpio_num)) {
+        ESP_RETURN_ON_ERROR(gpio_iomux_output(iomux_desc->de_pin.gpio_num, iomux_desc->de_pin.func), TAG, "set de iomux failed");
+        *gpio_reserve_mask |= (1ULL << panel_config->de_gpio_num);
+    }
+    return ESP_OK;
+}
+#endif // LCD_LL_SUPPORT(IOMUX)
+
+static esp_err_t lcd_rgb_panel_configure_gpio_matrix(const esp_lcd_rgb_panel_config_t *panel_config, int panel_id, uint64_t *gpio_reserve_mask)
+{
+    // connect peripheral signals via GPIO matrix
+    for (size_t i = 0; i < panel_config->data_width; i++) {
+        if (GPIO_IS_VALID_OUTPUT_GPIO(panel_config->data_gpio_nums[i])) {
+            gpio_matrix_output(panel_config->data_gpio_nums[i],
+                               soc_lcd_rgb_signals[panel_id].data_sigs[i], false, false);
+            *gpio_reserve_mask |= (1ULL << panel_config->data_gpio_nums[i]);
+        }
+    }
+    if (GPIO_IS_VALID_OUTPUT_GPIO(panel_config->hsync_gpio_num)) {
+        gpio_matrix_output(panel_config->hsync_gpio_num,
+                           soc_lcd_rgb_signals[panel_id].hsync_sig, false, false);
+        *gpio_reserve_mask |= (1ULL << panel_config->hsync_gpio_num);
+    }
+    if (GPIO_IS_VALID_OUTPUT_GPIO(panel_config->vsync_gpio_num)) {
+        gpio_matrix_output(panel_config->vsync_gpio_num,
+                           soc_lcd_rgb_signals[panel_id].vsync_sig, false, false);
+        *gpio_reserve_mask |= (1ULL << panel_config->vsync_gpio_num);
+    }
+    // PCLK may not be necessary in some cases (i.e. VGA output)
+    if (GPIO_IS_VALID_OUTPUT_GPIO(panel_config->pclk_gpio_num)) {
+        gpio_matrix_output(panel_config->pclk_gpio_num,
+                           soc_lcd_rgb_signals[panel_id].pclk_sig, false, false);
+        *gpio_reserve_mask |= (1ULL << panel_config->pclk_gpio_num);
+    }
+    // DE signal might not be necessary for some RGB LCD
+    if (GPIO_IS_VALID_OUTPUT_GPIO(panel_config->de_gpio_num)) {
+        gpio_matrix_output(panel_config->de_gpio_num,
+                           soc_lcd_rgb_signals[panel_id].de_sig, false, false);
+        *gpio_reserve_mask |= (1ULL << panel_config->de_gpio_num);
+    }
     return ESP_OK;
 }
 
@@ -1197,10 +1280,10 @@ static IRAM_ATTR void lcd_rgb_panel_try_restart_transmission(esp_rgb_panel_t *pa
 static void lcd_rgb_panel_start_transmission(esp_rgb_panel_t *rgb_panel)
 {
     // reset FIFO of DMA and LCD, in case there remains old frame data
-    gdma_reset(rgb_panel->dma_chan);
     lcd_ll_stop(rgb_panel->hal.dev);
     lcd_ll_reset(rgb_panel->hal.dev);
     lcd_ll_fifo_reset(rgb_panel->hal.dev);
+    gdma_reset(rgb_panel->dma_chan);
 
     // pre-fill bounce buffers if needed
     if (rgb_panel->bb_size) {
