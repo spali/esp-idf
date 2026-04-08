@@ -10,7 +10,6 @@ from pytest_embedded_idf.utils import idf_parametrize
 
 @pytest.mark.generic
 @idf_parametrize('target', ['supported_targets'], indirect=['target'])
-@pytest.mark.temp_skip_ci(targets=['esp32s31'], reason='s31 bringup on this module is not done')
 def test_blink(dut: IdfDut) -> None:
     # check and log bin size
     binary_file = os.path.join(dut.app.binary_path, 'blink.bin')
