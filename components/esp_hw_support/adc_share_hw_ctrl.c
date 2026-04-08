@@ -208,7 +208,7 @@ void adc_apb_periph_claim(void)
         //enable ADC digital part
         periph_module_enable(PERIPH_SARADC_MODULE);
         //reset ADC digital part
-        periph_module_reset(PERIPH_SARADC_MODULE);
+        sar_periph_ctrl_adc_reset();
     }
 
     portEXIT_CRITICAL(&s_spinlock);
