@@ -9,7 +9,6 @@ from pytest_embedded_idf.utils import idf_parametrize
 
 
 @pytest.mark.ethernet
-@pytest.mark.flaky(reruns=2, reruns_delay=5)
 @idf_parametrize('target', ['esp32'], indirect=['target'])
 def test_examples_protocol_https_x509_bundle(dut: Dut) -> None:
     """
@@ -31,7 +30,6 @@ def test_examples_protocol_https_x509_bundle(dut: Dut) -> None:
 
 
 @pytest.mark.ethernet
-@pytest.mark.flaky(reruns=2, reruns_delay=5)
 @pytest.mark.parametrize(
     'config',
     [
