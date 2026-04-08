@@ -340,6 +340,7 @@ if __name__ == '__main__':
     _exclude_dirs = [
         os.path.join(IDF_PATH, 'tools', 'test_build_system'),
         os.path.join(IDF_PATH, 'tools', 'templates', 'sample_project'),
+        os.path.join(IDF_PATH, 'tools', 'templates', 'sample_project_cpp'),
         os.path.join(IDF_PATH, 'tools', 'cmakev2', 'test'),
     ]
 

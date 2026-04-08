@@ -25,7 +25,7 @@ Start a New Project: ``create-project``
 
     idf.py create-project <project name>
 
-This command creates a new ESP-IDF project. Additionally, the folder where the project will be created in can be specified by the ``--path`` option.
+This command creates a new ESP-IDF project. Additionally, the folder where the project will be created in can be specified by the ``--path`` option. Pass ``--cpp`` to create a C++ source file (``<project name>.cpp``) with C linkage for ``app_main`` instead of a ``.c`` file.
 
 Create a New Component: ``create-component``
 --------------------------------------------
