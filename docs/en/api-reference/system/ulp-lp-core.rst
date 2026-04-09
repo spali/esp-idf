@@ -202,6 +202,15 @@ Once the program is loaded into LP memory, the application can be configured and
 
     ESP_ERROR_CHECK( ulp_lp_core_run(&cfg) );
 
+Running the LP Core from HP Memory
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+:ref:`CONFIG_ULP_COPROC_RUN_FROM_HP_MEM` allows placing most of the LP core application in reserved HP SRAM instead of LP RAM. This can be useful when the application is too large to fit in LP RAM, while still keeping the LP reset and handler code in LP memory.
+
+When this option is enabled, :ref:`CONFIG_ULP_COPROC_RESERVE_HP_MEM_BYTES` reserves a window at the top of HP SRAM for the LP core binary. During :cpp:func:`ulp_lp_core_load_binary`, LP-memory segments are still loaded into the reserved LP region, while data and code segments mapped to the HP-memory window are copied into the reserved HP SRAM region.
+
+This mode has an important limitation: the LP core cannot keep running while the chip is in Deep-sleep, because HP SRAM is powered down in that sleep mode. Use this mode for cases where the LP core only needs to run while the HP system remains powered, and keep the default LP-memory-only mode for Deep-sleep use cases.
+
 ULP LP Core Program Flow
 ------------------------
 
