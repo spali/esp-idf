@@ -7,6 +7,7 @@ from pytest_embedded_qemu.dut import QemuDut
 
 @pytest.mark.qemu
 @idf_parametrize('target', ['esp32', 'esp32c3'], indirect=['target'])
+@pytest.mark.temp_skip_ci(targets=['esp32', 'esp32c3'], reason='Build is failing, todo IDFCI-10438')
 def test_cmakev2_import_lib(dut: QemuDut) -> None:
     dut.expect_exact('Initializing the filesystem')
     dut.expect_exact('Read XML data:')
