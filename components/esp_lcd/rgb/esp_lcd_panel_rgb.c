@@ -954,7 +954,7 @@ static IRAM_ATTR bool lcd_rgb_panel_fill_bounce_buffer(esp_rgb_panel_t *panel, u
     if (panel->num_fbs > 0 && panel->flags.fb_behind_cache) {
         cache_hal_preload(CACHE_LL_LEVEL_EXT_MEM, CACHE_TYPE_DATA,
                           (uint32_t)&panel->fbs[panel->bb_fb_index][panel->bounce_pos_px * bytes_per_pixel],
-                          panel->bb_size, false);
+                          panel->bb_size, CACHE_PRELOAD_ORDER_ASCENDING);
     }
     return need_yield;
 }
