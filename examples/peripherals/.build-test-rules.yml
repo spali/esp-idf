@@ -835,9 +835,6 @@ examples/peripherals/usb/device/tusb_ncm:
 examples/peripherals/usb/host:
   disable:
     - if: SOC_USB_OTG_SUPPORTED != 1
-    - if: IDF_TARGET == "esp32s31"
-      temporary: true
-      reason: USB host examples do not support esp32s31 yet
   disable_test:
     - if: IDF_TARGET not in ["esp32s3", "esp32p4"]
       temporary: true
