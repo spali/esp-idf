@@ -54,7 +54,6 @@ BLE_DOCS = [
     'migration-guides/release-5.x/5.0/bluetooth-low-energy.rst',
 ]
 
-
 BLE_MESH_DOCS = [
     'api-guides/esp-ble-mesh/ble-mesh-index.rst',
     'api-guides/esp-ble-mesh/ble-mesh-feature-list.rst',
@@ -330,7 +329,6 @@ ESP32H4_DOCS = [
 
 ESP32S31_DOCS = [
     'api-reference/system/ipc.rst',
-    'api-reference/peripherals/sd_pullup_requirements.rst',
     'api-guides/RF_calibration.rst',
     'api-guides/phy.rst',
 ]
@@ -451,7 +449,6 @@ github_repo = 'espressif/esp-idf'
 # context used by sphinx_idf_theme
 html_context['github_user'] = 'espressif'  # noqa: F405
 html_context['github_repo'] = 'esp-idf'  # noqa: F405
-
 
 # Extra options required by sphinx_idf_theme
 project_slug = 'esp-idf'
