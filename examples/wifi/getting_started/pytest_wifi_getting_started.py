@@ -33,7 +33,7 @@ from pytest_embedded_idf.utils import idf_parametrize
 )
 @idf_parametrize(
     'target',
-    ['esp32', 'esp32c3', 'esp32s2', 'esp32s3', 'esp32c5', 'esp32c6', 'esp32c61'],
+    ['esp32', 'esp32c3', 'esp32s2', 'esp32s3', 'esp32s31', 'esp32c5', 'esp32c6', 'esp32c61'],
     indirect=['target'],
 )
 def test_wifi_getting_started(dut: tuple[IdfDut, IdfDut]) -> None:

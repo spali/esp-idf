@@ -330,6 +330,9 @@ ESP32H4_DOCS = [
 
 ESP32S31_DOCS = [
     'api-reference/system/ipc.rst',
+    'api-reference/peripherals/sd_pullup_requirements.rst',
+    'api-guides/RF_calibration.rst',
+    'api-guides/phy.rst',
 ]
 
 ESP32P4_DOCS = [
@@ -454,7 +457,7 @@ html_context['github_repo'] = 'esp-idf'  # noqa: F405
 project_slug = 'esp-idf'
 versions_url = 'https://dl.espressif.com/dl/esp-idf/idf_versions.js'
 
-idf_targets = ['esp32', 'esp32s2', 'esp32s3', 'esp32c3', 'esp32c2', 'esp32c5', 'esp32c6', 'esp32p4']
+idf_targets = ['esp32', 'esp32s2', 'esp32s3', 'esp32s31', 'esp32c3', 'esp32c2', 'esp32c5', 'esp32c6', 'esp32p4']
 languages = ['en', 'zh_CN']
 
 google_analytics_id = os.environ.get('CI_GOOGLE_ANALYTICS_ID', None)

@@ -47,7 +47,7 @@ def _sniffer_packets_check(dut: Dut, channel: int, packet_num: int) -> None:
 )
 @idf_parametrize(
     'target',
-    ['esp32', 'esp32c2', 'esp32c3', 'esp32c5', 'esp32c6', 'esp32c61', 'esp32s2', 'esp32s3'],
+    ['esp32', 'esp32c2', 'esp32c3', 'esp32c5', 'esp32c6', 'esp32c61', 'esp32s2', 'esp32s3', 'esp32s31'],
     indirect=['target'],
 )
 def test_examples_simple_sniffer(dut: Dut) -> None:
