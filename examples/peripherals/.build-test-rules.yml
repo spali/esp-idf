@@ -718,7 +718,7 @@ examples/peripherals/touch_sensor/touch_sens_basic:
 
 examples/peripherals/touch_sensor/touch_sens_sleep:
   disable:
-    - if: SOC_TOUCH_SENSOR_SUPPORTED != 1 or SOC_PM_SUPPORT_TOUCH_SENSOR_WAKEUP != 1
+    - if: SOC_TOUCH_SENSOR_SUPPORTED != 1 or SOC_PM_SUPPORT_TOUCH_SENSOR_WAKEUP != 1 or SOC_TOUCH_SUPPORT_SLEEP_WAKEUP != 1
   depends_components:
     - esp_driver_touch_sens
     - esp_hal_touch_sens
