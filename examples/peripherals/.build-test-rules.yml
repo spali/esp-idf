@@ -744,6 +744,10 @@ examples/peripherals/twai/twai_error_recovery:
 examples/peripherals/twai/twai_network/twai_listen_only:
   disable:
     - if: SOC_TWAI_SUPPORTED != 1
+  disable_test:
+    - if: IDF_TARGET in ["esp32s31"]
+      temporary: true
+      reason: no runner
   depends_components:
     - esp_driver_twai
     - esp_hal_twai
@@ -752,6 +756,10 @@ examples/peripherals/twai/twai_network/twai_listen_only:
 examples/peripherals/twai/twai_network/twai_sender:
   disable:
     - if: SOC_TWAI_SUPPORTED != 1
+  disable_test:
+    - if: IDF_TARGET in ["esp32s31"]
+      temporary: true
+      reason: no runner
   depends_components:
     - esp_driver_twai
     - esp_hal_twai
