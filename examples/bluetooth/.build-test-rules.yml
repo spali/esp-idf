@@ -162,6 +162,24 @@ examples/bluetooth/blufi:
     - esp_console
     - esp_wifi
 
+examples/bluetooth/esp_ble_audio:
+  <<: *bt_default_depends
+  enable:
+    - if: SOC_BLE_AUDIO_SUPPORTED == 1 and IDF_TARGET == "esp32H4"
+      temporary: true
+      reason: BLE Audio examples only supported on ESP32-H4
+  depends_filepatterns:
+    - examples/bluetooth/esp_ble_audio/common_components/**/*
+
+examples/bluetooth/esp_ble_iso:
+  <<: *bt_default_depends
+  enable:
+    - if: SOC_BLE_ISO_SUPPORTED == 1 and IDF_TARGET == "esp32H4"
+      temporary: true
+      reason: BLE ISO examples only supported on ESP32-H4
+  depends_filepatterns:
+    - examples/bluetooth/esp_ble_iso/common_components/**/*
+
 examples/bluetooth/esp_ble_mesh:
   <<: *bt_default_depends
   disable:
