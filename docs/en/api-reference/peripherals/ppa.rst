@@ -175,7 +175,7 @@ The PPA operations are acted on the target block of an input picture. Therefore,
 Application Examples
 ^^^^^^^^^^^^^^^^^^^^
 
-* :example:`peripherals/ppa/ppa_dsi` - PPA with DSI display example. The image used in this example will be first scaled up, rotated at counter-clockwise direction and rotated back, mirrored and mirror back, and scaled down. Then the image will be blended with a whole red image with less transparency. Next the `ESP32` word will be color-keyed out. Lastly a frame will be filled around the `ESP32`.
+* :example:`peripherals/ppa/ppa_rgb_lcd` - PPA with RGB LCD display example. The image used in this example will be first scaled up, rotated at counter-clockwise direction and rotated back, mirrored and mirror back, and scaled down. Then the image will be blended with a whole red image with less transparency. Next the `ESP32` word will be color-keyed out. Lastly a frame will be filled around the `ESP32`.
 
 API Reference
 -------------
