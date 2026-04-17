@@ -173,8 +173,7 @@ examples/bluetooth/bluedroid/coex/a2dp_gatts_coex:
 examples/bluetooth/blufi:
   <<: *bt_default_depends
   disable:
-    - if: SOC_BT_SUPPORTED != 1
-    - if: SOC_WIFI_SUPPORTED != 1
+    - if: SOC_BLUFI_SUPPORTED != 1
   depends_components+:
     - esp_console
     - esp_wifi
