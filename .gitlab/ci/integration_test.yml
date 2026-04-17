@@ -43,6 +43,8 @@ gen_integration_pipeline:
   needs:
     - job: manual_gate
       optional: true
+    - job: pre_check_complete
+      artifacts: false
   artifacts:
     paths:
       - idf-integration-ci/child_pipeline/
