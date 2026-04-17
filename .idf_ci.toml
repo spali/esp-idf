@@ -1,5 +1,6 @@
 preserve_non_test_related_apps = false
 filter_non_test_related_apps_by_modified_files = true
+filter_apps_by_component_target = true
 exclude_dirs = [
     'tools/test_mkdfu',
     'tools/test_idf_size',
