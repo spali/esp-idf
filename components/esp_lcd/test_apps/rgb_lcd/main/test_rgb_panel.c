@@ -11,7 +11,6 @@
 #include "unity.h"
 #include "esp_lcd_panel_rgb.h"
 #include "esp_lcd_panel_ops.h"
-#include "esp_random.h"
 #include "esp_timer.h"
 #include "esp_attr.h"
 #include "test_rgb_board.h"
@@ -101,9 +100,9 @@ TEST_CASE("lcd_rgb_panel_stream_mode", "[lcd]")
     esp_lcd_panel_handle_t panel_handle = test_rgb_panel_initialization(16, LCD_COLOR_FMT_RGB565, 0, LCD_CLK_SRC_DEFAULT, false, false, NULL, NULL);
     printf("flush random color block\r\n");
     for (int i = 0; i < 200; i++) {
-        uint8_t color_byte = esp_random() & 0xFF;
-        int x_start = esp_random() % (TEST_LCD_H_RES - 100);
-        int y_start = esp_random() % (TEST_LCD_V_RES - 100);
+        uint8_t color_byte = rand() & 0xFF;
+        int x_start = rand() % (TEST_LCD_H_RES - 100);
+        int y_start = rand() % (TEST_LCD_V_RES - 100);
         memset(img, color_byte, TEST_IMG_SIZE);
         esp_lcd_panel_draw_bitmap(panel_handle, x_start, y_start, x_start + 100, y_start + 100, img);
         vTaskDelay(pdMS_TO_TICKS(10));
@@ -121,10 +120,10 @@ TEST_CASE("lcd_rgb_panel_8bit_interface", "[lcd]")
     printf("initialize RGB panel with stream mode\r\n");
     // bpp for RGB888 is 24
     esp_lcd_panel_handle_t panel_handle = test_rgb_panel_initialization(8, LCD_COLOR_FMT_RGB888, 0, LCD_CLK_SRC_DEFAULT, false, false, NULL, NULL);
-    uint8_t color_byte = esp_random() & 0xFF;
+    uint8_t color_byte = rand() & 0xFF;
     printf("flush random color block 0x%x\r\n", color_byte);
-    int x_start = esp_random() % (TEST_LCD_H_RES - 100);
-    int y_start = esp_random() % (TEST_LCD_V_RES - 100);
+    int x_start = rand() % (TEST_LCD_H_RES - 100);
+    int y_start = rand() % (TEST_LCD_V_RES - 100);
     memset(img, color_byte, 100 * 100 * 3);
     esp_lcd_panel_draw_bitmap(panel_handle, x_start, y_start, x_start + 100, y_start + 100, img);
     vTaskDelay(pdMS_TO_TICKS(2000));
@@ -151,9 +150,9 @@ TEST_CASE("lcd_rgb_panel_refresh_on_demand", "[lcd]")
     esp_lcd_panel_handle_t panel_handle = test_rgb_panel_initialization(16, LCD_COLOR_FMT_RGB565, 0, LCD_CLK_SRC_DEFAULT, true, false, test_rgb_panel_trans_done, cur_task);
     printf("flush random color block\r\n");
     for (int i = 0; i < 200; i++) {
-        uint8_t color_byte = esp_random() & 0xFF;
-        int x_start = esp_random() % (TEST_LCD_H_RES - 100);
-        int y_start = esp_random() % (TEST_LCD_V_RES - 100);
+        uint8_t color_byte = rand() & 0xFF;
+        int x_start = rand() % (TEST_LCD_H_RES - 100);
+        int y_start = rand() % (TEST_LCD_V_RES - 100);
         memset(img, color_byte, TEST_IMG_SIZE);
         esp_lcd_panel_draw_bitmap(panel_handle, x_start, y_start, x_start + 100, y_start + 100, img);
         esp_lcd_rgb_panel_refresh(panel_handle);
@@ -176,9 +175,9 @@ TEST_CASE("lcd_rgb_panel_bounce_buffer", "[lcd]")
     esp_lcd_panel_handle_t panel_handle = test_rgb_panel_initialization(16, LCD_COLOR_FMT_RGB565, 20 * TEST_LCD_H_RES, LCD_CLK_SRC_DEFAULT, false, false, test_rgb_panel_trans_done, cur_task);
     printf("flush random color block\r\n");
     for (int i = 0; i < 200; i++) {
-        uint8_t color_byte = esp_random() & 0xFF;
-        int x_start = esp_random() % (TEST_LCD_H_RES - 100);
-        int y_start = esp_random() % (TEST_LCD_V_RES - 100);
+        uint8_t color_byte = rand() & 0xFF;
+        int x_start = rand() % (TEST_LCD_H_RES - 100);
+        int y_start = rand() % (TEST_LCD_V_RES - 100);
         memset(img, color_byte, TEST_IMG_SIZE);
         esp_lcd_panel_draw_bitmap(panel_handle, x_start, y_start, x_start + 100, y_start + 100, img);
         // wait for flush done
@@ -198,9 +197,9 @@ TEST_CASE("lcd_rgb_panel_update_pclk", "[lcd]")
     printf("initialize RGB panel with stream mode\r\n");
     esp_lcd_panel_handle_t panel_handle = test_rgb_panel_initialization(16, LCD_COLOR_FMT_RGB565, 0, LCD_CLK_SRC_DEFAULT, false, false, NULL, NULL);
     printf("flush one clock block to the LCD\r\n");
-    uint8_t color_byte = esp_random() & 0xFF;
-    int x_start = esp_random() % (TEST_LCD_H_RES - 100);
-    int y_start = esp_random() % (TEST_LCD_V_RES - 100);
+    uint8_t color_byte = rand() & 0xFF;
+    int x_start = rand() % (TEST_LCD_H_RES - 100);
+    int y_start = rand() % (TEST_LCD_V_RES - 100);
     memset(img, color_byte, TEST_IMG_SIZE);
     esp_lcd_panel_draw_bitmap(panel_handle, x_start, y_start, x_start + 100, y_start + 100, img);
     printf("The LCD driver should keep flushing the color block in the background (as it's in stream mode)\r\n");
@@ -226,9 +225,9 @@ TEST_CASE("lcd_rgb_panel_restart", "[lcd]")
     printf("initialize RGB panel with stream mode\r\n");
     esp_lcd_panel_handle_t panel_handle = test_rgb_panel_initialization(16, LCD_COLOR_FMT_RGB565, 0, LCD_CLK_SRC_DEFAULT, false, false, NULL, NULL);
     printf("flush one clock block to the LCD\r\n");
-    uint8_t color_byte = esp_random() & 0xFF;
-    int x_start = esp_random() % (TEST_LCD_H_RES - 100);
-    int y_start = esp_random() % (TEST_LCD_V_RES - 100);
+    uint8_t color_byte = rand() & 0xFF;
+    int x_start = rand() % (TEST_LCD_H_RES - 100);
+    int y_start = rand() % (TEST_LCD_V_RES - 100);
     memset(img, color_byte, TEST_IMG_SIZE);
     esp_lcd_panel_draw_bitmap(panel_handle, x_start, y_start, x_start + 100, y_start + 100, img);
     printf("The LCD driver should keep flushing the color block in the background (as it's in stream mode)\r\n");
@@ -250,7 +249,7 @@ TEST_CASE("lcd_rgb_panel_rotate", "[lcd]")
     uint64_t t = 0;
     uint8_t *img = malloc(w * h * sizeof(uint16_t));
     TEST_ASSERT_NOT_NULL(img);
-    uint8_t color_byte = esp_random() & 0xFF;
+    uint8_t color_byte = rand() & 0xFF;
     memset(img, color_byte, w * h * sizeof(uint16_t));
 
     printf("initialize RGB panel with stream mode\r\n");
@@ -282,9 +281,9 @@ TEST_CASE("lcd_rgb_panel_user_frame_buffer", "[lcd]")
     esp_lcd_panel_handle_t panel_handle = test_rgb_panel_initialization(16, LCD_COLOR_FMT_RGB565, 0, LCD_CLK_SRC_DEFAULT, false, true, NULL, NULL);
 
     printf("flush one clock block to the LCD\r\n");
-    uint8_t color_byte = esp_random() & 0xFF;
-    int x_start = esp_random() % (TEST_LCD_H_RES - 100);
-    int y_start = esp_random() % (TEST_LCD_V_RES - 100);
+    uint8_t color_byte = rand() & 0xFF;
+    int x_start = rand() % (TEST_LCD_H_RES - 100);
+    int y_start = rand() % (TEST_LCD_V_RES - 100);
     memset(img, color_byte, TEST_IMG_SIZE);
     esp_lcd_panel_draw_bitmap(panel_handle, x_start, y_start, x_start + 100, y_start + 100, img);
     printf("The LCD driver should keep flushing the color block in the background (as it's in stream mode)\r\n");
@@ -316,9 +315,9 @@ TEST_CASE("lcd_rgb_panel_use_apll", "[lcd]")
     esp_lcd_panel_handle_t panel_handle = test_rgb_panel_initialization(16, LCD_COLOR_FMT_RGB565, 0, LCD_CLK_SRC_APLL, false, false, NULL, NULL);
     printf("flush random color block\r\n");
     for (int i = 0; i < 200; i++) {
-        uint8_t color_byte = esp_random() & 0xFF;
-        int x_start = esp_random() % (TEST_LCD_H_RES - 100);
-        int y_start = esp_random() % (TEST_LCD_V_RES - 100);
+        uint8_t color_byte = rand() & 0xFF;
+        int x_start = rand() % (TEST_LCD_H_RES - 100);
+        int y_start = rand() % (TEST_LCD_V_RES - 100);
         memset(img, color_byte, TEST_IMG_SIZE);
         esp_lcd_panel_draw_bitmap(panel_handle, x_start, y_start, x_start + 100, y_start + 100, img);
         vTaskDelay(pdMS_TO_TICKS(10));
@@ -356,9 +355,9 @@ TEST_CASE("lcd_rgb_panel_iram_safe", "[lcd]")
     printf("initialize RGB panel with stream mode\r\n");
     esp_lcd_panel_handle_t panel_handle = test_rgb_panel_initialization(16, LCD_COLOR_FMT_RGB565, 0, LCD_CLK_SRC_DEFAULT, false, false, test_rgb_panel_count_in_callback, &callback_calls);
     printf("flush one clock block to the LCD\r\n");
-    uint8_t color_byte = esp_random() & 0xFF;
-    int x_start = esp_random() % (TEST_LCD_H_RES - 100);
-    int y_start = esp_random() % (TEST_LCD_V_RES - 100);
+    uint8_t color_byte = rand() & 0xFF;
+    int x_start = rand() % (TEST_LCD_H_RES - 100);
+    int y_start = rand() % (TEST_LCD_V_RES - 100);
     memset(img, color_byte, TEST_IMG_SIZE);
     esp_lcd_panel_draw_bitmap(panel_handle, x_start, y_start, x_start + 100, y_start + 100, img);
     printf("The LCD driver should keep flushing the color block in the background (as it's in stream mode)\r\n");
