@@ -58,6 +58,7 @@ list(APPEND srcs "common/multi_heap.c")
 
 # TLSF implementation for heap
 list(APPEND include "${heap_dir}/tlsf")
+list(APPEND include "${heap_dir}/rom_patches/include")
 
 # esp_app_desc_t configuration structure for TEE
 list(APPEND srcs "common/esp_app_desc_tee.c")
