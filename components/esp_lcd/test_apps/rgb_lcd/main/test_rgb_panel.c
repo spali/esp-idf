@@ -308,7 +308,7 @@ TEST_CASE("lcd_rgb_panel_use_apll", "[lcd]")
 
     printf("set APLL frequency\r\n");
     uint32_t real_freq = 0;
-    TEST_ESP_OK(esp_clk_tree_src_set_freq_hz(SOC_MOD_CLK_APLL, 160 * 1000 * 1000, &real_freq));
+    TEST_ESP_OK(esp_clk_tree_src_set_freq_hz(SOC_MOD_CLK_APLL, 120 * 1000 * 1000, &real_freq));
     printf("APLL frequency: %"PRIu32" Hz\r\n", real_freq);
 
     printf("initialize RGB panel with stream mode\r\n");
