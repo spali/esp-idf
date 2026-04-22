@@ -556,6 +556,7 @@ static int esp_transport_read_exact_size(transport_ws_t *ws, char *buffer, int r
 
 
 /* Read and parse the WS header, determine length of payload */
+
 static int ws_read_header(esp_transport_handle_t t, char *buffer, int len, int timeout_ms)
 {
     transport_ws_t *ws = esp_transport_get_context_data(t);
@@ -635,6 +636,16 @@ static int ws_read_header(esp_transport_handle_t t, char *buffer, int len, int t
     if ((ws->frame_state.opcode & WS_OPCODE_CONTROL_FRAME) && payload_len > 125) {
         ESP_LOGE(TAG, "Control frame with excessive payload detected (opcode=0x%02X, payload_len=%d) - protocol violation",
                  ws->frame_state.opcode, payload_len);
+        // Consume the payload bytes from the TCP stream to keep it in sync before returning error
+        int remaining = payload_len;
+        while (remaining > 0 && len > 0) {
+            int to_read = remaining < len ? remaining : len;
+            int bytes_read = esp_transport_read_internal(ws, buffer, to_read, timeout_ms);
+            if (bytes_read <= 0) {
+                break;
+            }
+            remaining -= bytes_read;
+        }
         return -1;
     }
     if (mask) {
@@ -725,6 +736,24 @@ static int ws_read(esp_transport_handle_t t, char *buffer, int len, int timeout_
             // automatically handle only 0 payload frames and make the transport read to return 0 on success
             // which might be interpreted as timeouts
             return ws_handle_control_frame_internal(t, timeout_ms);
+        }
+
+        // Read the full control frame payload into the caller's buffer in one shot.
+        // This prevents the client from receiving the payload in chunks and
+        // incorrectly echoing only the last chunk as a PONG response.
+        if ((ws->frame_state.opcode & WS_OPCODE_CONTROL_FRAME) && ws->frame_state.payload_len > 0) {
+            int payload_len = ws->frame_state.payload_len;
+            if (payload_len > len) {
+                ESP_LOGE(TAG, "Control frame payload (%d) exceeds caller buffer (%d)", payload_len, len);
+                return -1;
+            }
+            int bytes_read = esp_transport_read_exact_size(ws, buffer, payload_len, timeout_ms);
+            if (bytes_read != payload_len) {
+                ESP_LOGE(TAG, "Control frame payload read failed (expected=%d, got=%d)", payload_len, bytes_read);
+                return -1;
+            }
+            ws->frame_state.bytes_remaining = 0;
+            return payload_len;
         }
 
         if (rlen == 0) {
