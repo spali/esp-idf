@@ -1066,15 +1066,77 @@ Application Examples
 API Reference
 -------------
 
+MCPWM APIs are divided into the following sections:
+
+* `Timer API`_
+* `Operator API`_
+* `Comparator API`_
+* `Generator API`_
+* `Fault API`_
+* `Sync API`_
+* `Capture API`_
+* `ETM API`_
+* `Driver Types`_
+* `HAL Types`_
+
+
+Timer API
+^^^^^^^^^
+
 .. include-build-file:: inc/mcpwm_timer.inc
+
+
+Operator API
+^^^^^^^^^^^^
+
 .. include-build-file:: inc/mcpwm_oper.inc
+
+
+Comparator API
+^^^^^^^^^^^^^^
+
 .. include-build-file:: inc/mcpwm_cmpr.inc
+
+
+Generator API
+^^^^^^^^^^^^^
+
 .. include-build-file:: inc/mcpwm_gen.inc
+
+
+Fault API
+^^^^^^^^^
+
 .. include-build-file:: inc/mcpwm_fault.inc
+
+
+Sync API
+^^^^^^^^
+
 .. include-build-file:: inc/mcpwm_sync.inc
+
+
+Capture API
+^^^^^^^^^^^
+
 .. include-build-file:: inc/mcpwm_cap.inc
+
+
+ETM API
+^^^^^^^
+
 .. include-build-file:: inc/mcpwm_etm.inc
+
+
+Driver Types
+^^^^^^^^^^^^
+
 .. include-build-file:: inc/components/esp_driver_mcpwm/include/driver/mcpwm_types.inc
+
+
+HAL Types
+^^^^^^^^^
+
 .. include-build-file:: inc/components/esp_hal_mcpwm/include/hal/mcpwm_types.inc
 
 
