@@ -164,14 +164,6 @@ KNOWN_MISSING = {
     'peripherals/usb/host/msc',
     'peripherals/usb/host/usb_host_lib',
     'peripherals/usb/host/uvc',
-    # TODO IDF-15383: add :example: references for protocols examples
-    'protocols/dns_over_https',
-    'protocols/http_request',
-    'protocols/icmp/pmtu_probe',
-    'protocols/mqtt',
-    'protocols/mqtt5',
-    'protocols/smtp_client',
-    'protocols/sockets/tcp_transport_client',
     # TODO IDF-15384: add :example: references for wifi examples
     'wifi/ftm',
     'wifi/wifi_nvs_config',
