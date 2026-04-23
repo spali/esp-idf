@@ -81,8 +81,10 @@ HTTP 流
 
     * :cpp:func:`esp_http_client_init`：创建一个 HTTP 客户端句柄。
     * ``esp_http_client_set_*`` 或 ``esp_http_client_delete_*``：修改 HTTP 连接参数（可选）。
-    * :cpp:func:`esp_http_client_open`：用 ``write_len`` （该参数为需要写入服务器的内容长度）打开 HTTP 连接，设置 ``write_len=0`` 为只读连接。
+    * :cpp:func:`esp_http_client_open`：用 ``write_len`` （该参数为需要写入服务器的内容长度）打开 HTTP 连接，设置 ``write_len=0`` 为只读连接，设置 ``write_len=-1`` 为分块编码数据传输。
     * :cpp:func:`esp_http_client_write`：向服务器写入数据，最大长度为 :cpp:func:`esp_http_client_open` 函数中的 ``write_len`` 值；配置 ``write_len=0`` 无需调用此函数。
+    * :cpp:func:`esp_http_client_chunk_write_begin`：使用分块传输编码（``write_len=-1``）时，发送分块头（大小行）以开始一个新分块。
+    * :cpp:func:`esp_http_client_chunk_write_end`：使用分块传输编码时，发送分块尾以结束当前分块。
     * :cpp:func:`esp_http_client_fetch_headers`：在发送完请求头和服务器数据（如有）后，读取 HTTP 服务器的响应头。从服务器返回 ``content-length``，并可以由 :cpp:func:`esp_http_client_get_status_code` 继承，以获取连接的 HTTP 状态。
     * :cpp:func:`esp_http_client_read`：读取 HTTP 流。
     * :cpp:func:`esp_http_client_close`：关闭连接。

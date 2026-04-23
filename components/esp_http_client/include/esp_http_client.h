@@ -651,6 +651,10 @@ esp_err_t esp_http_client_delete_all_headers(esp_http_client_handle_t client);
  *
  * @param[in]  client     The esp_http_client handle
  * @param[in]  write_len  HTTP Content length need to write to the server
+ *                        - If write_len >= 0: Sets Content-Length header with the specified value; use esp_http_client_write() for the body.
+ *                        - If write_len = -1: Enables chunked transfer encoding (Transfer-Encoding: chunked); use
+ *                          esp_http_client_chunk_write_begin() / esp_http_client_write() / esp_http_client_chunk_write_end() for each chunk.
+ *                          Pass last_chunk=true in esp_http_client_chunk_write_end() for the final chunk to send the terminator.
  *
  * @return
  *  - ESP_OK
@@ -662,15 +666,55 @@ esp_err_t esp_http_client_open(esp_http_client_handle_t client, int write_len);
 /**
  * @brief     This function will write data to the HTTP connection previously opened by esp_http_client_open()
  *
- * @param[in]  client  The esp_http_client handle
- * @param      buffer  The buffer
- * @param[in]  len     This value must not be larger than the write_len parameter provided to esp_http_client_open()
+ * @param[in]  client  The esp_http_client handle (must not be NULL)
+ * @param      buffer  The buffer (may be NULL only if len is 0)
+ * @param[in]  len     Length of data to write. Value must not be larger than write_len passed to esp_http_client_open()
  *
  * @return
  *     - (-1) if any errors
- *     - Length of data written
+ *     - Length of data written on success
+ *
+ * @note      When esp_http_client_open() was called with write_len = -1 (chunked encoding), wrap each chunk with
+ *            esp_http_client_chunk_write_begin() and esp_http_client_chunk_write_end(). Pass last_chunk=true in
+ *            esp_http_client_chunk_write_end() for the final chunk.
  */
 int esp_http_client_write(esp_http_client_handle_t client, const char *buffer, int len);
+
+/**
+ * @brief     Begin writing a chunk in chunked transfer encoding mode.
+ *
+ * Sends the chunk header (<hex-size>\\r\\n) per RFC 7230. After this call, use esp_http_client_write()
+ * to send the chunk body data, then call esp_http_client_chunk_write_end() to finish the chunk.
+ * For normal (non-chunked) write operations this API is not used.
+ *
+ * @pre Transfer-Encoding: chunked header must be set and esp_http_client_open() called with write_len = -1.
+ *
+ * @param[in]  client  The esp_http_client handle (must not be NULL)
+ * @param[in]  len     Length of the chunk body that will follow (must be > 0)
+ *
+ * @return
+ *     - 0 on success
+ *     - -1 on failure (NULL client, invalid state, len <= 0, or transport write error)
+ */
+int esp_http_client_chunk_write_begin(esp_http_client_handle_t client, const int len);
+
+/**
+ * @brief     End writing a chunk in chunked transfer encoding mode.
+ *
+ * Sends the chunk trailer (\\r\\n) per RFC 7230 to complete a chunk started by esp_http_client_chunk_write_begin().
+ * When last_chunk is true, also sends the final terminator (0\\r\\n\\r\\n) to signal end of chunked body.
+ * For normal (non-chunked) write operations this API is not used.
+ *
+ * @pre A chunk must have been started with esp_http_client_chunk_write_begin().
+ *
+ * @param[in]  client      The esp_http_client handle (must not be NULL)
+ * @param[in]  last_chunk  If true, sends the final chunk terminator (0\\r\\n\\r\\n) after the chunk trailer
+ *
+ * @return
+ *     - 0 on success
+ *     - -1 on failure (NULL client, invalid state, or transport write error)
+ */
+int esp_http_client_chunk_write_end(esp_http_client_handle_t client, bool last_chunk);
 
 /**
  * @brief      This function need to call after esp_http_client_open, it will read from http stream, process all receive headers
