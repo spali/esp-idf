@@ -1066,15 +1066,77 @@ Kconfig 选项
 API 参考
 -------------
 
+MCPWM API 分为以下几部分：
+
+* `定时器 API`_
+* `操作器 API`_
+* `比较器 API`_
+* `生成器 API`_
+* `故障 API`_
+* `同步 API`_
+* `捕获 API`_
+* `ETM API`_
+* `驱动类型`_
+* `HAL 类型`_
+
+
+定时器 API
+^^^^^^^^^^^
+
 .. include-build-file:: inc/mcpwm_timer.inc
+
+
+操作器 API
+^^^^^^^^^^^
+
 .. include-build-file:: inc/mcpwm_oper.inc
+
+
+比较器 API
+^^^^^^^^^^^
+
 .. include-build-file:: inc/mcpwm_cmpr.inc
+
+
+生成器 API
+^^^^^^^^^^^
+
 .. include-build-file:: inc/mcpwm_gen.inc
+
+
+故障 API
+^^^^^^^^
+
 .. include-build-file:: inc/mcpwm_fault.inc
+
+
+同步 API
+^^^^^^^^
+
 .. include-build-file:: inc/mcpwm_sync.inc
+
+
+捕获 API
+^^^^^^^^
+
 .. include-build-file:: inc/mcpwm_cap.inc
+
+
+ETM API
+^^^^^^^
+
 .. include-build-file:: inc/mcpwm_etm.inc
+
+
+驱动类型
+^^^^^^^^
+
 .. include-build-file:: inc/components/esp_driver_mcpwm/include/driver/mcpwm_types.inc
+
+
+HAL 类型
+^^^^^^^^
+
 .. include-build-file:: inc/components/esp_hal_mcpwm/include/hal/mcpwm_types.inc
 
 
