@@ -214,7 +214,7 @@
 /examples/zigbee/             @esp-idf-codeowners/ieee802154
 
 /tools/                       @esp-idf-codeowners/tools
-/tools/ble/                   @esp-idf-codeowners/app-utilities
+/tools/ble/                   @esp-idf-codeowners/bluetooth
 /tools/bt/                    @esp-idf-codeowners/bluetooth
 /tools/ci/                    @esp-idf-codeowners/ci
 /tools/cmake/                 @esp-idf-codeowners/build-config
