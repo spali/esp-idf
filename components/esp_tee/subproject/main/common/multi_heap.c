@@ -6,7 +6,7 @@
 #include <assert.h>
 #include <stdio.h>
 #include <stdbool.h>
-#include "esp_rom_tlsf.h"
+#include "rom_patch_tlsf.h"
 #include "esp_rom_sys.h"
 #include "tlsf_block_functions.h"
 #include "multi_heap.h"
