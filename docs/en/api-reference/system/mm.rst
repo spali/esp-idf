@@ -77,7 +77,7 @@ The virtual memory pool is made up with one or multiple virtual memory regions, 
 - A virtual memory block is a piece of virtual address range that is dynamically mapped.
 - A slot is the virtual address range between two virtual memory blocks.
 - A physical memory block is a piece of physical address range that is to-be-mapped or already mapped to a virtual memory block.
-- Dynamical mapping is done by calling ``esp_mmap`` driver API :cpp:func:`esp_mmu_map`. This API maps the given physical memory block to a virtual memory block which is allocated by the ``esp_mmap`` driver.
+- Dynamical mapping is done by calling ``esp_mmap`` driver API :cpp:func:`esp_mmu_map` or :cpp:func:`esp_mmu_map_virt`. These map the given physical memory block to a virtual memory block, either automatically chosen or requested by a specific virtual start address.
 
 
 Relation Between Memory Blocks
@@ -120,7 +120,7 @@ Driver Behaviour
 Memory Map
 ^^^^^^^^^^
 
-You can call :cpp:func:`esp_mmu_map` to do a dynamical mapping. This API can allocate a certain size of virtual memory block according to the virtual memory capabilities you selected, then map this virtual memory block to the physical memory block as you requested. The ``esp_mmap`` driver supports mapping to one or more types of physical memory, so you should specify the physical memory target when mapping.
+You can call :cpp:func:`esp_mmu_map` to do a dynamical mapping, or :cpp:func:`esp_mmu_map_virt` if you need a specific virtual start address. These APIs allocate, or place, a virtual memory block of the required size according to the virtual memory capabilities you selected, then map it to the physical memory block you requested. The ``esp_mmap`` driver supports mapping to one or more types of physical memory, so you should specify the physical memory target when mapping.
 
 By default, physical memory blocks and virtual memory blocks are one-to-one mapped. This means, when calling :cpp:func:`esp_mmu_map`:
 
@@ -131,6 +131,12 @@ By default, physical memory blocks and virtual memory blocks are one-to-one mapp
 Specially, you can use :c:macro:`ESP_MMU_MMAP_FLAG_PADDR_SHARED`. This flag stands for one-to-multiple mapping between a physical address and multiple virtual addresses:
 
 * If it is the overlapped scenario, this API will allocate a new virtual memory block as requested, then map to the given physical memory block.
+
+
+Mapping at a chosen virtual address
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+:cpp:func:`esp_mmu_map_virt` maps a physical block the same way as :cpp:func:`esp_mmu_map`, but you can pass the virtual start address as ``vaddr_start``. Passing a value of ``0`` for ``vaddr_start`` will let the driver allocate any suitable free block. With a non-zero ``vaddr_start`` value, the whole range must lie in an unmapped slot for the given capabilities and target, and the address must be valid for the MMU view implied by ``caps``.
 
 
 Memory Unmap
