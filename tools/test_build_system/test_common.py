@@ -313,6 +313,21 @@ def test_create_component_project(idf_copy: Path) -> None:
     run_idf_py('build', workdir=(idf_copy / 'projects' / 'temp_test_project'))
 
 
+def test_create_project_cpp(idf_copy: Path) -> None:
+    logging.info('Create C++ project with idf.py create-project --cpp')
+    proj_dir = idf_copy / 'projects' / 'cpp_test_project'
+    run_idf_py('-C', 'projects', 'create-project', '--cpp', 'cpp_test_project', workdir=idf_copy)
+    main_cpp = proj_dir / 'main' / 'cpp_test_project.cpp'
+    assert main_cpp.is_file()
+    text = main_cpp.read_text(encoding='utf-8')
+    assert 'extern "C" void app_main(void)' in text
+    cmake = (proj_dir / 'main' / 'CMakeLists.txt').read_text(encoding='utf-8')
+    assert 'cpp_test_project.cpp' in cmake
+    # Avoid `assert 'cpp_test_project.c' not in cmake`: that string is a substring of `cpp_test_project.cpp`.
+    assert 'SRCS "cpp_test_project.c"' not in cmake
+    run_idf_py('build', workdir=str(proj_dir))
+
+
 # In this test function, there are actually two logical tests in one test function.
 # It would be better to have every check in a separate
 # test case, but that would mean doing idf_copy each time, and copying takes most of the time
