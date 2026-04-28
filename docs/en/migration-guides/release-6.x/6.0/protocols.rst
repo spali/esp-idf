@@ -158,5 +158,5 @@ Breaking change: ESP-MQTT moved to a managed component and example set updated.
   - Legacy MQTT TLS examples under ``examples/protocols/mqtt/ssl*`` were removed.
   - New reference examples are available:
 
-    - ``examples/protocols/mqtt``: MQTT over TLS.
-    - ``examples/protocols/mqtt5``: MQTT v5.0 over TLS.
+    - :example:`protocols/mqtt`: MQTT over TLS.
+    - :example:`protocols/mqtt5`: MQTT v5.0 over TLS.

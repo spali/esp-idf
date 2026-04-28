@@ -176,6 +176,8 @@ Refer to the examples :example:`protocols/https_server/simple` (simple HTTPS ser
 
 If you plan to use the Mbed TLS API directly, refer to the example :example:`protocols/https_mbedtls`. This example demonstrates how to establish an HTTPS connection using Mbed TLS by setting up a secure socket with a certificate bundle for verification.
 
+The example :example:`protocols/smtp_client` sends email (including attachments) over SMTP with STARTTLS using the Mbed TLS APIs.
+
 
 Important Config Options
 ------------------------
