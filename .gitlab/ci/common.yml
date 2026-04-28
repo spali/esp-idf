@@ -281,6 +281,31 @@ variables:
   after_script: []  # ccache now is disabled for macos brew runners
   timeout: 30m
 
+.brew-windows-settings:
+  image: windows_11_idf_v6_1
+  tags: [windows-vm, brew]
+  variables:
+    GIT_STRATEGY: fetch
+    LC_ALL: C.UTF-8
+    # git clean at the final cleanup stage stuck on Windows VM
+    # a new VM for each job anyway, so we can skip cleaning the workspace
+    GIT_CLEAN_FLAGS: none
+#    IDF_CCACHE_ENABLE: "1"
+#    CCACHE_DIR: "C:/cache/idf_ccache"
+  before_script:
+    - if ($env:IDF_DONT_USE_MIRRORS) { $env:IDF_MIRROR_PREFIX_MAP = '' }
+    - ./install.ps1 --enable-ci
+    - ./export.ps1
+    - $env:PYTHONPATH = "$env:PYTHONPATH;$env:IDF_PATH\tools;$env:IDF_PATH\tools\esp_app_trace;$env:IDF_PATH\components\partition_table;$env:IDF_PATH\tools\ci\python_packages"
+    - python "${SUBMODULE_FETCH_TOOL}" -s "${SUBMODULES_TO_FETCH}"
+    # The time in VM may not be synced, since it's built a long time ago, so we need to sync time
+    - net start w32time
+    - w32tm /config /manualpeerlist:"time.google.com,0x9 pool.ntp.org,0x9" /syncfromflags:manual /reliable:yes /update
+    - net stop w32time
+    - net start w32time
+    - w32tm /resync
+  after_script: []
+
 #############
 # `default` #
 #############
