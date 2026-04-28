@@ -12,6 +12,7 @@ from pathlib import Path
 
 import pytest
 import yaml
+from test_build_system_helpers import EXT_IDF_PATH
 from test_build_system_helpers import EnvDict
 from test_build_system_helpers import IdfPyFunc
 from test_build_system_helpers import append_to_file
@@ -20,6 +21,25 @@ from test_build_system_helpers import find_python
 from test_build_system_helpers import get_snapshot
 from test_build_system_helpers import replace_in_file
 from test_build_system_helpers import run_idf_py
+
+
+def _parse_idf_py_help_cmake_custom_target_names(stdout: str) -> list[str]:
+    """Return target names listed under the ``CMake Custom Targets`` heading in ``idf.py --help`` output."""
+    lines = stdout.splitlines()
+    for i, line in enumerate(lines):
+        if line.strip() != 'CMake Custom Targets:':
+            continue
+        names: list[str] = []
+        for j in range(i + 1, len(lines)):
+            raw = lines[j]
+            stripped = raw.strip()
+            if not stripped:
+                continue
+            if not raw.startswith((' ', '\t')):
+                break
+            names.append(stripped.split(None, 1)[0])
+        return names
+    return []
 
 
 def get_subdirs_absolute_paths(path: Path) -> list[str]:
@@ -201,6 +221,79 @@ def test_fallback_to_build_system_target(idf_py: IdfPyFunc, test_app_copy: Path)
     )
     ret = idf_py('custom_target')
     assert msg in ret.stdout, 'Custom target did not produce expected output'
+
+
+@pytest.mark.usefixtures('test_app_copy')
+def test_idf_py_help_without_build_dir_has_no_cmake_custom_targets_section(idf_py: IdfPyFunc) -> None:
+    """With no configured build directory, root help must not advertise CMake custom targets."""
+    ret = idf_py('--help')
+    assert 'CMake Custom Targets' not in ret.stdout
+
+
+@pytest.mark.usefixtures('test_app_copy')
+def test_idf_py_help_after_configure_with_no_custom_targets_has_no_section(idf_py: IdfPyFunc) -> None:
+    """After configure, if the project defines no custom targets, `idf.py --help` must not show the section."""
+    idf_py('reconfigure')
+    ret = idf_py('--help')
+    assert 'CMake Custom Targets' not in ret.stdout
+
+
+@pytest.mark.usefixtures('test_app_copy')
+def test_idf_py_help_lists_cmake_custom_targets_after_configure(idf_py: IdfPyFunc, test_app_copy: Path) -> None:
+    """After configure, project-only phony targets should appear under CMake Custom Targets in idf.py --help."""
+    tgt = 'idf_py_help_visible_custom_tgt'
+    append_to_file(
+        test_app_copy / 'CMakeLists.txt',
+        f'add_custom_target({tgt} COMMAND ${{CMAKE_COMMAND}} -E echo "ok")\n',
+    )
+    idf_py('reconfigure')
+    ret = idf_py('--help')
+    assert 'CMake Custom Targets' in ret.stdout
+    assert tgt in ret.stdout
+
+    tools_dir = str(Path(EXT_IDF_PATH) / 'tools')
+    if tools_dir not in sys.path:
+        sys.path.insert(0, tools_dir)
+    from idf_py_actions.help_custom_targets_skip import IDF_PY_HELP_SKIP_TARGETS  # noqa: E402
+    from idf_py_actions.help_custom_targets_skip import help_phony_name_passes_shape_policy  # noqa: E402
+
+    names = _parse_idf_py_help_cmake_custom_target_names(ret.stdout)
+    for n in names:
+        assert help_phony_name_passes_shape_policy(n), (
+            f'Target {n!r} in CMake Custom Targets violates shape policy (prefix/suffix/substring/path). '
+            'Fix filtering in tools/idf.py or adjust HELP_PHONY_NAME_* / help_phony_name_passes_shape_policy in '
+            'tools/idf_py_actions/help_custom_targets_skip.py.'
+        )
+    unexpected = sorted({n for n in names if n not in IDF_PY_HELP_SKIP_TARGETS and n != tgt})
+    assert not unexpected, (
+        f'Unexpected CMake custom target(s) in idf.py --help: {unexpected!r}.\n'
+        'These are usually internal phony targets. Add each name to IDF_PY_HELP_SKIP_TARGETS in '
+        'tools/idf_py_actions/help_custom_targets_skip.py (keep the set sorted), then re-run this test.\n'
+        'If the leak matches a pattern (prefix, suffix, or substring), adjust HELP_PHONY_NAME_* in that module '
+        'instead of the frozenset.\n'
+        'If a name is intentionally user-visible for this test app only, extend the allowlist in '
+        'test_idf_py_help_lists_cmake_custom_targets_after_configure in tools/test_build_system/test_common.py '
+        f'(expected project target name: {tgt!r}).'
+    )
+
+
+@pytest.mark.usefixtures('test_app_copy')
+def test_idf_py_help_splits_multi_output_ninja_phony_targets(idf_py: IdfPyFunc, test_app_copy: Path) -> None:
+    """Multi-output Ninja `build ...: phony` lines must yield separate target names (not a single whitespace string)."""
+    a = 'idf_py_help_multi_out_a'
+    b = 'idf_py_help_multi_out_b'
+    c = 'idf_py_help_multi_out_c'
+    idf_py('reconfigure')
+
+    # Inject a multi-output phony line directly into build.ninja and verify help parsing splits it.
+    append_to_file(test_app_copy / 'build' / 'build.ninja', f'\nbuild {a} {b} {c}: phony\n')
+    ret = idf_py('--help')
+
+    names = _parse_idf_py_help_cmake_custom_target_names(ret.stdout)
+    assert a in names
+    assert b in names
+    assert c in names
+    assert f'{a} {b} {c}' not in names
 
 
 def test_create_component_project(idf_copy: Path) -> None:
