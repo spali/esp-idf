@@ -45,7 +45,7 @@ examples/system/efuse:
       reason: Secure Boot V2 with ECDSA P384 is not supported.
     - if: IDF_TARGET in ["esp32s31"]
       temporary: true
-      reason: not support yet # TODO: [ESP32S31] IDF-14688
+      reason: not support yet # TODO: [ESP32S31] IDF-14442
   depends_components:
     - *common_components
     - efuse
